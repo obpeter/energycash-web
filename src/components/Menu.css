@@ -1,3 +1,12 @@
+:host {
+  --side-max-width: 20%;
+}
+
+ion-split-pane {
+  --side-min-width: 270px; /*Update this as per your requirements*/
+  --side-max-width: 18%;
+}
+
 ion-menu ion-content {
   --background: var(--ion-item-background, var(--ion-background-color, #fff));
 }

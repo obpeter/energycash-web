@@ -1,0 +1,42 @@
+
+.participant-header::part(native) {
+    background: inherit;
+}
+
+.details-body {
+    padding: 10px 25px;
+}
+
+.details-header {
+    padding: 10px 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 30px;
+    background: transparent;
+}
+
+.details-box {
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin-bottom: 25px;
+    margin-right: 25px;
+}
+
+.pane-content-details {
+    position: relative;
+    flex-grow: 1;
+}
+
+.pane-content-details-content {
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+}
+
+.details-box .eeg-item-box.selected::part(native) {
+    background: rgba(var(--ion-color-primary-rgb), 0.14);
+}

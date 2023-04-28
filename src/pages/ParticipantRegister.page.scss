@@ -1,0 +1,15 @@
+
+.register-participant-content {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  //flex-direction: row;
+  //height: 100vh;
+  width: 100%;
+
+  & .register-content-pane {
+    height: 100%;
+    //max-width: 50%;
+    flex-grow: 1;
+    margin: 16px;
+  }
+}

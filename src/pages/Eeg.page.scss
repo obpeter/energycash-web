@@ -1,0 +1,11 @@
+
+.eeg-property-card {
+  max-width: 600px;
+  padding-top: 20px;
+  flex-grow: 0;
+
+  & .header {
+    font-size: 22px;
+    padding-left: 10px;
+  }
+}

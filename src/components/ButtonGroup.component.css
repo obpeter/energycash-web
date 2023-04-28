@@ -1,0 +1,24 @@
+/*.ion-item-button-group {*/
+/*    --inner-padding-end: 10px;*/
+/*    --padding-start: 10px;*/
+/*}*/
+
+/*.no-space {*/
+/*    --inner-padding-end: 0px;*/
+/*    margin: 0px;*/
+/*}*/
+
+.button-group {
+    border: 1px solid #e8e5d7;
+    border-radius: 5px;
+}
+
+.button-group-item {
+    --border-radius: unset !important;
+
+}
+
+.button-group-item.isActive {
+    --ion-text-color-rgb: 103, 103, 103;
+    --background: #C0E5E1;
+}

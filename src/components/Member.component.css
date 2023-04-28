@@ -1,0 +1,88 @@
+/*ion-range {*/
+/*    --knob-border-radius: 0px;*/
+/*    --knob-size: 0px;*/
+/*    --bar-height: 6px;*/
+/*    --bar-border-radius: 10px;*/
+/*    --height: 6px;*/
+/*    padding: 0;*/
+/*    margin-right: 10px;*/
+/*    margin-left: 10px;*/
+/*}*/
+
+.ion-card-meter {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+.ion-item-meter {
+    margin-bottom: 0px;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.full-space {
+    width: 100%;
+}
+
+.vertical-space {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.energy-slider-container {
+    position: relative;
+    display: block;
+    height: 6px;
+    margin-right: 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+}
+
+.energy-slider-back {
+    display: block;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+    background-color: #2dd36f;
+    border-radius: 10px;
+}
+
+.energy-slider-front {
+    display: block;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 50%;
+    left: 0px;
+    background-color: #86938b;
+    border-radius: 10px;
+}
+
+.forward-button > :focus {
+    border-radius: 30px;
+    background-color: #656464;
+}
+
+.producer {
+    background-color: var(--eeg-background-producer);
+}
+
+.consumer {
+    background-color: var(--eeg-background-consumer);
+}
+
+.producer-text {
+    color: var(--eeg-background-producer);
+}
+
+.consumer-text {
+    color: var(--eeg-background-consumer);
+}
+
+.member-card-select-box {
+    --ion-background-color: transparent !important;
+}
