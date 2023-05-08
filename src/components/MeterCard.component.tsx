@@ -19,11 +19,12 @@ import {formatMeteringPointString} from "../util/Helper.util";
 interface MeterCardComponentProps {
   participant:EegParticipant;
   meter: Metering;
-  hideMeter: boolean
-  onSelect?: (participantId: string, meterpoint: string) => void
+  hideMeter: boolean;
+  onSelect?: (participantId: string, meter: Metering) => void;
+  showCash?: boolean;
 }
 
-const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hideMeter, onSelect}) => {
+const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hideMeter, onSelect, showCash}) => {
 
   const currentDate = new Date();
   const year = currentDate.getFullYear();
@@ -34,7 +35,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const tariff = useAppSelector(selectRateById(meter.tariffId))
   const bill = useAppSelector(selectBillByMeter(participant.id, meter.meteringPoint))
 
-  const {showAmount} = useContext(MemberViewContext)
+  // const {showAmount} = useContext(MemberViewContext)
 
   const ratio = (own: number, total: number) => {
     return 100 - Math.round((own / total) * 100);
@@ -61,7 +62,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
 
   const meterValue = () => {
     if (report && report.allocated) {
-      if (showAmount && tariff) {
+      if (showCash && tariff) {
         return (<><span>{bill}</span><span style={{fontSize:"12px"}}> €</span></>);
       }
       return (<><span>{(Math.round(report?.allocated! * 10) / 10)}</span><span style={{fontSize:"10px"}}> kWh</span></>);
@@ -71,7 +72,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
 
   // /*history.push(`/participant/${participant.id}/meter/${meter.meteringPoint}`*/
   return (
-    <IonCard style={{marginTop: "0px", fontSize: "16px"}} onClick={() => onSelect && onSelect(participant.id, meter.meteringPoint)}>
+    <IonCard style={{marginTop: "0px", fontSize: "16px"}} onClick={() => onSelect && onSelect(participant.id, meter)}>
       <IonGrid fixed={true} style={{paddingTop: "12px"}}>
         <IonRow style={isMeterPending() ? {color: "#DC631E"} : {color: "#1E4640"}}>
           <IonCol size={"1"}>
@@ -84,7 +85,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
           {isMeterPending() || (
             <IonCol size={"4"}>
               <div style={{display: "flex", flexFlow:"row-reverse"}}>
-                { showAmount ? (
+                { showCash ? (
                   <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator()}, {"consumer-text": isGenerator()})}>{meterValue()}</IonLabel>
                 ) : (
                   <IonLabel className={cn("ion-text-end", {"producer-text": isGenerator()}, {"consumer-text": !isGenerator()})}>{meterValue()}</IonLabel>

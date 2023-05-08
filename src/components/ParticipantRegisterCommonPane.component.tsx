@@ -22,7 +22,7 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
   // const {handleSubmit, control, register, setValue} = useForm({defaultValues: participant});
 
-  const { control, setValue } = useFormContext();
+  const { handleSubmit, control, setValue, formState: {errors} } = useFormContext<EegParticipant>();
   const onSubmit = (data: EegParticipant) => {
     onAdd(data)
   }
@@ -50,20 +50,20 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
           </IonCol>
         </IonRow>
       </IonGrid>
-      {/*<form id={submitId} onSubmit={handleSubmit(onSubmit)}>*/}
+      <form id={submitId} onSubmit={handleSubmit(onSubmit)}>
         <div style={{display: "flex", flexDirection: "row"}}>
           <div style={{flexGrow: "1", height: "100%"}}>
             <IonList>
               <IonListHeader>Kontakt</IonListHeader>
-              <InputForm name={"firstname"} label="Vorname" control={control} rules={{}} type="text"/>
-              <InputForm name={"lastname"} label="Nachname" control={control} rules={{}} type="text"/>
-              <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{}} type="text"/>
-              <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} rules={{}}
-                         type="number"/>
-              <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} rules={{}} type="text"/>
-              <InputForm name={"residentAddress.city"} label="Ort" control={control} rules={{}} type="text"/>
-              <InputForm name={"contact.phone"} label="Telefon" control={control} rules={{}} type="text"/>
-              <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{}} type="text"/>
+              <InputForm name={"firstname"} label="Vorname" control={control} rules={{required: "Firstname is required"}} type="text" error={errors.firstname}/>
+              <InputForm name={"lastname"} label="Nachname" control={control} rules={{required: "Vorname fehlt"}} type="text" error={errors.lastname}/>
+              <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street}/>
+              <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} rules={{required: "Hausnummer fehlt"}}
+                         type="number" error={errors.residentAddress?.streetNumber}/>
+              <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} rules={{required: "PLZ fehlt"}} type="text" error={errors.residentAddress?.zip}/>
+              <InputForm name={"residentAddress.city"} label="Ort" control={control} rules={{required: "Ort fehlt"}} type="text" error={errors.residentAddress?.city}/>
+              <InputForm name={"contact.phone"} label="Telefon" control={control} type="text"/>
+              <InputForm name={"contact.email"} label="E-Mail" control={control} type="text"/>
             </IonList>
 
           </div>
@@ -71,18 +71,18 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
           <div style={{flexGrow: "1", height: "100%"}}>
             <IonList>
               <IonListHeader>Bankdaten</IonListHeader>
-              <InputForm name={"accountInfo.iban"} label="IBAN" control={control} rules={{}} type="text"/>
-              <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} rules={{}} type="text"/>
+              <InputForm name={"accountInfo.iban"} label="IBAN" control={control} rules={{required: "IBAN fehlt"}} type="text" error={errors.accountInfo?.iban}/>
+              <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} rules={{required: "Kontoinhaber fehlt"}} type="text" error={errors.accountInfo?.owner}/>
             </IonList>
             <IonList>
               <IonListHeader>Optional</IonListHeader>
-              <InputForm name={"optionals.website"} label="Webseite" control={control} rules={{}} type="text"/>
+              <InputForm name={"optionals.website"} label="Webseite" control={control} type="text"/>
             </IonList>
 
           </div>
         </div>
 
-      {/*</form>*/}
+      </form>
     </div>
   )
 }

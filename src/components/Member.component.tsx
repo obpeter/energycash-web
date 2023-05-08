@@ -13,6 +13,8 @@ import "./Member.component.css";
 import {eegSumSign} from "../eegIcons";
 import MemberNameComponent from "./MemberName.component";
 import {ParticipantBillType} from "../models/meteringpoint.model";
+import {useAppSelector} from "../store";
+import {selectBillById} from "../store/billing";
 
 interface MemberProps {
   participant: EegParticipant;
@@ -21,7 +23,6 @@ interface MemberProps {
   hideMember: boolean;
   hideMeter: boolean;
   showAmount: boolean;
-  memberBill: ParticipantBillType | undefined;
   onCheck: (e: CheckboxCustomEvent) => void;
   showDetailsPage: (participant: EegParticipant) => void;
 }
@@ -32,9 +33,10 @@ const MemberComponent: FC<MemberProps> = ( {participant,
                                              hideMember,
                                              hideMeter,
                                              showAmount,
-                                             memberBill,
                                              onCheck,
                                              showDetailsPage}) => {
+
+  const memberBill = useAppSelector(selectBillById(participant.id))
 
   const ratio = (own: number, total: number) => {
     return 100 - Math.round((own / total) * 100);

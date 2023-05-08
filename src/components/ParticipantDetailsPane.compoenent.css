@@ -3,20 +3,6 @@
     background: inherit;
 }
 
-.details-body {
-    padding: 10px 25px;
-}
-
-.details-header {
-    padding: 10px 0px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 30px;
-    background: transparent;
-}
-
 .details-box {
     box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2);
     border-radius: 4px;

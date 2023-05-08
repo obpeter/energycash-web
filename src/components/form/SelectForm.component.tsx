@@ -1,9 +1,11 @@
 import React from "react";
-import {Control, Controller, FieldValues} from "react-hook-form";
+import {Control, Controller, FieldError, FieldValues} from "react-hook-form";
 import {IonItem, IonLabel, IonSelect, IonSelectOption} from "@ionic/react";
 
-const SelectForm: React.FC<{ label: string, placeholder: string, control: Control<any, any>, name: string, options: { key: any, value: string }[], readonly?: boolean, disabled?: boolean }> = (
-  { label, placeholder, control, name, options, readonly,disabled, ...rest}) => {
+import "./form-element.css"
+
+const SelectForm: React.FC<{ label: string, placeholder: string, control: Control<any, any>, name: string, options: { key: any, value: string }[], rules?: object, readonly?: boolean, disabled?: boolean, error?:  FieldError }> = (
+  { label, placeholder, control, name, options, rules, readonly,disabled, ...rest}) => {
   return (
     <div className="form-element">
       <IonItem fill="outline" disabled={disabled}>
@@ -13,6 +15,7 @@ const SelectForm: React.FC<{ label: string, placeholder: string, control: Contro
         <Controller
           name={name}
           control={control}
+          rules={rules}
           render={({field}) => {
             const {onChange} = field;
             return (<IonSelect interface="action-sheet" placeholder={placeholder} onIonChange={onChange} {...field} {...rest}>
@@ -22,6 +25,7 @@ const SelectForm: React.FC<{ label: string, placeholder: string, control: Contro
         }
         />
       </IonItem>
+      {rest.error && <span className={"error-line"}>{rest.error.message}</span>}
     </div>
   );
 };

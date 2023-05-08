@@ -12,7 +12,7 @@ export interface ParticipantState extends EntityState<EegParticipant> {
 }
 
 export const adapter = createEntityAdapter<EegParticipant>({
-  selectId: (participant) => participant.id
+  // selectId: (participant) => participant.id
 });
 
 export const initialState: ParticipantState = adapter.getInitialState({

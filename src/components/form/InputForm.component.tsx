@@ -1,6 +1,6 @@
 import React from "react";
 import {IonInput, IonItem, IonLabel} from "@ionic/react";
-import {Control, Controller} from "react-hook-form";
+import {Control, Controller, FieldError, FieldErrors} from "react-hook-form";
 import "./form-element.css";
 
 // export interface InputForm {
@@ -9,8 +9,8 @@ import "./form-element.css";
 // }
 
 
-const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: string, rules: object, type: "text" | "number" | "password", disabled?: boolean, readonly?: boolean,
-  inputMode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined }>) =
+const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: string, rules?: object, type: "text" | "number" | "password", disabled?: boolean, readonly?: boolean,
+  inputMode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined, error?:  FieldError}>) =
   ({ label, control, name,rules, type, disabled,...rest}) => {
   return (
     <div className={"form-element"}>
@@ -30,6 +30,7 @@ const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: st
           } }
         />
       </IonItem>
+      {rest.error && <span className={"error-line"}>{rest.error.message}</span>}
     </div>
   );
 };

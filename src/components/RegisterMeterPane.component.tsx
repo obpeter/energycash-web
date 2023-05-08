@@ -15,14 +15,12 @@ import {EegParticipant} from "../models/members.model";
 import {Address} from "../models/eeg.model";
 
 interface RegisterMeterPaneComponentProps {
-  participant: EegParticipant;
-  // control: Control<EegParticipant, any>
-  index: number;
+  meter: Metering
   onAdd: (meter: Metering) => void
-  onChancel: (index: number) => void
+  onChancel: () => void
 }
 
-const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({participant, index, onAdd, onChancel}) => {
+const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({meter, onAdd, onChancel}) => {
 
   const rates = useAppSelector(ratesSelector);
   const [selectedDirection, setSelectedDirection] = useState(0);
@@ -34,12 +32,12 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({partic
   const participantControl = useFormContext();
   const address = participantControl.watch("residentAddress", {} as Address)
 
-  const {handleSubmit, setValue, control} = useForm({defaultValues: meteringPoint});
+  const {handleSubmit, setValue, control, formState: {errors:counterPointErrors}} = useForm({defaultValues: meter});
   // const control = participantControl.control
 
   const onChangeDirection = (s: number) => {
     setSelectedDirection(s)
-    participantControl.setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATOR");
+    setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATOR");
   }
 
   const getRatesOption = () => {
@@ -51,10 +49,10 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({partic
   const takeOverAddress = (ok: boolean) => {
     if (address) {
       if (ok) {
-        participantControl.setValue(`street`, address.street);
-        participantControl.setValue(`streetNumber`, "" + address.streetNumber);
-        participantControl.setValue(`city`, address.city);
-        participantControl.setValue(`zip`, address.zip);
+        setValue(`street`, address.street);
+        setValue(`streetNumber`, "" + address.streetNumber);
+        setValue(`city`, address.city);
+        setValue(`zip`, address.zip);
       }
 
       setWithOwner(ok);
@@ -83,42 +81,41 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({partic
 
   const handleSubmitWithoutPropagation = (e: any) => {
     e.preventDefault();
-    e.stopPropagation();
     handleSubmit(forwardSave)(e);
+    // e.stopPropagation();
   };
 
   return (
     <>
-      <form id="add-meter" onSubmit={handleSubmitWithoutPropagation}>
-
+      <form onSubmit={ handleSubmitWithoutPropagation} action={undefined} >
         <div style={{display: "grid", gridTemplateColumns: "50% 50%", justifyContent: "space-between"}}>
           <div style={{flexGrow: "1", height: "100%"}}>
             <IonGrid>
               <IonRow>
                 <IonCol size="auto">
+                  {address.street+"s"}
                   <ToggleButtonComponent
                     buttons={[{label: 'Verbraucher', icon: eegPlug}, {label: 'Erzeuger', icon: star}]}
                     onChange={onChangeDirection}
                     initalType={selectedDirection}
                     changeable={editable()}
                   />
-                  {address.street}
                 </IonCol>
               </IonRow>
             </IonGrid>
             <IonList>
               <SelectForm name={`tariffId`} label="Tarif" control={control} options={getRatesOption()}
-                          placeholder="Tarif" disabled={false}/>
-              <InputForm name={`meters[${index}].meteringPoint`} label="Zählpunkt" control={control} rules={{regex: /AT[0-9]{32}/}}
-                         type="text"/>
+                          placeholder="Tarif" disabled={false} rules={{required: "Tarif fehlt"}} error={counterPointErrors.tariffId}/>
+              <InputForm name={`meteringPoint`} label="Zählpunkt" control={control} rules={{required: "Zählpunktnummer fehlt", min: 33, regex: /AT[0-9]{32}/}}
+                         type="text" error={counterPointErrors.meteringPoint}/>
               <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                                  checked={withWechselrichter}></CheckboxComponent>
               {withWechselrichter && (
-                <InputForm name={`inverterId`} label="Wechselrichternummer" control={control} rules={{}}
+                <InputForm name={`inverterId`} label="Wechselrichternummer" control={control}
                            type="text"/>
               )}
-              <InputForm name={`transformer`} label="Transformator" control={control} rules={{}} type="text"/>
-              <InputForm name={`equipmentName`} label="Anlagename" control={control} rules={{}} type="text"/>
+              <InputForm name={`transformer`} label="Transformator" control={control} type="text"/>
+              <InputForm name={`equipmentName`} label="Anlagename" control={control} type="text"/>
             </IonList>
           </div>
           <div style={{flexGrow: "1", height: "100%"}}>
@@ -126,17 +123,17 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({partic
               <IonListHeader>Adresse</IonListHeader>
               <CheckboxComponent label="Adresse vom Besitzer übernehmen" setChecked={takeOverAddress}
                                  checked={withOwner}></CheckboxComponent>
-              <InputForm name={`street`} label="Straße" control={control} rules={{}} type="text"/>
-              <InputForm name={`streetNumber`} label="Hausnummer" control={control} rules={{}} type="text"/>
-              <InputForm name={`zip`} label="Postleitzahl" control={control} rules={{}} type="text"/>
-              <InputForm name={`city`} label="Ort" control={control} rules={{}} type="text"/>
+              <InputForm name={`street`} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text"/>
+              <InputForm name={`streetNumber`} label="Hausnummer" control={control} rules={{required: "Straße fehlt"}} type="text"/>
+              <InputForm name={`zip`} label="Postleitzahl" control={control} rules={{required: "Straße fehlt"}} type="text"/>
+              <InputForm name={`city`} label="Ort" control={control} rules={{required: "Straße fehlt"}} type="text"/>
             </IonList>
           </div>
           <div style={{gridColumnStart: "1", gridColumnEnd: "2", display: "grid"}}>
             <IonFooter>
               <IonToolbar className={"ion-padding-horizontal"}>
-                <IonButton fill="clear" slot="start" onClick={() => onChancel(index)}>Abbrechen</IonButton>
-                <IonButton slot="end" type="submit" form="add-meter">Hinzufügen</IonButton>
+                <IonButton fill="clear" slot="start" onClick={() => onChancel()}>Abbrechen</IonButton>
+                <IonButton slot="end" type="submit">Hinzufügen</IonButton>
               </IonToolbar>
             </IonFooter>
           </div>

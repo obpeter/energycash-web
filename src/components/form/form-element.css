@@ -6,3 +6,12 @@
 .form-element:first-child {
     padding-bottom: 0px;
 }
+
+.error-line {
+    font-size: 10px;
+    color: red;
+    position: absolute;
+    left: 0;
+    margin-left: 30px;
+    margin-top: 3px;
+}

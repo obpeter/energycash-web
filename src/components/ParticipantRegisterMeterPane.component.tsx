@@ -33,37 +33,30 @@ interface ParticipantRegisterMeterPaneComponentProps {
 const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant, onAddMeter}) => {
 
   const [addMeterPaneActive, setAddMeterPaneActive] = useState(false)
+  const [meteringPoint, setMeteringPoint] = useState<Metering | undefined>()
 
-  const { control, watch, formState: { errors }} = useFormContext<EegParticipant>();
+  const { control, setValue, getValues, watch, formState: { errors }} = useFormContext<EegParticipant>();
 
-  // const meters = watch("meters", [])
-  // const address = watch("residentAddress", {} as Address)
+ const meters = watch("meters")
 
-  const {fields, append, remove} =
-    useFieldArray({control, name: "meters", rules: {
-      required: "Jedes Mitglied benötigt mindestens einen Zählpunkt."
-    }})
-
-  console.log("meters available: ", fields);
-  const addMeter = (meter: Metering) => {
-    // onAddMeter(meter);
-    // participant && participant.meters && participant.meters.push(meter);
-    // append(meter);
-    setAddMeterPaneActive(true);
+  const showMeter = (meter: Metering) => {
+   setMeteringPoint(meter);
+   setAddMeterPaneActive(true);
   }
 
   const appendMeter = (meter: Metering) => {
-    append(meter);
     setAddMeterPaneActive(false)
+    onAddMeter(meter);
+    setMeteringPoint(undefined);
   }
 
-  const removeMeter = (index: number) => {
-    remove(index)
+  const removeMeter = () => {
     setAddMeterPaneActive(false);
+    setMeteringPoint(undefined);
   }
 
   const allMeteringPoints = () => {
-    if (errors.meters || fields.length === 0) {
+    if (meters === undefined || meters.length === 0) {
       return (
         <IonCard style={{boxShadow: "none", background: "rgba(43, 104, 96, 0.08)", color: "#005457"}}>
           <IonCardContent>
@@ -74,8 +67,8 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
         </IonCard>
       )
     }
-    return fields.map((m, idx) => (
-      <MeterCardComponent key={idx} participant={participant} meter={m} hideMeter={true}/>
+    return meters.map((m, idx) => (
+      <MeterCardComponent key={idx} participant={participant} meter={m} hideMeter={true} onSelect={(p, m) => showMeter(m)}/>
     ))
   }
 
@@ -95,7 +88,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
             </IonRow>
             <IonRow class="ion-justify-content-end">
               <IonCol size="auto">
-                <IonItem button lines="none" onClick={() => addMeter({direction: "CONSUMPTION", status: "NEW", meteringPoint: ""} as Metering)}>
+                <IonItem button lines="none" onClick={() => showMeter({direction: "CONSUMPTION", status: "NEW", meteringPoint: ""} as Metering)}>
                   <IonIcon icon={add}></IonIcon>
                   <IonLabel>Zählpunkt hinzufügen</IonLabel>
                 </IonItem>
@@ -104,7 +97,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
           </IonGrid>
         </div>
         <div style={{flexGrow: 1}}>
-          {addMeterPaneActive && <RegisterMeterPaneComponent participant={participant} index={fields.length} onAdd={appendMeter} onChancel={removeMeter}/>}
+          {addMeterPaneActive && meteringPoint && <RegisterMeterPaneComponent meter={meteringPoint} onAdd={appendMeter} onChancel={removeMeter}/>}
         </div>
       </div>
     </div>

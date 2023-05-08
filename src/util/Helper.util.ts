@@ -28,3 +28,7 @@ export const formatMeteringPointString = (m: string | undefined) => {
   console.log(m, "Len MeteringId: ", m && m.length);
   return m
 }
+
+export const isParticipantActivated = (participants: EegParticipant[], id: string) => {
+  return participants.find((p) => p.id === id && p.status === 'ACTIVE') !== undefined
+}

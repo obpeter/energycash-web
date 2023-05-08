@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, useContext} from "react";
 import {
   IonButtons,
   IonContent,
@@ -18,6 +18,10 @@ import {participantsSelector, selectedParticipantSelector, selectParticipant} fr
 import {periodsSelector, selectedPeriodSelector} from "../store/energy";
 import {selectedTenant} from "../store/eeg";
 import ParticipantDetailsPaneComponent from "../components/ParticipantDetailsPane.component";
+import {MemberViewContext} from "../store/hook/MemberViewProvider";
+import ParticipantInvoiceDetailsComponent from "../components/ParticipantInvoiceDetails.component";
+import {ParticipantContext} from "../store/hook/ParticipantProvider";
+import {selectBillById} from "../store/billing";
 
 const Participants: FC = () => {
   const dispatcher = useAppDispatch();
@@ -28,18 +32,27 @@ const Participants: FC = () => {
 
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
 
+  const {
+    enableBilling
+  } = useContext(ParticipantContext);
+
   function showParticipantDetails() {
     if (selectedParticipant) {
-      return (
-        <ParticipantDetailsPaneComponent selectedParticipant={selectedParticipant}/>
-      )
+      if (enableBilling) {
+        return (
+          <ParticipantInvoiceDetailsComponent />
+        )
+      } else {
+        return (
+          <ParticipantDetailsPaneComponent />
+        )
+      }
     } else {
       return (
         <></>
       )
     }
   }
-
 
   return (
     <IonPage>

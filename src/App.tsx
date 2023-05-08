@@ -68,9 +68,7 @@ const SecureSection: React.FC = () => {
               </MemberViewProvider>
               <Route path="/page/rates" component={RatesPage} exact={true}/>
               <Route path="/page/eeg" component={EegPage} exact={true}/>
-              <Route path="/page/addParticipant" exact={true}>
-                <ParticipantRegisterPage/>
-              </Route>
+              <Route path="/page/addParticipant" exact={true} component={ParticipantRegisterPage} />
             </IonRouterOutlet>
           </IonSplitPane>
         </ParticipantProvider>

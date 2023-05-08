@@ -185,3 +185,25 @@ http://ionicframework.com/docs/theming/ */
   --ion-toolbar-segment-color: rgb(255, 255, 255, 0.74);
   --ion-toolbar-segment-color-checked: rgb(255, 255, 255, 100);
 }
+
+.details-body {
+  padding: 10px 25px;
+  position: relative;
+}
+
+.details-header {
+  padding: 10px 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 30px;
+  background: transparent;
+}
+
+.details-footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}

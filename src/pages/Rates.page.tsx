@@ -3,7 +3,7 @@ import EegWebContentPaneComponent from "../components/EegWebContentPane.componen
 import {useAppSelector} from "../store";
 import {ratesSelector} from "../store/rate";
 import RateCardComponent from "../components/RateCard.component";
-import {IonContent, IonIcon, IonItem, IonLabel, IonPage} from "@ionic/react";
+import {IonButton, IonContent, IonFooter, IonIcon, IonItem, IonLabel, IonPage, IonToolbar} from "@ionic/react";
 import {EegTariff} from "../models/eeg.model";
 import cn from "classnames";
 
@@ -30,7 +30,7 @@ const RatesPage: FC = () => {
 
   return (
     <IonPage>
-      <IonContent fullscreen>
+      <IonContent fullscreen color="eeg">
         <div style={{display: "flex", flexDirection: "row", height: "100vh"}}>
           <div className={"ratePane"}>
             {rates.map((r, idx) => (
@@ -40,7 +40,7 @@ const RatesPage: FC = () => {
             ))}
           </div>
           <div style={{flexGrow:"1", background: "#EAE7D9"}}>
-            <RateDetailPaneComponent selectedRate={selectedRate} onSubmit={(d) => console.log(d)} />
+            <RateDetailPaneComponent selectedRate={selectedRate} submitId="change-rate-submit-id" onSubmit={(d) => console.log(d)} />
           </div>
         </div>
       </IonContent>

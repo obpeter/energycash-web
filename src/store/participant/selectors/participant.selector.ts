@@ -63,3 +63,8 @@ export const selectParticipantNames = createSelector(
     return {id: p.id, name: `${p.firstname} ${p.lastname}`}
   })
 )
+
+export const selectedMeterIdSelector = createSelector(
+  featureStateSelector,
+  state => state.selectedMeter
+)

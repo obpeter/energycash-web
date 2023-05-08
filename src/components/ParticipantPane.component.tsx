@@ -2,14 +2,14 @@ import React, {FC, useContext, useEffect, useState} from "react";
 
 import {EegParticipant} from "../models/members.model";
 import {
-  CheckboxCustomEvent, IonIcon, SelectCustomEvent, useIonAlert
+  CheckboxCustomEvent, IonButton, IonCol, IonIcon, IonItem, IonLabel, IonRow, SelectCustomEvent, useIonAlert
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
 import {SelectedPeriod} from "../models/energy.model";
 import PeriodSelectorComponent from "./PeriodSelector.component";
 import MemberComponent from "./Member.component";
-import {ParticipantBillType} from "../models/meteringpoint.model";
+import {Metering, ParticipantBillType} from "../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
 import {MemberViewContext} from "../store/hook/MemberViewProvider";
@@ -17,20 +17,20 @@ import {MemberViewContext} from "../store/hook/MemberViewProvider";
 import "./ParticipantPane.component.scss"
 import SlideButtonComponent from "./SlideButton.component";
 import {useAppDispatch, useAppSelector} from "../store";
-import {fetchEnergyBills} from "../store/billing";
+import {billingSelector, fetchEnergyBills} from "../store/billing";
 import {selectedTenant} from "../store/eeg";
 import {fetchEnergyReport, meteringEnergyGroup} from "../store/energy";
 import ButtonGroup from "./ButtonGroup.component";
 import {flash, person} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../eegIcons";
-import {selectedParticipantSelector, selectParticipant} from "../store/participant";
+import {selectedParticipantSelector, selectMetering, selectParticipant} from "../store/participant";
 import cn from "classnames";
+import {isParticipantActivated} from "../util/Helper.util";
 
 interface ParticipantPaneProps {
   participants: EegParticipant[];
   periods: { begin: string, end: string };
   activePeriod: SelectedPeriod | undefined;
-  memberBill?: ParticipantBillType;
   onUpdatePeriod: (e: SelectCustomEvent<number>) => void;
 }
 
@@ -38,7 +38,6 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                                                               participants,
                                                               periods,
                                                               activePeriod,
-                                                              memberBill,
                                                               onUpdatePeriod
                                                             }) => {
 
@@ -46,6 +45,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const tenant = useAppSelector(selectedTenant);
   const energyMeterGroup = useAppSelector(meteringEnergyGroup);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
+  const billingInfo = useAppSelector(billingSelector);
 
   const [sortedParticipants, setSortedParticipants] = useState(participants);
   const {
@@ -68,6 +68,17 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   } = useContext(MemberViewContext);
 
   const [presentAlert] = useIonAlert();
+
+  useEffect(() => {
+    if (checkedParticipant) {
+      const nextBillingEnabled = Object.entries(checkedParticipant).reduce((r, e) => (isParticipantActivated(participants, e[0]) && e[1]) || r, false)
+      // console.log("Show Billing: ", nextBillingEnabled);
+
+      setEnableBilling(nextBillingEnabled)
+      if (!nextBillingEnabled)
+        toggleShowAmount(false)
+    }
+  }, [checkedParticipant])
 
   useEffect(() => {
     const sorted = participants.sort((a, b) => {
@@ -158,6 +169,18 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     dispatcher(selectParticipant(p.id))
   }
 
+  const billingSum = () => {
+    if (billingInfo) {
+      const sum = billingInfo.reduce((i, s) => i + s.amount + s.meteringPoints.reduce((mi, ms) => ms.amount, 0), 0)
+      return Math.round(sum * 100) / 100;
+    }
+    return 0
+  }
+
+  const selectMeter = (participantId: string, meter: Metering) => {
+    dispatcher(selectMetering(meter.meteringPoint))
+  }
+
   return (
     <div className={"participant-pane"}>
       <div className={"pane-body"}>
@@ -167,16 +190,16 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
           {sortedParticipants.map((p, idx) => {
             return (
-              <div key={idx} onClick={() => onSelectParticipant(p)} className={cn("participant", {"selected": p.id === selectedParticipant.id})}>
+              <div key={idx} onClick={() => onSelectParticipant(p)}
+                   className={cn("participant", {"selected": p.id === selectedParticipant.id})}>
                 <MemberComponent
-                                 participant={p}
-                                 onCheck={onCheckParticipant(p)}
-                                 isChecked={checkedParticipant && (checkedParticipant[p.id] || false)}
-                                 hideMeter={hideMeter}
-                                 hideMember={hideMember}
-                                 showAmount={showAmount}
-                                 showDetailsPage={showDetailsPage}
-                                 memberBill={memberBill}
+                  participant={p}
+                  onCheck={onCheckParticipant(p)}
+                  isChecked={checkedParticipant && (checkedParticipant[p.id] || false)}
+                  hideMeter={hideMeter}
+                  hideMember={hideMember}
+                  showAmount={showAmount}
+                  showDetailsPage={showDetailsPage}
                 >
                   {hideMeter || p.meters.filter((m) => {
                     if (m.direction === 'GENERATOR' && hideProducers)
@@ -185,7 +208,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                       return false;
                     return true;
                   }).map((m, i) => (
-                    <MeterCardComponent key={i} participant={p} meter={m} hideMeter={false}/>
+                    <MeterCardComponent key={i} participant={p} meter={m} hideMeter={false} showCash={showAmount} onSelect={selectMeter}/>
                   ))}
                 </MemberComponent>
               </div>
@@ -193,22 +216,41 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
           })}
         </div>
         <div className={"pane-footer"}>
-          <div style={{marginLeft: "20px"}}>
-            <SlideButtonComponent checked={showAmount} disabled={!enableBilling}
-                                  setChecked={(c) => activateBilling(c)}></SlideButtonComponent>
-          </div>
-          <div style={{marginRight: "20px", display: "flex", flexDirection: "row"}}>
-            <div style={{marginRight: "10px"}}>
-              <ButtonGroup buttons={[
-                {icon: <IonIcon slot="icon-only" icon={person}></IonIcon>},
-                {icon: <IonIcon slot="icon-only" icon={flash}></IonIcon>}
-              ]} onChange={toggleMembersMeter}/>
-            </div>
+          {showAmount &&
             <div>
-              <ButtonGroup buttons={[
-                {icon: <IonIcon slot="icon-only" icon={eegSolar}></IonIcon>},
-                {icon: <IonIcon slot="icon-only" icon={eegPlug}></IonIcon>}
-              ]} onChange={toggleMetering}/>
+              <IonRow>
+                <IonCol>
+                  <IonItem lines="none">
+                    <IonLabel slot="end">Gesamte EEG: {billingSum()} €</IonLabel>
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonButton expand="block"
+                             disabled>{`RECHNUNG VERSENDEN (${billingInfo.length})`}</IonButton>
+                </IonCol>
+              </IonRow>
+            </div>
+          }
+          <div className={"button-bar"}>
+            <div style={{marginLeft: "20px"}}>
+              <SlideButtonComponent checked={showAmount} disabled={!enableBilling}
+                                    setChecked={(c) => activateBilling(c)}></SlideButtonComponent>
+            </div>
+            <div style={{marginRight: "20px", display: "flex", flexDirection: "row"}}>
+              <div style={{marginRight: "10px"}}>
+                <ButtonGroup buttons={[
+                  {icon: <IonIcon slot="icon-only" icon={person}></IonIcon>},
+                  {icon: <IonIcon slot="icon-only" icon={flash}></IonIcon>}
+                ]} onChange={toggleMembersMeter}/>
+              </div>
+              <div>
+                <ButtonGroup buttons={[
+                  {icon: <IonIcon slot="icon-only" icon={eegSolar}></IonIcon>},
+                  {icon: <IonIcon slot="icon-only" icon={eegPlug}></IonIcon>}
+                ]} onChange={toggleMetering}/>
+              </div>
             </div>
           </div>
         </div>

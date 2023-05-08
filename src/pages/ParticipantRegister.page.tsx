@@ -19,25 +19,46 @@ import {EegParticipant} from "../models/members.model";
 import {useAppDispatch, useAppSelector} from "../store";
 import {selectedTenant} from "../store/eeg";
 import ParticipantRegisterMeterPaneComponent from "../components/ParticipantRegisterMeterPane.component";
-import {FormProvider, useForm} from "react-hook-form";
+import {FormProvider, useFieldArray, useForm} from "react-hook-form";
 import {Metering} from "../models/meteringpoint.model";
+import {RouteComponentProps} from "react-router";
 
-const ParticipantRegisterPage: FC = () => {
+const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
 
   const dispatch = useAppDispatch();
 
   const tenant = useAppSelector(selectedTenant)
-  const selectedParticipant: EegParticipant = {} as EegParticipant
+  const selectedParticipant: EegParticipant = {
+    id: '',
+    firstname: '',
+    lastname: '',
+    status: 'NEW',
+    titlePrefix: '',
+    titleSufix: '',
+    residentAddress: {street: '', type: 'RESIDENCE', city: '', streetNumber: 0, zip: ''},
+    billingAddress:  {street: '', type: 'BILLING', city: '', streetNumber: 0, zip: ''},
+    contact: {email: "", phone: ""},
+    accountInfo: {iban: '', owner: '', sepa: false},
+    businessRole: 'EEG_PRIVATE',
+    role: 'EEG_USER',
+    optionals: {website: ''},
+    taxNumber: '',
+    tariffId: '',
+    meters: []} as EegParticipant
 
-  const fromMethods = useForm({defaultValues: selectedParticipant})
+  const formMethods = useForm<EegParticipant>({defaultValues: selectedParticipant})
+  const {control} = formMethods
+
+  const {fields, append} = useFieldArray<EegParticipant>({control, name: 'meters'})
 
   const onRegisterParticipant = (participant: EegParticipant) => {
+    console.log("Append participant: ", participant);
     dispatch(createParticipant({tenant, participant}))
+    history.replace("/page/participants")
   }
 
   const onAddMeter = (meter: Metering) => {
-    console.log("Add Meter: ", [...selectedParticipant.meters, meter])
-    fromMethods.setValue("meters", [...selectedParticipant.meters, meter])
+    append(meter)
   }
 
   return (
@@ -51,8 +72,8 @@ const ParticipantRegisterPage: FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent color="eeg">
-        <FormProvider {...fromMethods}>
-          <form>
+        <FormProvider {...formMethods}>
+          {/*<form>*/}
             <div className={"register-participant-content"}>
               <div className="register-content-pane">
                 <h4>Allgemeines</h4>
@@ -65,7 +86,7 @@ const ParticipantRegisterPage: FC = () => {
                 <ParticipantRegisterMeterPaneComponent participant={selectedParticipant} onAddMeter={onAddMeter}/>
               </div>
             </div>
-          </form>
+          {/*</form>*/}
         </FormProvider>
       </IonContent>
       <IonFooter>
