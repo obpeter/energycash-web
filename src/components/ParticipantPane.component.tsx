@@ -2,7 +2,17 @@ import React, {FC, useContext, useEffect, useState} from "react";
 
 import {EegParticipant} from "../models/members.model";
 import {
-  CheckboxCustomEvent, IonButton, IonCol, IonIcon, IonItem, IonLabel, IonRow, SelectCustomEvent, useIonAlert
+  CheckboxCustomEvent,
+  IonButton,
+  IonButtons,
+  IonCol,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonRow,
+  IonToolbar,
+  SelectCustomEvent,
+  useIonAlert
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
@@ -21,7 +31,7 @@ import {billingSelector, fetchEnergyBills} from "../store/billing";
 import {selectedTenant} from "../store/eeg";
 import {fetchEnergyReport, meteringEnergyGroup} from "../store/energy";
 import ButtonGroup from "./ButtonGroup.component";
-import {flash, person} from "ionicons/icons";
+import {add, flash, person} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../eegIcons";
 import {selectedParticipantSelector, selectMetering, selectParticipant} from "../store/participant";
 import cn from "classnames";
@@ -167,24 +177,41 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const onSelectParticipant = (p: EegParticipant) => {
     dispatcher(selectParticipant(p.id))
+    dispatcher(selectMetering(p.meters[0].meteringPoint));
+    // e.stopPropagation();
   }
 
   const billingSum = () => {
     if (billingInfo) {
-      const sum = billingInfo.reduce((i, s) => i + s.amount + s.meteringPoints.reduce((mi, ms) => ms.amount, 0), 0)
+      const sum = billingInfo.reduce((i, s) => i + s.amount + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
       return Math.round(sum * 100) / 100;
     }
     return 0
   }
 
-  const selectMeter = (participantId: string, meter: Metering) => {
-    dispatcher(selectMetering(meter.meteringPoint))
+  const selectMeter = (e: React.MouseEvent<HTMLIonCardElement, MouseEvent>, participantId: string, meter: Metering) => {
+    dispatcher(selectParticipant(participantId))
+    dispatcher(selectMetering(meter.meteringPoint));
+    e.stopPropagation();
   }
 
   return (
     <div className={"participant-pane"}>
       <div className={"pane-body"}>
         <div className={"pane-content"}>
+          <IonToolbar color="eeg">
+            <IonButtons slot="end">
+              <IonButton
+                color="primary"
+                shape="round"
+                fill={"solid"}
+                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
+                routerLink="/page/addParticipant" routerDirection="root"
+              >
+                <IonIcon slot="icon-only" icon={add}></IonIcon>
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
           <PeriodSelectorComponent periods={periods} activePeriod={activePeriod} selectAll={selectAll}
                                    onUpdatePeriod={onUpdatePeriodSelection}/>
 

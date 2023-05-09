@@ -16,7 +16,7 @@ run:
 docker-clean:
 	$(DOCKER) rmi ghcr.io/vfeeg-development/$(BINARY_NAME):latest
 
-docker:
+docker: docker-clean
 	$(DOCKER) build -t ghcr.io/vfeeg-development/$(BINARY_NAME):latest .
 
 push: docker

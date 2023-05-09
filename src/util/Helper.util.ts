@@ -25,7 +25,6 @@ export const formatMeteringPointString = (m: string | undefined) => {
   if (m && m.length > 32) {
     return m.slice(0, 8) + "..." + m.slice(23)
   }
-  console.log(m, "Len MeteringId: ", m && m.length);
   return m
 }
 

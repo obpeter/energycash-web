@@ -91,7 +91,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
       </IonContent>
       <IonFooter>
         <IonToolbar className={"ion-padding-horizontal"}>
-          <IonButton fill="clear" slot="start">Zurück</IonButton>
+          <IonButton fill="clear" slot="start" routerLink="/page/participants" routerDirection="root">Zurück</IonButton>
           <IonButton form="submit-register-participant" type="submit" slot="end">Registrieren</IonButton>
         </IonToolbar>
       </IonFooter>

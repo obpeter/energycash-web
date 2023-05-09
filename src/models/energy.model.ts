@@ -13,6 +13,7 @@ export interface EnergyReport {
   allocated: number[]
   consumed: number[]
   produced: number[]
+  distributed: number[]
   total_produced: number
 }
 

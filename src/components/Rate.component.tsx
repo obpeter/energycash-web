@@ -5,9 +5,12 @@ import {FieldValues, useForm} from "react-hook-form";
 import {EegTariff} from "../models/eeg.model";
 import CheckboxComponent from "./form/Checkbox.component";
 import ToggleButtonComponent from "./ToggleButton.component";
+import {useRateType} from "../store/hook/Rate.provider";
 
-const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: FieldValues) => void, submitId: string, mode: string }> =
+const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, submitId: string, mode?: 'NEW' }> =
   ({rate, onSubmit, submitId, mode}) => {
+
+    const {currentRateType, setRateType} = useRateType()
 
     // const [state, setState] = useState<EegTariff>(rate)
     const {
@@ -27,12 +30,15 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: FieldValues) => void
       switch (type) {
         case 0:
           setValue("type", "EEG");
+          setRateType('EEG')
           break;
         case 1:
           setValue("type", "EZP");
+          setRateType('EZP')
           break;
         case 2:
           setValue("type", "VZP");
+          setRateType('VZP')
           break;
       }
     }
@@ -52,7 +58,7 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: FieldValues) => void
     const editable = mode === 'NEW';
 
     const RateFormType = (rate: EegTariff) => {
-      switch (rate.type) {
+      switch (currentRateType) {
         case "EEG":
           return (
             <div>
@@ -93,7 +99,7 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: FieldValues) => void
               <ToggleButtonComponent
                 buttons={[{label: 'Mitglied'}, {label: 'Erzeuger'}, {label: 'Verbraucher'}]}
                 onChange={handleRateType}
-                initalType={transformType(rate.type)}
+                value={transformType(currentRateType)}
                 changeable={editable}
               />
             </IonCol>

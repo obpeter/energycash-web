@@ -73,6 +73,40 @@ class EegService {
     }).then(res => res.json());
   }
 
+  async createParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/participant`, {
+      method: 'POST',
+      headers: { ... this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(participant)
+    }).then(res => res.json());
+  }
+
+  async updateParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/participant/${participant.id}`, {
+      method: 'PUT',
+      headers: { ... this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(participant)
+    }).then(res => res.json());
+  }
+
+  async confirmParticipant(tenant: string, pid: string, data: FormData): Promise<boolean> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/participant/${pid}/confirm`, {
+      method: 'POST',
+      headers: { ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json'
+      },
+      body: data
+    }).then(res => true);
+
+  }
+
   async fetchRates(token: string, tenant: string): Promise<EegTariff[]> {
     return await fetch(`${API_API_SERVER}/eeg/tariff`, {
       method: 'GET',
@@ -91,17 +125,6 @@ class EegService {
       },
       body: JSON.stringify(rate)
     }).then(async res => res.json());
-  }
-
-  async createParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
-    const token = await this.authClient.getToken();
-    return await fetch(`${API_API_SERVER}/participant`, {
-      method: 'POST',
-      headers: { ... this.getSecureHeaders(token, tenant),
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(participant)
-    }).then(res => res.json());
   }
 
   async createMeteringPoint(tenant: string, participantId: string, meter: Metering): Promise<Metering> {

@@ -1,7 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {featureKey} from "../states/rate.state";
 import {eegService} from "../../../service/eeg.service";
-import {EegRate} from "../../../models/eeg.model";
+import {EegRate, EegTariff} from "../../../models/eeg.model";
 
 export const fetchRatesModel = createAsyncThunk(
   `${featureKey}/fetch`,
@@ -14,7 +14,7 @@ export const fetchRatesModel = createAsyncThunk(
 
 export const saveNewRate = createAsyncThunk(
   `${featureKey}/save`,
-  async (arg: { rate: EegRate, tenant: string }) => {
+  async (arg: { rate: EegTariff, tenant: string }) => {
     const {rate, tenant} = arg
     const result = await eegService.addRate(tenant, rate);
     return result;
@@ -23,7 +23,7 @@ export const saveNewRate = createAsyncThunk(
 
 export const updateRate = createAsyncThunk(
   `${featureKey}/update`,
-  async (arg: {rate: EegRate, tenant: string}) => {
+  async (arg: {rate: EegTariff, tenant: string}) => {
       const {rate, tenant} = arg
       const result = await eegService.addRate(tenant, rate);
       return result;

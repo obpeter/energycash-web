@@ -8,12 +8,13 @@ import {EegParticipant} from "../models/members.model";
 interface MemberFormComponentProps {
   participant: EegParticipant
   formId: string
-  onSubmit: (data: any) => void
+  onSubmit: (data: EegParticipant) => void
 }
 
 const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId, onSubmit}) => {
 
-  const { handleSubmit, control } = useForm({defaultValues: participant, values: participant});
+  const { handleSubmit, control } = useForm({
+    defaultValues: participant, values: participant, mode: "onBlur"});
 
   return (
     <>
@@ -33,15 +34,15 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
           </IonCol>
         </IonRow>
       </IonGrid>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onBlur={handleSubmit(onSubmit)}>
         <IonList>
           <IonListHeader>Kontakt</IonListHeader>
           <InputForm name={"firstname"} label="Vorname" control={control} rules={{}} type="text"/>
           <InputForm name={"lastname"} label="Nachname" control={control} rules={{}} type="text"/>
-          <InputForm name={"address.street"} label="Straße" control={control} rules={{}} type="text"/>
-          <InputForm name={"address.streetNumber"} label="Hausnummer" control={control} rules={{}} type="text"/>
-          <InputForm name={"address.zip"} label="Postleitzahl" control={control} rules={{}} type="text"/>
-          <InputForm name={"address.city"} label="Ort" control={control} rules={{}} type="text"/>
+          <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{}} type="text"/>
+          <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} rules={{}} type="text"/>
+          <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} rules={{}} type="text"/>
+          <InputForm name={"residentAddress.city"} label="Ort" control={control} rules={{}} type="text"/>
           <InputForm name={"contact.phone"} label="Telefon" control={control} rules={{}} type="text"/>
           <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{}} type="text"/>
         </IonList>

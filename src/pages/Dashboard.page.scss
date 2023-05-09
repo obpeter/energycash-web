@@ -1,0 +1,29 @@
+.energy-card {
+  border-radius: 10% 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5px;
+
+  &.production {
+    background: rgb(58, 114, 52, 0.3);
+  }
+
+  &.consumption {
+    background: rgb(22, 87, 166, 0.3);
+  }
+
+  &.allocation {
+    background: rgb(31, 116, 133, 0.3);
+  }
+
+  & div.header {
+    text-align: center;
+    font-size: 12px;
+    padding: 6px;
+  }
+  & div.value {
+    text-align: center;
+    font-weight: bold;
+  }
+}

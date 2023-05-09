@@ -14,8 +14,6 @@ interface RateCardComponentProps {
 
 const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect}) => {
 
-  const history = useHistory();
-
   const defineIcon = (type: string) => {
     switch (type) {
       case "EEG":

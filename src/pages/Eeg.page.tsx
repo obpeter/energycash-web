@@ -26,7 +26,7 @@ const EegPage: FC = () => {
   const tenant = useAppSelector(selectedTenant);
   const dispatcher = useAppDispatch();
 
-  const {handleSubmit, control, watch} = useForm({defaultValues: eeg})
+  const {handleSubmit, control, watch} = useForm({defaultValues: eeg, values: eeg})
   const [tenantsState, setTenantsState] = useState<string[]>([])
   const tenants = useTenants()
 
@@ -51,16 +51,16 @@ const EegPage: FC = () => {
                 <div className={"header"}>Einstellungen</div>
                 <IonCard color="eeglight">
                   <div className="form-element">
-                    <IonItem fill="outline">
+                    {/*<IonItem fill="outline">*/}
                       {/*<IonLabel position="floating">RC Nummer</IonLabel>*/}
-                      <IonSelect label="RC Nummer" labelPlacement={"floating"} className="select-box" value={tenant}
+                      <IonSelect fill="outline" label="RC Nummer" labelPlacement={"floating"} className="select-box" value={tenant}
                                  onIonChange={onSwitchTenant}>
                         {tenantsState && tenantsState.map((o, idx) => (
                             <IonSelectOption key={idx} value={o}>{o}</IonSelectOption>
                           )
                         )}
                       </IonSelect>
-                    </IonItem>
+                    {/*</IonItem>*/}
                   </div>
                   <SelectForm label={"Abrechnungszeitraum"} placeholder={"Abrechnungszeitraum"} control={control}
                               name={"settlementInterval"} options={[
@@ -68,15 +68,20 @@ const EegPage: FC = () => {
                     {key: "ANNUAL", value: "Jährlich"},
                   ]}></SelectForm>
                   <IonItem lines="none">
-                    <IonLabel slot="start">SEPA aktiv</IonLabel>
+                    {/*<IonLabel slot="start">SEPA aktiv</IonLabel>*/}
                     <Controller
                       name={"accountInfo.sepa"}
                       control={control}
                       render={({field}) => {
                         const {onChange, value} = field;
-                        return (<IonToggle slot="end" checked={value} onIonChange={(e) => {
-                          onChange(e.detail.checked);
-                        }}></IonToggle>)
+                        return (<IonToggle
+                          style={{width: "100%"}}
+                          slot="start"
+                          labelPlacement="start"
+                          checked={value}
+                          onIonChange={(e) => {
+                            onChange(e.detail.checked);
+                        }}>SEPA aktiv</IonToggle>)
                       }
                       }
                     />

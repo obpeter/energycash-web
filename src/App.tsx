@@ -2,7 +2,6 @@ import {IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact} from '@ionic/rea
 import {IonReactRouter} from '@ionic/react-router';
 import {Redirect, Route} from 'react-router-dom';
 import Menu from './components/Menu';
-import Page from './pages/Page';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -35,6 +34,8 @@ import TestPage from "./pages/TestPage";
 import RatesPage from "./pages/Rates.page";
 import EegPage from "./pages/Eeg.page";
 import ParticipantRegisterPage from "./pages/ParticipantRegister.page";
+import RateProvider from "./store/hook/Rate.provider";
+import DashbaordPage from "./pages/Dashbaord.page";
 
 setupIonicReact();
 
@@ -55,20 +56,17 @@ const SecureSection: React.FC = () => {
           <IonSplitPane contentId="main">
             <Menu/>
             <IonRouterOutlet id="main">
-              <Route path="/" exact={true}>
-                <Redirect to="/page/participants"/>
-              </Route>
-              <MemberViewProvider>
-                <Route path="/page/participants" exact={true}>
-                  <Participants></Participants>
-                  <Route path="inner/details" exact={true}>
-                    <TestPage/>
-                  </Route>
-                </Route>
-              </MemberViewProvider>
-              <Route path="/page/rates" component={RatesPage} exact={true}/>
+              <Route path="/" exact={true} render={() => <Redirect to="/page/participants"/>}/>
+              <Route path="/page/dashboard" component={DashbaordPage} exact={true}/>
               <Route path="/page/eeg" component={EegPage} exact={true}/>
+              <MemberViewProvider>
+                <Route path="/page/participants" exact={true} component={Participants} />
+                <RateProvider>
+                  <Route path="/page/rates" component={RatesPage} exact={true}/>
+                </RateProvider>
+              </MemberViewProvider>
               <Route path="/page/addParticipant" exact={true} component={ParticipantRegisterPage} />
+              {/*<Route path="*" render={() => <Redirect to="/page/participants"/>} />*/}
             </IonRouterOutlet>
           </IonSplitPane>
         </ParticipantProvider>
@@ -91,6 +89,7 @@ const PublicRouter: React.FC<{ children: React.ReactNode }> = ({children}) => {
   return !isAuthenticated ? (
     <>{children}</>
   ) : (
+    // <Redirect to="/page/participants"/>
     <Redirect to="/page/participants"/>
   )
 }

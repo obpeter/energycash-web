@@ -68,7 +68,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
       )
     }
     return meters.map((m, idx) => (
-      <MeterCardComponent key={idx} participant={participant} meter={m} hideMeter={true} onSelect={(p, m) => showMeter(m)}/>
+      <MeterCardComponent key={idx} participant={participant} meter={m} hideMeter={true} onSelect={(e, p, m) => showMeter(m)}/>
     ))
   }
 

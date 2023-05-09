@@ -1,49 +1,39 @@
-import {createContext, FC, ReactNode, useState} from "react";
-import {useAppSelector} from "../index";
-import {meteringEnergyGroup} from "../energy";
-import {MeteringEnergyGroupType} from "../../models/meteringpoint.model";
+import {createContext, FC, ReactNode, useContext, useState} from "react";
 
-type ParticipantRateType = "EEG" | "VZP" | "EZP"
+type RateType = "EEG" | "VZP" | "EZP" | "AKONTO"
 
-export interface ParticipantsRateState {
-  participantRates: Record<string, Record<ParticipantRateType, number>>
-  setParticipantRate: (participantId: string, type: ParticipantRateType, value: number) => void
-  energyMeterGroup: MeteringEnergyGroupType[]
-  // updateBillPreview: () => void
+interface RateState {
+  currentRateType: RateType;
+  setRateType: (r: RateType) => void;
 }
 
-const initialState: ParticipantsRateState = {
-  participantRates: {},
-  setParticipantRate: (participantId: string, type: ParticipantRateType, value: number) => {},
-  energyMeterGroup: []
+const initialState: RateState = {
+  currentRateType: 'EEG',
+  setRateType: (r: RateType) => {}
 }
 
-export const ParticipantRateContext = createContext(initialState)
+export const RateContext = createContext(initialState)
 
 
-const ParticipantRateProvider: FC<{children: ReactNode}> = ({children}) => {
+const RateProvider: FC<{children: ReactNode}> = ({children}) => {
 
-  const [participantsRate, setParticipantsRate] = useState<Record<string, Record<ParticipantRateType, number>>>({})
-
-  const energyMeterGroup = useAppSelector(meteringEnergyGroup)
+  const [rateType, setRateType] = useState<RateType>('EEG')
 
   const value = {
-    participantRates: participantsRate,
-    setParticipantRate: (participantId: string, type: ParticipantRateType, value: number) => {
-      setParticipantsRate((state) => {
-        const newState = {...state}
-        newState[participantId][type] = value
-        return newState
-      })
-    },
-    energyMeterGroup: energyMeterGroup,
-  } as ParticipantsRateState
+    currentRateType: rateType,
+    setRateType: setRateType,
+  } as RateState
 
   return (
-    <ParticipantRateContext.Provider value={value}>
+    <RateContext.Provider value={value}>
       {children}
-    </ParticipantRateContext.Provider>
+    </RateContext.Provider>
   )
 }
 
-export default ParticipantRateProvider
+export default RateProvider
+
+export const useRateType = () => {
+  const {currentRateType, setRateType} = useContext(RateContext)
+  return {currentRateType, setRateType}
+}

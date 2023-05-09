@@ -1,9 +1,9 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {
   addMeteringPoint,
-  chancelNewParticipant, createParticipant, fetchParticipantModel,
+  chancelNewParticipant, confirmParticipant, createParticipant, fetchParticipantModel,
   newParticipant, registerMeteringpoint,
-  saveNewParticipant, selectMetering, selectParticipant, updateMeteringPoint
+  saveNewParticipant, selectMetering, selectParticipant, updateMeteringPoint, updateParticipant
 } from "../actions/participant.action";
 import {adapter, initialState} from "../states";
 import {EegParticipant} from "../../../models/members.model";
@@ -59,5 +59,13 @@ export const reducer = createReducer(initialState, builder =>
       const modParticipant = state.selectedParticipant;
       const changedParticipant = {...modParticipant, meters: [...modParticipant.meters.filter(m => m.meteringPoint !== meter.meteringPoint), ...[meter]] }
       return adapter.updateOne(state, {id: modParticipant.id, changes: changedParticipant})
+    })
+    .addCase(confirmParticipant.fulfilled, (state, action) => {
+      return adapter.updateOne({...state, selectedParticipant: {} as EegParticipant},
+        { id: action.payload.participantId, changes: {status: "ACTIVE"} } )
+
+    })
+    .addCase(updateParticipant.fulfilled, (state, action) => {
+      return adapter.updateOne({...state}, {id: action.payload.id, changes: action.payload})
     })
 );

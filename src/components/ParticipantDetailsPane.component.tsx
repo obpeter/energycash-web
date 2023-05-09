@@ -31,7 +31,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import {useAppSelector} from "../store";
+import {useAppDispatch, useAppSelector} from "../store";
 import {energySeriesByMeter} from "../store/energy";
 import {Metering} from "../models/meteringpoint.model";
 import MemberFormComponent from "./MemberForm.component";
@@ -40,10 +40,11 @@ import {
   selectedMeterIdSelector,
   selectedParticipantSelector,
   selectMetering,
-  selectParticipant
+  selectParticipant, updateParticipant
 } from "../store/participant";
 import {formatMeteringPointString} from "../util/Helper.util";
 import participants from "../pages/Participants";
+import {selectedTenant} from "../store/eeg";
 
 type DynamicComponentKey = "memberForm" | "meterForm"
 // interface DynamicComponentProps {
@@ -79,9 +80,10 @@ interface ParticipantDetailsPaneProps {
 const ParticipantDetailsPaneComponent: FC = () => {
 
   // const {selectedParticipant} = props;
+  const dispatcher = useAppDispatch();
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
-
-  const selectedMeterId = useAppSelector(selectedMeterIdSelector)
+  const selectedMeterId = useAppSelector(selectedMeterIdSelector);
+  const tenant = useAppSelector(selectedTenant)
 
   // const selectedMeter: Metering | undefined = {} as Metering
   const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
@@ -113,25 +115,25 @@ const ParticipantDetailsPaneComponent: FC = () => {
   //
   // }, [activeMenu, selectedParticipant])
 
-  useEffect(() => {
-    if (selectedParticipant && selectedParticipant.meters && selectedParticipant.meters.length > 0) {
-      // setSelectedMeter(selectedParticipant.meters[0])
-
-      if (selectedMeter) {
-        let m = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeter.meteringPoint)
-        if (!m) {
-          m = selectedParticipant.meters[0]
-        }
-        setSelectedMeter(m)
-
-        if (accordionGroup && accordionGroup.current) {
-          accordionGroup.current.value = selectedMeter.meteringPoint
-        }
-      } else {
-        setSelectedMeter(selectedParticipant.meters[0])
-      }
-    }
-  }, [selectedParticipant])
+  // useEffect(() => {
+  //   if (selectedParticipant && selectedParticipant.meters && selectedParticipant.meters.length > 0) {
+  //     // setSelectedMeter(selectedParticipant.meters[0])
+  //
+  //     if (selectedMeter) {
+  //       let m = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeter.meteringPoint)
+  //       if (!m) {
+  //         m = selectedParticipant.meters[0]
+  //       }
+  //       setSelectedMeter(m)
+  //
+  //       if (accordionGroup && accordionGroup.current) {
+  //         accordionGroup.current.value = selectedMeter.meteringPoint
+  //       }
+  //     } else {
+  //       setSelectedMeter(selectedParticipant.meters[0])
+  //     }
+  //   }
+  // }, [selectedParticipant])
 
   useEffect(() => {
     if (selectedMeterId) {
@@ -172,15 +174,16 @@ const ParticipantDetailsPaneComponent: FC = () => {
     }
   }
 
-  const accordionGroupChange = (ev: AccordionGroupCustomEvent) => {
-
+  const onUpdateParticipant = (participant: EegParticipant) => {
+    dispatcher(updateParticipant({tenant, participant}))
   }
+
   const dynamicComponent = (componentKey: DynamicComponentKey) => {
 
     switch (componentKey) {
       case "memberForm":
         return <MemberFormComponent participant={selectedParticipant} formId={""}
-                                    onSubmit={(e) => console.log("update", e)}/>
+                                    onSubmit={onUpdateParticipant}/>
       case "meterForm":
         if (selectedMeter) {
           return <MeterFormComponent meteringPoint={selectedMeter}/>
@@ -200,11 +203,6 @@ const ParticipantDetailsPaneComponent: FC = () => {
           <IonIcon icon={trashBin} slot="start" style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
           <IonLabel>Benutzer archivieren</IonLabel>
         </IonItem>
-        <IonFab horizontal="end">
-          <IonFabButton size="small" routerLink="/page/addParticipant" routerDirection="root">
-            <IonIcon icon={add}></IonIcon>
-          </IonFabButton>
-        </IonFab>
       </div>
       <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
         <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
@@ -240,91 +238,84 @@ const ParticipantDetailsPaneComponent: FC = () => {
             </div>
           </div>
           <div className={"details-box"}>
-            <IonAccordionGroup onIonChange={switchMeter} ref={accordionGroup}>
-              {selectedParticipant && selectedParticipant.meters && selectedParticipant.meters.map((m, i) =>
-                <IonAccordion key={i} value={m.meteringPoint}>
-                  {/*<IonItem slot="header" color="light">*/}
-                  {/*  <IonLabel>{m.meteringPoint}</IonLabel>*/}
-                  {/*</IonItem>*/}
-                  <IonItem slot="header" color="primary" lines="full"><IonTitle>{formatMeteringPointString(m.meteringPoint)}</IonTitle></IonItem>
-                  <div className="ion-padding" slot="content">
-                    {/*<IonToolbar*/}
-                    {/*  color="primary"><IonTitle>{formatMeteringPointString(m.meteringPoint)}</IonTitle></IonToolbar>*/}
-                    <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterPending()}>
-                      <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
-                      <div>
-                        <div
-                          className={"detail-header"}>{`Zählpunkt ${m.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
-                      </div>
-                      <IonToggle slot="end" checked={m.status === "ACTIVE"}></IonToggle>
-                    </IonItem>
-                    <IonItem button lines="full"
-                             className={cn("eeg-item-box", {"selected": activeMenu === "meterForm"})}
-                             onClick={() => setActiveMenu("meterForm")}>
-                      <IonIcon icon={isGenerator() ? eegSolar : eegPlug} slot="start"></IonIcon>
-                      <div>
-                        <div className={"detail-header"}>Details und Adresse</div>
-                      </div>
-                    </IonItem>
-                    <IonItem lines="full" className={"eeg-item-box"}>
-                      <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
-                      <div>
-                        <div className={"detail-header"}>Dokumente</div>
-                        <div className={"detail-subheader"}>z.B. Verträge</div>
-                      </div>
-                    </IonItem>
-                    <IonItem lines="full" className={"eeg-item-box"} onClick={() => console.log("onSyncMeterpoint")}>
-                      <IonIcon icon={syncOutline} slot="start"></IonIcon>
-                      <div>
-                        <div className={"detail-header"}>Synchronisieren</div>
-                        <div className={"detail-subheader"}>mit Energieprovider</div>
-                      </div>
-                    </IonItem>
-                    <div style={{marginLeft: "20px"}}><h4>Verbrauch</h4></div>
-                    {/*<div style={{display: "flex", height: "300px", width: "100%"}}>*/}
-                    <div style={{height: "300px", width: "100%"}}>
-                      <ResponsiveContainer width="90%" height={300}>
-                        {/*<LineChart width={600} height={300} data={energySeries.map((e, i) => {*/}
-                        {/*  return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}*/}
-                        {/*})} margin={{top: 15, right: 15, bottom: 35, left: 0}}>*/}
-                        {/*  <YAxis fontSize={10} unit={" kW"}/>*/}
-                        {/*  <CartesianGrid strokeDasharray="3 3"/>*/}
-                        {/*  <XAxis dataKey="name" angle={315} tickMargin={5} fontSize={10}/>*/}
-                        {/*  <Tooltip/>*/}
-                        {/*  <Legend align={'center'} verticalAlign={'bottom'} height={40} fontSize={"4px"}/>*/}
-                        {/*  <Line name="EEG" type="monotone" dataKey="distributed" stroke="#20c997" strokeWidth={1} fontSize={6} activeDot={false} dot={false}/>*/}
-                        {/*  <Line name="Netz" type="monotone" dataKey="consumed" stroke="#000000" strokeWidth={1} fontSize={6} activeDot={false} dot={false}/>*/}
-                        {/*</LineChart>*/}
-                        <BarChart
-                          width={500}
-                          height={300}
-                          data={energySeries.map((e, i) => {
-                            return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}
-                          })}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                          }}
-                          barCategoryGap={0}
-                          barGap={1}
-                        >
-                          <CartesianGrid strokeDasharray="3 3"/>
-                          <XAxis dataKey="name"/>
-                          <YAxis fontSize={10} unit={" kWh"}/>
-                          <Tooltip/>
-                          <Legend/>
-                          <Bar name="EEG" dataKey="distributed" fill="#8884d8"/>
-                          <Bar name="Netz" dataKey="consumed" fill="#82ca9d"/>
-                        </BarChart>
+            { selectedMeter ? (
+            <div className="ion-padding" slot="content">
+              <IonToolbar
+                color="primary"><IonTitle>{formatMeteringPointString(selectedMeter.meteringPoint)}</IonTitle></IonToolbar>
+              <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterPending()}>
+                <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
+                <div>
+                  <div
+                    className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
+                </div>
+                <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"} disabled={true}></IonToggle>
+              </IonItem>
+              <IonItem button lines="full"
+                       className={cn("eeg-item-box", {"selected": activeMenu === "meterForm"})}
+                       onClick={() => setActiveMenu("meterForm")}>
+                <IonIcon icon={isGenerator() ? eegSolar : eegPlug} slot="start"></IonIcon>
+                <div>
+                  <div className={"detail-header"}>Details und Adresse</div>
+                </div>
+              </IonItem>
+              <IonItem lines="full" className={"eeg-item-box"}>
+                <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
+                <div>
+                  <div className={"detail-header"}>Dokumente</div>
+                  <div className={"detail-subheader"}>z.B. Verträge</div>
+                </div>
+              </IonItem>
+              <IonItem lines="full" className={"eeg-item-box"} onClick={() => console.log("onSyncMeterpoint")}>
+                <IonIcon icon={syncOutline} slot="start"></IonIcon>
+                <div>
+                  <div className={"detail-header"}>Synchronisieren</div>
+                  <div className={"detail-subheader"}>mit Energieprovider</div>
+                </div>
+              </IonItem>
+              <div style={{marginLeft: "20px"}}><h4>Verbrauch</h4></div>
+              {/*<div style={{display: "flex", height: "300px", width: "100%"}}>*/}
+              <div style={{height: "300px", width: "100%"}}>
+                <ResponsiveContainer width="90%" height={300}>
+                  {/*<LineChart width={600} height={300} data={energySeries.map((e, i) => {*/}
+                  {/*  return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}*/}
+                  {/*})} margin={{top: 15, right: 15, bottom: 35, left: 0}}>*/}
+                  {/*  <YAxis fontSize={10} unit={" kW"}/>*/}
+                  {/*  <CartesianGrid strokeDasharray="3 3"/>*/}
+                  {/*  <XAxis dataKey="name" angle={315} tickMargin={5} fontSize={10}/>*/}
+                  {/*  <Tooltip/>*/}
+                  {/*  <Legend align={'center'} verticalAlign={'bottom'} height={40} fontSize={"4px"}/>*/}
+                  {/*  <Line name="EEG" type="monotone" dataKey="distributed" stroke="#20c997" strokeWidth={1} fontSize={6} activeDot={false} dot={false}/>*/}
+                  {/*  <Line name="Netz" type="monotone" dataKey="consumed" stroke="#000000" strokeWidth={1} fontSize={6} activeDot={false} dot={false}/>*/}
+                  {/*</LineChart>*/}
+                  <BarChart
+                    width={500}
+                    height={300}
+                    data={energySeries.map((e, i) => {
+                      return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}
+                    })}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                    barCategoryGap={0}
+                    barGap={1}
+                  >
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis dataKey="name"/>
+                    <YAxis fontSize={10} unit={" kWh"}/>
+                    <Tooltip formatter={(value) => Number(value).toFixed(3) + " kWh"}/>
+                    <Legend/>
+                    <Bar name="EEG" dataKey="distributed" fill="#8884d8"/>
+                    <Bar name="Netz" dataKey="consumed" fill="#82ca9d"/>
+                  </BarChart>
 
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </IonAccordion>
-              )}
-            </IonAccordionGroup>
+                </ResponsiveContainer>
+              </div>
+            </div>) :
+              <></>
+            }
           </div>
         </div>
         <div className="pane-content-details">

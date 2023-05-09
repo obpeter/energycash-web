@@ -44,7 +44,7 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
             <ToggleButtonComponent
               buttons={[{label: 'Privat', icon: people}, {label: 'Firma', icon: eegBusiness}]}
               onChange={onChangeBusinessType}
-              initalType={selectedBusinessType}
+              value={selectedBusinessType}
               changeable={editable()}
             />
           </IonCol>

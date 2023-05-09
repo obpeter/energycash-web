@@ -56,6 +56,14 @@ export const createParticipant = createAsyncThunk(
   }
 )
 
+export const updateParticipant = createAsyncThunk(
+  `${featureKey}/update`,
+  async (arg: { tenant: string, participant: EegParticipant }) => {
+    const {participant, tenant} = arg
+    return await eegService.updateParticipant(tenant, participant);
+  }
+)
+
 export const registerMeteringpoint = createAsyncThunk(
   `${featureKey}/meter/create`,
   async (arg: { tenant: string, participant: string, meter: Metering }) => {
@@ -70,5 +78,14 @@ export const updateMeteringPoint = createAsyncThunk(
     const {tenant, participantId, meter} = args
     await eegService.updateMeteringPoint(tenant, participantId, meter);
     return {meter: meter, participantId: participantId}
+  }
+)
+
+export const confirmParticipant = createAsyncThunk(
+  `${featureKey}/participant/confirm`,
+  async (args: {tenant: string, participantId: string, data: FormData}) => {
+    const {tenant, participantId, data} = args
+    await eegService.confirmParticipant(tenant, participantId, data);
+    return {participantId: participantId}
   }
 )

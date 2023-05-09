@@ -14,10 +14,10 @@ const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: st
   ({ label, control, name,rules, type, disabled,...rest}) => {
   return (
     <div className={"form-element"}>
-      <IonItem fill="outline" disabled={disabled} style={{"--min-height": "12px"}}>
-        {label && (
-          <IonLabel position="floating">{label}</IonLabel>
-        )}
+      {/*<IonItem disabled={disabled} style={{"--min-height": "12px"}}>*/}
+        {/*{label && (*/}
+        {/*  <IonLabel position="floating">{label}</IonLabel>*/}
+        {/*)}*/}
         <Controller
           name={name}
           control={control}
@@ -26,10 +26,14 @@ const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: st
             const { onChange, value } = field;
             return (<IonInput onIonChange={(e) => onChange((type === 'number' ? Number(e.detail.value!) : e.detail.value!))}
                               placeholder="Enter text"
+                              fill="outline"
+                              label={label}
+                              labelPlacement={"floating"}
+                              disabled={disabled}
                               type={type} {...rest} {...field}></IonInput>)
           } }
         />
-      </IonItem>
+      {/*</IonItem>*/}
       {rest.error && <span className={"error-line"}>{rest.error.message}</span>}
     </div>
   );

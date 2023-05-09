@@ -60,8 +60,9 @@ export const meteringReportSelector = (meterId: string, reportId: string) => cre
         } as ConsumerReport
       } else {
         return {
-          allocated: report.produced[meta.sourceIdx],
-          total_production: report.total_produced
+          produced: report.produced[meta.sourceIdx],
+          allocated: report.distributed[meta.sourceIdx],
+          total_production: report.distributed.reduce((s, d) => s + d, 0)
         } as ProducerReport
       }
     }
@@ -105,7 +106,7 @@ export const meteringEnergyGroup = createSelector(
       if (m.dir === "CONSUMPTION") {
         allocation = report.allocated[m.sourceIdx]
       } else {
-        allocation = report.produced[m.sourceIdx]
+        allocation = report.distributed[m.sourceIdx]
       }
     }
     return {meteringPoint: m.name, allocation: allocation} as MeteringEnergyGroupType

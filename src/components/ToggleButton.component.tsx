@@ -11,17 +11,15 @@ export type ToggleButtonItems = {
 interface ToggleButtonComponentProps {
   buttons: ToggleButtonItems[]
   onChange: (selectedIdx: number) => void
-  initalType: number
+  value: number
   changeable: boolean
 }
 
 const ToggleButtonComponent: FC<ToggleButtonComponentProps>
-  = ({buttons, onChange, initalType, changeable}) => {
-  const [selected, setSelected] = useState(initalType);
+  = ({buttons, onChange, value, changeable}) => {
 
   const handleSelected = (idx: number) => {
     if(changeable) {
-      setSelected(idx);
       onChange(idx);
     }
   }
@@ -29,7 +27,7 @@ const ToggleButtonComponent: FC<ToggleButtonComponentProps>
   return (
     <>
       {buttons.map((b, idx) => (
-        <IonChip key={idx} className="ToggleButtonComponent" outline={!(selected === idx)} onClick={() => handleSelected(idx)}>
+        <IonChip key={idx} className="ToggleButtonComponent" outline={!(value === idx)} onClick={() => handleSelected(idx)}>
           {b.icon && <IonIcon icon={b.icon}/>}
           <IonLabel>{b.label}</IonLabel>
         </IonChip>

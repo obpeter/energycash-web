@@ -1,7 +1,7 @@
 import React, {createContext, FC, ReactNode, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../index";
 import {fetchEegModel, selectedTenant, selectTenant} from "../eeg";
-import {useKeycloak} from "./AuthProvider";
+import {useKeycloak, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
 import {fetchParticipantModel} from "../participant";
 import {fetchEnergyReport, setSelectedPeriod} from "../energy";
@@ -14,6 +14,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const dispatch = useAppDispatch();
   const {keycloak} = useKeycloak();
+  const tenants = useTenants();
 
   const tenant = useAppSelector(selectedTenant)
 
@@ -22,6 +23,15 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     // console.log("APP STATE CHANGED: ", state)
     if (tenant) init()
   }, [tenant])
+
+  useEffect(() => {
+    const storedTenant = localStorage.getItem("tenant")
+    if (storedTenant) {
+      if (!tenant) {
+        dispatch(selectTenant(storedTenant))
+      }
+    }
+  }, [tenants])
 
   const init = async () => {
     let initTenant = tenant

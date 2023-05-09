@@ -65,7 +65,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
           }
         })}
         <IonItem lines="none" fill={undefined} style={{"--background": "transparent"}}>
-          <IonLabel slot="end">{sum} €</IonLabel>
+          <IonLabel slot="end">{sum.toFixed(2)} €</IonLabel>
         </IonItem>
       </div>
     )
@@ -76,7 +76,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
       return (
         <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
           <div style={{padding: "5px"}}>Gutschriften</div>
-          <div style={{padding: "5px"}}>{credit} €</div>
+          <div style={{padding: "5px"}}>{credit.toFixed(2)} €</div>
         </div>
       )
     }
@@ -87,7 +87,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
       return (
         <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
           <div style={{padding: "5px"}}>Kosten</div>
-          <div style={{padding: "5px"}}>{debit} €</div>
+          <div style={{padding: "5px"}}>{debit.toFixed(2)} €</div>
         </div>
       )
     }
@@ -148,7 +148,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
                 {memberBill ? <>
                   <IonItem lines="none" fill={"outline"} style={{"--min-height": "32px", fontSize: "14px"}}>
                     <IonIcon style={{marginTop: "5px", marginBottom: "5px"}} icon={eegSumSign} slot="start"></IonIcon>
-                    <span>{Math.round(memberBill.meteringPoints.reduce((s, m) => s + m.amount, memberBill.amount) * 100) / 100}</span> €
+                    <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, memberBill.amount).toFixed(2)}</span> €
                   </IonItem></> : <></>}
               </div>
             </IonRow>

@@ -1,5 +1,5 @@
-import React, {FC, useContext, useEffect} from "react";
-import {IonCard, IonCol, IonGrid, IonIcon, IonItem, IonLabel, IonRow} from "@ionic/react";
+import React, {FC} from "react";
+import {IonCard, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from "@ionic/react";
 import {eegPlug, eegSolar} from "../eegIcons";
 import {EegParticipant} from "../models/members.model";
 import {Metering} from "../models/meteringpoint.model";
@@ -10,9 +10,7 @@ import {useHistory} from "react-router";
 import {useAppSelector} from "../store";
 import {meteringReportSelector} from "../store/energy";
 import {ConsumerReport, ProducerReport} from "../models/energy.model";
-import {MemberViewContext} from "../store/hook/MemberViewProvider";
 import {selectRateById} from "../store/rate";
-import {amountInEuro} from "../util/TariffHelper";
 import {selectBillByMeter} from "../store/billing";
 import {formatMeteringPointString} from "../util/Helper.util";
 
@@ -20,7 +18,7 @@ interface MeterCardComponentProps {
   participant:EegParticipant;
   meter: Metering;
   hideMeter: boolean;
-  onSelect?: (participantId: string, meter: Metering) => void;
+  onSelect?: (e: React.MouseEvent<HTMLIonCardElement, MouseEvent>, participantId: string, meter: Metering) => void;
   showCash?: boolean;
 }
 
@@ -30,7 +28,6 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
 
-  const history = useHistory();
   const report = useAppSelector(meteringReportSelector(meter.meteringPoint, `MRP/${year}/${month}`))
   const tariff = useAppSelector(selectRateById(meter.tariffId))
   const bill = useAppSelector(selectBillByMeter(participant.id, meter.meteringPoint))
@@ -72,7 +69,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
 
   // /*history.push(`/participant/${participant.id}/meter/${meter.meteringPoint}`*/
   return (
-    <IonCard style={{marginTop: "0px", fontSize: "16px"}} onClick={() => onSelect && onSelect(participant.id, meter)}>
+    <IonCard style={{marginTop: "0px", fontSize: "16px"}} onClick={(e) => onSelect && onSelect(e, participant.id, meter)}>
       <IonGrid fixed={true} style={{paddingTop: "12px"}}>
         <IonRow style={isMeterPending() ? {color: "#DC631E"} : {color: "#1E4640"}}>
           <IonCol size={"1"}>
@@ -80,7 +77,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
           </IonCol>
           <IonCol size={isMeterPending() ? "11" : "7"}>
             {/*<IonLabel style={{textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{participant.participant.meters[0].meteringPoint}</IonLabel>*/}
-            <div style={{fontSize: "15px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{formatMeteringPointString(meter.meteringPoint)}</div>
+            <div style={{fontSize: "15px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer"}}>{formatMeteringPointString(meter.meteringPoint)}</div>
           </IonCol>
           {isMeterPending() || (
             <IonCol size={"4"}>

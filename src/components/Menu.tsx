@@ -1,5 +1,5 @@
 import {
-  IonContent,
+  IonContent, IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
@@ -8,11 +8,24 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/react';
 
-import { useLocation } from 'react-router-dom';
-import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import {useLocation} from 'react-router-dom';
+import {
+  archiveOutline,
+  archiveSharp,
+  heartOutline,
+  heartSharp, newspaper,
+  paperPlaneOutline,
+  paperPlaneSharp, people, person, personOutline,
+  trashOutline,
+  trashSharp, wallet, walletOutline, walletSharp
+} from 'ionicons/icons';
 import './Menu.css';
+import React from "react";
+import {eegChatIcon} from "../eegIcons";
 
 interface AppPage {
   url: string;
@@ -24,33 +37,33 @@ interface AppPage {
 const appPages: AppPage[] = [
   {
     title: 'Dashboard',
-    url: '/page/Inbox',
-    iosIcon: mailOutline,
-    mdIcon: mailSharp
+    url: '/page/dashboard',
+    iosIcon: eegChatIcon,
+    mdIcon: eegChatIcon
   },
   {
     title: 'Viere',
     url: '/page/eeg',
-    iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp
+    iosIcon: newspaper,
+    mdIcon: newspaper
   },
   {
     title: 'Mitglieder',
     url: '/page/participants',
-    iosIcon: heartOutline,
-    mdIcon: heartSharp
+    iosIcon: people,
+    mdIcon: people
   },
   {
     title: 'Tarife',
     url: '/page/rates',
-    iosIcon: archiveOutline,
-    mdIcon: archiveSharp
+    iosIcon: wallet,
+    mdIcon: walletSharp
   },
   {
     title: 'Profil',
     url: '/page/Trash',
-    iosIcon: trashOutline,
-    mdIcon: trashSharp
+    iosIcon: person,
+    mdIcon: person
   }
 ];
 
@@ -61,10 +74,12 @@ const Menu: React.FC = () => {
 
   return (
     <IonMenu contentId="main" type="overlay">
+      <IonHeader>
+        <IonToolbar
+          color="primary"><IonTitle>EEG <span style={{color: "#79DFB4"}}>Faktura</span></IonTitle></IonToolbar>
+      </IonHeader>
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Inbox</IonListHeader>
-          <IonNote>hi@ionicframework.com</IonNote>
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>

@@ -97,7 +97,7 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({meter,
                   <ToggleButtonComponent
                     buttons={[{label: 'Verbraucher', icon: eegPlug}, {label: 'Erzeuger', icon: star}]}
                     onChange={onChangeDirection}
-                    initalType={selectedDirection}
+                    value={selectedDirection}
                     changeable={editable()}
                   />
                 </IonCol>
