@@ -33,3 +33,24 @@ export const reportDateGraphqlQuery = (tenant: string) => {
     variables: {},
   }
 };
+
+const UploadEneryMutation = (tenant: string, sheet: string) => `{
+  singleUpload(tenant: "${tenant}", sheet: "${sheet}", file: $energyData)
+}`; // graphQl Query
+
+export const uploadEnergyGraphqlMutation = async (tenant: string, sheet: string, data: File) => {
+
+  const fileToBlob = async (file: File) => new Blob([new Uint8Array(await file.arrayBuffer())], {type: file.type });
+
+  const formData = new FormData();
+
+  formData.append("operations", JSON.stringify({
+    operationName: null,
+    query: `mutation ($energyData: Upload!) ${UploadEneryMutation(tenant.toLowerCase(), sheet)}`,
+    variables: {"energyData": null},
+  }))
+  formData.append("map", JSON.stringify({"0": ["variables.energyData"]}))
+  formData.append("0", data)
+
+  return formData;
+};

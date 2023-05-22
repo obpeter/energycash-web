@@ -36,6 +36,7 @@ import EegPage from "./pages/Eeg.page";
 import ParticipantRegisterPage from "./pages/ParticipantRegister.page";
 import RateProvider from "./store/hook/Rate.provider";
 import DashbaordPage from "./pages/Dashbaord.page";
+import ProfilesPage from "./pages/Profiles.page";
 
 setupIonicReact();
 
@@ -66,6 +67,7 @@ const SecureSection: React.FC = () => {
                 </RateProvider>
               </MemberViewProvider>
               <Route path="/page/addParticipant" exact={true} component={ParticipantRegisterPage} />
+              <Route path="/page/profiles" exact={true} component={ProfilesPage} />
               {/*<Route path="*" render={() => <Redirect to="/page/participants"/>} />*/}
             </IonRouterOutlet>
           </IonSplitPane>

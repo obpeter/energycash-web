@@ -85,7 +85,6 @@ export const confirmParticipant = createAsyncThunk(
   `${featureKey}/participant/confirm`,
   async (args: {tenant: string, participantId: string, data: FormData}) => {
     const {tenant, participantId, data} = args
-    await eegService.confirmParticipant(tenant, participantId, data);
-    return {participantId: participantId}
+    return await eegService.confirmParticipant(tenant, participantId, data);
   }
 )

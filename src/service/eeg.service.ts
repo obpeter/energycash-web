@@ -4,7 +4,13 @@ import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {Metering, MeteringEnergyGroupType, ParticipantBillType} from "../models/meteringpoint.model";
 import {EegEnergyReport} from "../models/energy.model";
-import {eegGraphqlQuery, energyGraphqlQuery, reportDateGraphqlQuery} from "./graphql-query";
+import {
+  eegGraphqlQuery,
+  energyGraphqlQuery,
+  reportDateGraphqlQuery,
+  uploadEnergyGraphqlMutation
+} from "./graphql-query";
+import {ExcelReportRequest} from "../models/reports.model";
 
 const ENERGY_API_SERVER = process.env.REACT_APP_ENERGY_SERVER_URL;
 const BILLING_API_SERVER = process.env.REACT_APP_BILLING_SERVER_URL;
@@ -25,7 +31,8 @@ class EegService {
   async fetchEeg(token: string, tenant: string): Promise<Eeg> {
     return await fetch(`${API_API_SERVER}/query`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(eegGraphqlQuery)
@@ -41,12 +48,14 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(eeg)
     }).then(res => res.json());
   }
+
   // async fetchEeg(token: string, tenant: string): Promise<Eeg> {
   //   return await fetch('./api/eeg',{
   //     method: 'GET',
@@ -67,7 +76,8 @@ class EegService {
     }
     return await fetch(`${API_API_SERVER}/participant`, {
       method: 'GET',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       }
     }).then(res => res.json());
@@ -77,7 +87,8 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/participant`, {
       method: 'POST',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(participant)
@@ -88,29 +99,32 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/participant/${participant.id}`, {
       method: 'PUT',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(participant)
     }).then(res => res.json());
   }
 
-  async confirmParticipant(tenant: string, pid: string, data: FormData): Promise<boolean> {
+  async confirmParticipant(tenant: string, pid: string, data: FormData): Promise<EegParticipant> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/participant/${pid}/confirm`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       },
       body: data
-    }).then(res => true);
+    }).then(res => res.json());
 
   }
 
   async fetchRates(token: string, tenant: string): Promise<EegTariff[]> {
     return await fetch(`${API_API_SERVER}/eeg/tariff`, {
       method: 'GET',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       }
     }).then(async res => res.json());
@@ -120,7 +134,8 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg/tariff`, {
       method: 'POST',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(rate)
@@ -131,7 +146,8 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/create`, {
       method: 'PUT',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(meter)
@@ -143,7 +159,8 @@ class EegService {
     // return new Promise<Metering>((resolve, reject) => resolve(meter));
     return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/update/${meter.meteringPoint}`, {
       method: 'PUT',
-      headers: { ... this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(meter)
@@ -156,27 +173,28 @@ class EegService {
     }
     return await fetch(`${ENERGY_API_SERVER}/eeg/${year}/${month}`, {
       method: 'GET',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json',
       },
     }).then(res => res.json());
 
-  //   return await Http.post({
-  //       url: `${ENERGY_API_SERVER}/query`,
-  //       method: 'POST',
-  //       headers: {
-  //         ...this.getSecureHeaders(token, tenant),
-  //         'Accept': 'application/json',
-  //         "Content-Type": "application/json",
-  //       },
-  //       data: JSON.stringify(energyGraphqlQuery(tenant, year, month))
-  //     }
-  //   ).then(async res => {
-  //     if (res.status === 200) {
-  //       const data = await res.data;
-  //       return data.data;
-  //     }
-  //   })
+    //   return await Http.post({
+    //       url: `${ENERGY_API_SERVER}/query`,
+    //       method: 'POST',
+    //       headers: {
+    //         ...this.getSecureHeaders(token, tenant),
+    //         'Accept': 'application/json',
+    //         "Content-Type": "application/json",
+    //       },
+    //       data: JSON.stringify(energyGraphqlQuery(tenant, year, month))
+    //     }
+    //   ).then(async res => {
+    //     if (res.status === 200) {
+    //       const data = await res.data;
+    //       return data.data;
+    //     }
+    //   })
   }
 
   async fetchLastReportEntryDate(tenant: string, token?: string): Promise<string> {
@@ -185,35 +203,37 @@ class EegService {
     }
     return await fetch(`${ENERGY_API_SERVER}/query`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json',
         "Content-Type": "application/json",
       },
       body: JSON.stringify(reportDateGraphqlQuery(tenant))
     }).then(res => res.json().then(data => data.data ? data.data.lastEnergyDate : ""));
-  //   return await Http.post({
-  //     url: `${ENERGY_API_SERVER}/query`,
-  //     method: 'POST',
-  //     headers: {
-  //       ...this.getSecureHeaders(token, tenant),
-  //       'Accept': 'application/json',
-  //       "Content-Type": "application/json",
-  //     },
-  //     data: JSON.stringify(reportDateGraphqlQuery(tenant))
-  //   }).then(async res => {
-  //     if (res.status === 200) {
-  //       const data = await res.data;
-  //       console.log("last Report DATE: ", data);
-  //       return data.data ? data.data.lastEnergyDate : "";
-  //     }
-  //   })
+    //   return await Http.post({
+    //     url: `${ENERGY_API_SERVER}/query`,
+    //     method: 'POST',
+    //     headers: {
+    //       ...this.getSecureHeaders(token, tenant),
+    //       'Accept': 'application/json',
+    //       "Content-Type": "application/json",
+    //     },
+    //     data: JSON.stringify(reportDateGraphqlQuery(tenant))
+    //   }).then(async res => {
+    //     if (res.status === 200) {
+    //       const data = await res.data;
+    //       console.log("last Report DATE: ", data);
+    //       return data.data ? data.data.lastEnergyDate : "";
+    //     }
+    //   })
   }
 
   async fetchEnergyBill(tenant: string, energyGroup: MeteringEnergyGroupType[]): Promise<ParticipantBillType[]> {
     const token = await this.authClient.getToken();
     return await fetch(`${BILLING_API_SERVER}/cash/preview`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json',
         "Content-Type": "application/json",
       },
@@ -225,7 +245,8 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg/sync/participants`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       }
     }).then(res => res.json());
@@ -235,7 +256,8 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg/sync/meterpoint`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       },
       body: JSON.stringify(meter)
@@ -246,11 +268,79 @@ class EegService {
     const token = await this.authClient.getToken();
     return await fetch(`${ENERGY_API_SERVER}/eeg/excel/export/${year}/${month}`, {
       method: 'POST',
-      headers: { ...this.getSecureHeaders(token, tenant),
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       },
     }).then(res => true);
 
+  }
+
+  async createReport(tenant: string, payload: ExcelReportRequest) {
+    const token = await this.authClient.getToken();
+    return fetch(`${ENERGY_API_SERVER}/eeg/excel/report/download`, {
+        method: 'POST',
+        headers: {
+          ...this.getSecureHeaders(token, tenant),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      }
+    ).then((response) => {
+      //Create a Blob from the PDF Stream
+      response.blob().then(file => {
+        //Build a URL from the file
+        const fileURL = URL.createObjectURL(file);
+        // //Open the URL on new Window
+        // window.open(fileURL, '');
+
+        const link = document.createElement('a');
+        let filename = response.headers.get('Filename')
+        if (!filename)
+          filename = "energy-export"
+
+        link.href = fileURL
+        link.setAttribute('download', filename)
+
+        // 3. Append to html page
+        document.body.appendChild(link);
+        // 4. Force download
+        link.click();
+        // 5. Clean up and remove the link
+        link.parentNode?.removeChild(link);
+        }
+      );
+      return true;
+    });
+  }
+
+  async uploadEnergyFile(tenant: string, sheet: string, data: File): Promise<boolean> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${ENERGY_API_SERVER}/query`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        // 'Content-Type': 'multipart/form-data'
+      },
+      body: await uploadEnergyGraphqlMutation(tenant, sheet, data)
+    }).then(res => true);
+  }
+
+  async uploadMasterDataFile(tenant: string, sheet: string, data: File): Promise<boolean> {
+    const token = await this.authClient.getToken();
+
+    const formData = new FormData();
+    formData.append("sheet", sheet)
+    formData.append("masterdatafile", data)
+
+    return await fetch(`${API_API_SERVER}/eeg/import/masterdata`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+      body: formData
+    }).then(res => true);
   }
 }
 

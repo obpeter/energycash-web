@@ -68,3 +68,9 @@ export const selectedMeterIdSelector = createSelector(
   featureStateSelector,
   state => state.selectedMeter
 )
+
+export const selectedMeterSelector = createSelector(
+  featureStateSelector,
+  state => state.selectedParticipant.meters.find(m => m.meteringPoint === state.selectedMeter)
+
+)

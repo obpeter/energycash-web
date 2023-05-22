@@ -1,4 +1,4 @@
-import React, {FC, useContext, useEffect, useState} from "react";
+import React, {FC, startTransition, useContext, useEffect, useRef, useState} from "react";
 
 import {EegParticipant} from "../models/members.model";
 import {
@@ -12,7 +12,7 @@ import {
   IonRow,
   IonToolbar,
   SelectCustomEvent,
-  useIonAlert
+  useIonAlert, useIonLoading, useIonPopover
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
@@ -28,14 +28,19 @@ import "./ParticipantPane.component.scss"
 import SlideButtonComponent from "./SlideButton.component";
 import {useAppDispatch, useAppSelector} from "../store";
 import {billingSelector, fetchEnergyBills} from "../store/billing";
-import {selectedTenant} from "../store/eeg";
+import {eegSelector, selectedTenant} from "../store/eeg";
 import {fetchEnergyReport, meteringEnergyGroup} from "../store/energy";
 import ButtonGroup from "./ButtonGroup.component";
-import {add, flash, person} from "ionicons/icons";
+import {add, cloudUploadOutline, downloadOutline, flash, person} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../eegIcons";
 import {selectedParticipantSelector, selectMetering, selectParticipant} from "../store/participant";
 import cn from "classnames";
 import {isParticipantActivated} from "../util/Helper.util";
+import DatepickerComponent from "./dialogs/datepicker.component";
+import DatepickerPopover from "./dialogs/datepicker.popover";
+import {ExcelReportRequest, InvestigatorCP} from "../models/reports.model";
+import {eegService} from "../service/eeg.service";
+import UploadPopup from "./dialogs/upload.popup";
 
 interface ParticipantPaneProps {
   participants: EegParticipant[];
@@ -56,8 +61,12 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const energyMeterGroup = useAppSelector(meteringEnergyGroup);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const billingInfo = useAppSelector(billingSelector);
+  const eeg = useAppSelector(eegSelector)
 
   const [sortedParticipants, setSortedParticipants] = useState(participants);
+
+  const [loading, dismissLoading] = useIonLoading();
+
   const {
     enableBilling,
     setEnableBilling,
@@ -195,12 +204,102 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     e.stopPropagation();
   }
 
+  const dismiss = (range: [Date|null, Date|null]) => {
+    const [startDate, endDate] = range
+    if (startDate === null || endDate === null) {
+      return
+    }
+    console.log("Export: ", range);
+  }
+
+  const [reportPopover, dismissReport] = useIonPopover(DatepickerPopover, {
+    onDismiss: (startDate: Date, endDate: Date) => {
+      loading({message: "Daten exportieren ..."})
+      onExport([startDate, endDate])
+        .then(b => {
+          dismissReport([startDate, endDate], "")
+          dismissLoading()
+        })
+        .catch(() => dismissLoading())
+    }
+  });
+
+  const [uploadPopover, dismissUpload] = useIonPopover(UploadPopup, {
+    tenant,
+    onDismiss: (data: any, role: string) => dismissUpload(data, role)
+  });
+
+  const onExport = async (data: any) => {
+    if (data && eeg) {
+      const [start, end] = data
+      const exportdata = {
+        start: start.getTime(),
+        end: end.getTime(),
+        communityId: eeg.communityId,
+        cps:  participants.reduce((r, p) =>
+          r.concat(p.meters.map( m => { return { meteringPoint: m.meteringPoint, direction: m.direction, name: p.firstname + " " + p.lastname} as InvestigatorCP})), [] as InvestigatorCP[])
+      } as ExcelReportRequest
+      return eegService.createReport(tenant, exportdata)
+    }
+  }
+
+  const onImport = (data: any) => {
+    if (data) {
+      const [file, sheetName, type] = data
+      if (file && file.length === 1 && sheetName) {
+        switch (type) {
+          case 0:
+            eegService.uploadEnergyFile(tenant, sheetName, file[0])
+            break
+          case 1:
+            eegService.uploadMasterDataFile(tenant, sheetName, file[0])
+            break;
+        }
+      }
+    }
+  }
+
+  const popoverRef = useRef<HTMLIonToolbarElement>(null)
   return (
     <div className={"participant-pane"}>
       <div className={"pane-body"}>
+        <DatepickerComponent range={dismiss} trigger="open-datepicker-dialog" />
         <div className={"pane-content"}>
-          <IonToolbar color="eeg">
+          <IonToolbar color="eeglight" style={{"--min-height": "56px"}} ref={popoverRef}>
             <IonButtons slot="end">
+              <IonButton
+                color="primary"
+                shape="round"
+                fill={"solid"}
+                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
+                onClick={(e: any) =>
+                  uploadPopover({
+                    event: e,
+                    size: "auto",
+                    side: "bottom",
+                    alignment: "start",
+                    cssClass: "upload-popover",
+                    onDidDismiss: (e: CustomEvent) => onImport(e.detail.data),
+                  })
+                }
+              >
+                <IonIcon slot="icon-only" icon={cloudUploadOutline}></IonIcon>
+              </IonButton>
+              <IonButton
+                // id="open-datepicker-dialog"
+                color="primary"
+                shape="round"
+                fill={"solid"}
+                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
+                onClick={(e: any) =>
+                  reportPopover({
+                    event: e,
+                    // onDidDismiss: (e: CustomEvent) => onExport(e.detail.data),
+                  })
+                }
+              >
+                <IonIcon slot="icon-only" icon={downloadOutline}></IonIcon>
+              </IonButton>
               <IonButton
                 color="primary"
                 shape="round"

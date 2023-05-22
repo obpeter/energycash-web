@@ -20,12 +20,12 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
                                                                                                  }) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
-  // const {handleSubmit, control, register, setValue} = useForm({defaultValues: participant});
+  // const {handleSubmit, control, register, setValue, formState: {errors}} = useForm({defaultValues: participant});
 
   const { handleSubmit, control, setValue, formState: {errors} } = useFormContext<EegParticipant>();
-  const onSubmit = (data: EegParticipant) => {
-    onAdd(data)
-  }
+  // const onSubmit = (data: EegParticipant) => {
+  //   onAdd(data)
+  // }
 
   const onChangeBusinessType = (s: number) => {
     setSelectedBusinessType(s)
@@ -50,7 +50,7 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
           </IonCol>
         </IonRow>
       </IonGrid>
-      <form id={submitId} onSubmit={handleSubmit(onSubmit)}>
+      {/*<form id={submitId} onSubmit={handleSubmit(onSubmit)}>*/}
         <div style={{display: "flex", flexDirection: "row"}}>
           <div style={{flexGrow: "1", height: "100%"}}>
             <IonList>
@@ -63,7 +63,7 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
               <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} rules={{required: "PLZ fehlt"}} type="text" error={errors.residentAddress?.zip}/>
               <InputForm name={"residentAddress.city"} label="Ort" control={control} rules={{required: "Ort fehlt"}} type="text" error={errors.residentAddress?.city}/>
               <InputForm name={"contact.phone"} label="Telefon" control={control} type="text"/>
-              <InputForm name={"contact.email"} label="E-Mail" control={control} type="text"/>
+              <InputForm name={"contact.email"} label="E-Mail" control={control} type="text" rules={{required: "Email Adresse fehlt"}}  error={errors.contact?.email}/>
             </IonList>
 
           </div>
@@ -82,7 +82,7 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
           </div>
         </div>
 
-      </form>
+      {/*</form>*/}
     </div>
   )
 }

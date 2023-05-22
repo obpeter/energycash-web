@@ -54,7 +54,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Cent pro kWh</p>
-              <p>{rate.centPerKWh+ " €"}</p>
+              <p>{rate.centPerKWh+ " Cent"}</p>
             </div>
             {rate.freeKWH && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Inklusive kWh</p>
@@ -71,7 +71,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Cent pro kWh</p>
-              <p>{(Number(rate.centPerKWh)) + " €"}</p>
+              <p>{(Number(rate.centPerKWh)) + " Cent"}</p>
             </div>
             {rate.discount && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Rabatt</p>

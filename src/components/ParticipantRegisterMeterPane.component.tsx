@@ -1,4 +1,4 @@
-import React, {FC, useState} from "react";
+import React, {FC, useEffect, useState} from "react";
 import {
   IonCard,
   IonCardContent,
@@ -36,17 +36,27 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
   const [meteringPoint, setMeteringPoint] = useState<Metering | undefined>()
 
   const { control, setValue, getValues, watch, formState: { errors }} = useFormContext<EegParticipant>();
+  const {fields, append, update, remove} = useFieldArray<EegParticipant>({control, name: 'meters'})
+
+  useEffect(() => {
+    remove(0)
+  }, [remove])
 
  const meters = watch("meters")
 
   const showMeter = (meter: Metering) => {
-   setMeteringPoint(meter);
-   setAddMeterPaneActive(true);
+    setMeteringPoint(meter);
+    setAddMeterPaneActive(true);
   }
 
   const appendMeter = (meter: Metering) => {
     setAddMeterPaneActive(false)
-    onAddMeter(meter);
+    const currentFieldIdx = fields.findIndex((m) => m.meteringPoint === meter.meteringPoint)
+    if (currentFieldIdx >= 0) {
+      update(currentFieldIdx, meter)
+    } else {
+      append(meter)
+    }
     setMeteringPoint(undefined);
   }
 
@@ -67,8 +77,8 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
         </IonCard>
       )
     }
-    return meters.map((m, idx) => (
-      <MeterCardComponent key={idx} participant={participant} meter={m} hideMeter={true} onSelect={(e, p, m) => showMeter(m)}/>
+    return fields.map((m, idx) => (
+      <MeterCardComponent key={m.id} participant={participant} meter={m} hideMeter={true} onSelect={() => showMeter(m)}/>
     ))
   }
 
@@ -97,7 +107,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
           </IonGrid>
         </div>
         <div style={{flexGrow: 1}}>
-          {addMeterPaneActive && meteringPoint && <RegisterMeterPaneComponent meter={meteringPoint} onAdd={appendMeter} onChancel={removeMeter}/>}
+          {addMeterPaneActive && meteringPoint && <RegisterMeterPaneComponent meteringPoint={meteringPoint} onAdd={appendMeter} onChancel={removeMeter}/>}
         </div>
       </div>
     </div>

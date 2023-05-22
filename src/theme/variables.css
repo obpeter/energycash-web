@@ -82,6 +82,13 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-white-shade: #e0e0e0;
   --ion-color-white-tint: #ffffff;
 
+  --ion-color-warning-light: rgba(220, 121, 30, 0.08);
+  --ion-color-warning-light-rgb: rgba(220, 121, 30, 0.08);
+  --ion-color-warning-light-contrast: #DC631E;
+  --ion-color-warning-light-contrast-rgb: 220,99,30;
+  --ion-color-warning-light-shade: #c26a1a;
+  --ion-color-warning-light-tint: #e08635;
+
   /*--ion-toolbar-background: #6100ec;*/
   --eeg-background-color: #f8fae3;
 
@@ -166,6 +173,15 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-contrast-rgb: var(--ion-color-eeglight-contrast-rgb, rgb(0, 0, 0)) !important;
   --ion-color-shade: var(--ion-color-eeglight-shade, #3171e0) !important;
   --ion-color-tint: var(--ion-color-eeglight-tint, #9d9fa6) !important;
+}
+
+.ion-color-warning-light {
+  --ion-color-base: var(--ion-color-warning-light);
+  --ion-color-base-rgb: var(--ion-color-warning-light-rgb);
+  --ion-color-contrast: var(--ion-color-warning-light-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-warning-light-contrast-rgb);
+  --ion-color-shade: var(--ion-color-warning-light-shade);
+  --ion-color-tint: var(--ion-color-warning-light-tint);
 }
 
 .ion-small-padding {

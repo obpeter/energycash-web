@@ -66,6 +66,7 @@ const EegPage: FC = () => {
                               name={"settlementInterval"} options={[
                     {key: "MONTHLY", value: "Monatlich"},
                     {key: "ANNUAL", value: "Jährlich"},
+                    {key: "BIANNUAL", value: "Halbjährlich"},
                   ]}></SelectForm>
                   <IonItem lines="none">
                     {/*<IonLabel slot="start">SEPA aktiv</IonLabel>*/}

@@ -47,9 +47,8 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
     meters: []} as EegParticipant
 
   const formMethods = useForm<EegParticipant>({defaultValues: selectedParticipant})
-  const {control} = formMethods
-
-  const {fields, append} = useFieldArray<EegParticipant>({control, name: 'meters'})
+  const {control, handleSubmit} = formMethods
+  // const {append} = useFieldArray<EegParticipant>({control, name: 'meters'})
 
   const onRegisterParticipant = (participant: EegParticipant) => {
     console.log("Append participant: ", participant);
@@ -58,7 +57,11 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
   }
 
   const onAddMeter = (meter: Metering) => {
-    append(meter)
+    // append(meter)
+  }
+
+  const onSubmit = (data: EegParticipant) => {
+    onRegisterParticipant(data)
   }
 
   return (
@@ -73,7 +76,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
       </IonHeader>
       <IonContent color="eeg">
         <FormProvider {...formMethods}>
-          {/*<form>*/}
+          <form id="submit-register-participant" onSubmit={handleSubmit(onSubmit)}>
             <div className={"register-participant-content"}>
               <div className="register-content-pane">
                 <h4>Allgemeines</h4>
@@ -86,7 +89,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
                 <ParticipantRegisterMeterPaneComponent participant={selectedParticipant} onAddMeter={onAddMeter}/>
               </div>
             </div>
-          {/*</form>*/}
+          </form>
         </FormProvider>
       </IonContent>
       <IonFooter>

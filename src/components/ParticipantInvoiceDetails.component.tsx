@@ -54,6 +54,13 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     const tariff = rates.find((r) => r.id === tariffId)
     const meterGroup = toRecord(selectedParticipant!.meters, "meteringPoint")
     const sum = Object.values(meters).reduce((s, m) => s + m, 0)
+
+    if (!tariff) {
+      return (
+        <></>
+      )
+    }
+
     return (
       <div key={tariffId}>
         <RateCardComponent rate={tariff!}/>

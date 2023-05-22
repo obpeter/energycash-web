@@ -3,9 +3,10 @@ import {Control, Controller, FieldError, FieldValues} from "react-hook-form";
 import {IonItem, IonLabel, IonSelect, IonSelectOption} from "@ionic/react";
 
 import "./form-element.css"
+import {SelectInterface} from "@ionic/core/dist/types/components/select/select-interface";
 
-const SelectForm: React.FC<{ label: string, placeholder: string, control: Control<any, any>, name: string, options: { key: any, value: string }[], rules?: object, readonly?: boolean, disabled?: boolean, error?:  FieldError }> = (
-  { label, placeholder, control, name, options, rules, readonly,disabled, ...rest}) => {
+const SelectForm: React.FC<{ label: string, placeholder: string, control: Control<any, any>, name: string, options: { key: any, value: string }[], rules?: object, readonly?: boolean, disabled?: boolean, selectInterface?: SelectInterface, error?:  FieldError }> = (
+  { label, placeholder, control, name, options, rules, readonly,disabled, selectInterface, ...rest}) => {
   return (
     <div className="form-element">
       {/*<IonItem fill="outline" disabled={disabled}>*/}
@@ -23,7 +24,7 @@ const SelectForm: React.FC<{ label: string, placeholder: string, control: Contro
               label={label}
               labelPlacement={"floating"}
               disabled={disabled}
-              interface="action-sheet"
+              interface={selectInterface}
               placeholder={placeholder}
               onIonChange={onChange} {...field} {...rest}>
               {options.map(({key, value}) => (<IonSelectOption key={key} value={key}>{value}</IonSelectOption>))}

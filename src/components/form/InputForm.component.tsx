@@ -2,6 +2,7 @@ import React from "react";
 import {IonInput, IonItem, IonLabel} from "@ionic/react";
 import {Control, Controller, FieldError, FieldErrors} from "react-hook-form";
 import "./form-element.css";
+import {TextFieldTypes} from "@ionic/core";
 
 // export interface InputForm {
 //   label: string
@@ -9,9 +10,9 @@ import "./form-element.css";
 // }
 
 
-const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: string, rules?: object, type: "text" | "number" | "password", disabled?: boolean, readonly?: boolean,
-  inputMode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined, error?:  FieldError}>) =
-  ({ label, control, name,rules, type, disabled,...rest}) => {
+const InputForm: (React.FC<{ control: Control<any, any>, name: string, rules?: object, error?:  FieldError, label: string, type?: TextFieldTypes, disabled?: boolean, readonly?: boolean,
+  inputmode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined}>) =
+  ({ control, name,rules, error,...rest}) => {
   return (
     <div className={"form-element"}>
       {/*<IonItem disabled={disabled} style={{"--min-height": "12px"}}>*/}
@@ -22,19 +23,23 @@ const InputForm: (React.FC<{ label: string, control: Control<any, any>, name: st
           name={name}
           control={control}
           rules={rules}
-          render={({field}) => {
-            const { onChange, value } = field;
-            return (<IonInput onIonChange={(e) => onChange((type === 'number' ? Number(e.detail.value!) : e.detail.value!))}
+          render={({field, fieldState}) => {
+            const { onChange, value, name,ref } = field;
+            return (<IonInput
+                              onIonChange={(e) => onChange((rest.type === 'number' ? Number(e.detail.value!) : e.detail.value!))}
+                              onIonBlur={(e) => onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))}
                               placeholder="Enter text"
                               fill="outline"
-                              label={label}
                               labelPlacement={"floating"}
-                              disabled={disabled}
-                              type={type} {...rest} {...field}></IonInput>)
-          } }
+                              value={value}
+                              name={name}
+                              ref={ref}
+                              // errorText={rest.error?.message}
+                              {...rest}></IonInput>)
+          }}
         />
       {/*</IonItem>*/}
-      {rest.error && <span className={"error-line"}>{rest.error.message}</span>}
+      {error && <div className={"error-line"}>{error.message}</div>}
     </div>
   );
 };

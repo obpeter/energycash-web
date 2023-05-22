@@ -8,6 +8,7 @@ export interface Eeg {
   taxNumber: string;
   settlement: string;
   settlementInterval: string;
+  communityId: string;
   address: Address;
   contact: Contact;
   accountInfo: AccountInfo;

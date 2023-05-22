@@ -7,18 +7,18 @@ import {
   AccordionGroupCustomEvent,
   IonAccordion,
   IonAccordionGroup,
-  IonBadge,
+  IonBadge, IonButton, IonCard,
   IonFab,
   IonFabButton,
   IonIcon,
   IonItem,
-  IonLabel,
+  IonLabel, IonThumbnail,
   IonTitle,
   IonToggle,
-  IonToolbar
+  IonToolbar, useIonToast
 } from "@ionic/react";
-import {add, caretForwardOutline, documentTextOutline, person, syncOutline, trashBin} from "ionicons/icons";
-import {eegPlug, eegShieldCrown, eegSolar} from "../eegIcons";
+import {add, caretForwardOutline, documentTextOutline, person, star, syncOutline, trashBin} from "ionicons/icons";
+import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../eegIcons";
 import {
   Bar,
   BarChart,
@@ -37,6 +37,7 @@ import {Metering} from "../models/meteringpoint.model";
 import MemberFormComponent from "./MemberForm.component";
 import MeterFormComponent from "./MeterForm.component";
 import {
+  confirmParticipant,
   selectedMeterIdSelector,
   selectedParticipantSelector,
   selectMetering,
@@ -45,8 +46,10 @@ import {
 import {formatMeteringPointString} from "../util/Helper.util";
 import participants from "../pages/Participants";
 import {selectedTenant} from "../store/eeg";
+import AllowParticipantDialog from "./dialogs/AllowParticipant.dialog";
+import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 
-type DynamicComponentKey = "memberForm" | "meterForm"
+type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm"
 // interface DynamicComponentProps {
 //   componentKey: DynamicComponentKey;
 //   args: any
@@ -91,13 +94,17 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const energySeries = useAppSelector(energySeriesByMeter(selectedMeter?.meteringPoint!))
 
   const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
+  const [toaster] = useIonToast();
 
   const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
 
   // const [dynamicComponent, setDynamicComponent] =
   //   useState<DynamicComponentProps>({componentKey: "memberForm", args: {participant: selectedParticipant, formId:"", onSubmit: (e:any) => console.log("update", e)}})
 
-  const isMeterPending = () => selectedMeter?.status === 'NEW';
+  const isMeterNew = () => selectedMeter?.status === 'NEW';
+  const isMeterActive = () => selectedMeter?.status === "ACTIVE"
+  const isMeterPending = () => selectedMeter?.status === "PENDING"
+
   const isGenerator = () => selectedMeter?.direction === 'GENERATOR';
 
   // useEffect(() => {
@@ -139,6 +146,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
     if (selectedMeterId) {
       const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
       if (meter) {
+        console.log("Set updated Meter: ", meter)
         setSelectedMeter(meter)
       }
     }
@@ -190,11 +198,43 @@ const ParticipantDetailsPaneComponent: FC = () => {
         } else {
           return <></>
         }
+      case "documentForm":
+        return <></>
       default:
         return <></>
     }
   }
 
+  const presentToast = (message: string) => {
+    toaster({
+      message: message,
+      duration: 3500,
+      position: 'bottom'
+    });
+  };
+
+  function onWillDismiss(participant: EegParticipant, ev: CustomEvent<OverlayEventDetail<FormData>>) {
+    if (ev.detail.role === 'confirm' && ev.detail.data) {
+      dispatcher(confirmParticipant({tenant, participantId: participant.id, data: ev.detail.data}))
+      presentToast(`${participant.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${participant.contact.email} gesendet.`)
+    }
+
+    // clearAll();
+    // setIsActivationActive(undefined);
+  }
+
+  const meterStatusText = (meter: Metering) => {
+    switch (meter.status) {
+      case 'NEW':
+        return "Antwort des Netzbetreibers noch ausstehend"
+      case 'PENDING':
+        return "Zustimmung des Mitglieds noch ausstehend"
+      case 'APPROVED':
+        return "Abschluss Meldung von Netzbetreiber noch ausstehend"
+      default:
+        return ""
+    }
+  }
   return (
     <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
       <div className={"details-header"}>
@@ -207,6 +247,18 @@ const ParticipantDetailsPaneComponent: FC = () => {
       <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
         <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
           <div className={"details-box"}>
+            {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (<div style={{background: "white"}}>
+              <AllowParticipantDialog trigger="open-participant-allow-dialog" participant={selectedParticipant} onDismiss={onWillDismiss}/>
+              <IonCard color="warning-light">
+                <IonItem lines="none" color="warning-light">
+                  <IonIcon icon={eegStar} slot="start"/>
+                  <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG aufnehmen?</IonLabel>
+                </IonItem>
+                <IonItem lines="none" color="warning-light">
+                  <IonButton id="open-participant-allow-dialog" slot="end" color="warning" size="default">Ja, Zulassen</IonButton>
+                </IonItem>
+              </IonCard>
+            </div>) : (<></>)}
             <div>
               <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "memberForm"})}
                        onClick={() => setActiveMenu("memberForm")}>
@@ -242,7 +294,17 @@ const ParticipantDetailsPaneComponent: FC = () => {
             <div className="ion-padding" slot="content">
               <IonToolbar
                 color="primary"><IonTitle>{formatMeteringPointString(selectedMeter.meteringPoint)}</IonTitle></IonToolbar>
-              <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterPending()}>
+
+              {!isMeterActive() &&
+                  <IonCard color="warning-light">
+                      <IonItem lines="none" color="warning-light">
+                          <IonIcon icon={eegSandClass} slot="start"/>
+                          <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
+                      </IonItem>
+                  </IonCard>
+              }
+
+              <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterNew()}>
                 <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
                 <div>
                   <div
@@ -265,16 +327,16 @@ const ParticipantDetailsPaneComponent: FC = () => {
                   <div className={"detail-subheader"}>z.B. Verträge</div>
                 </div>
               </IonItem>
-              <IonItem lines="full" className={"eeg-item-box"} onClick={() => console.log("onSyncMeterpoint")}>
-                <IonIcon icon={syncOutline} slot="start"></IonIcon>
-                <div>
-                  <div className={"detail-header"}>Synchronisieren</div>
-                  <div className={"detail-subheader"}>mit Energieprovider</div>
-                </div>
-              </IonItem>
+              {/*<IonItem lines="full" className={"eeg-item-box"} onClick={() => console.log("onSyncMeterpoint")}>*/}
+              {/*  <IonIcon icon={syncOutline} slot="start"></IonIcon>*/}
+              {/*  <div>*/}
+              {/*    <div className={"detail-header"}>Synchronisieren</div>*/}
+              {/*    <div className={"detail-subheader"}>mit Energieprovider</div>*/}
+              {/*  </div>*/}
+              {/*</IonItem>*/}
               <div style={{marginLeft: "20px"}}><h4>Verbrauch</h4></div>
               {/*<div style={{display: "flex", height: "300px", width: "100%"}}>*/}
-              <div style={{height: "300px", width: "100%"}}>
+              {isMeterActive() && <div style={{height: "300px", width: "100%"}}>
                 <ResponsiveContainer width="90%" height={300}>
                   {/*<LineChart width={600} height={300} data={energySeries.map((e, i) => {*/}
                   {/*  return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}*/}
@@ -312,7 +374,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
                   </BarChart>
 
                 </ResponsiveContainer>
-              </div>
+              </div> }
             </div>) :
               <></>
             }

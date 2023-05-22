@@ -7,7 +7,7 @@ import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../store";
 import {ratesSelector} from "../store/rate";
 import {selectedTenant} from "../store/eeg";
-import {selectedParticipantSelector, updateMeteringPoint} from "../store/participant";
+import {selectedMeterSelector, selectedParticipantSelector, updateMeteringPoint} from "../store/participant";
 import {Metering} from "../models/meteringpoint.model";
 
 interface MeterFromComponentProps {
@@ -21,10 +21,11 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
 
   const rates = useAppSelector(ratesSelector);
   const tenant = useAppSelector(selectedTenant);
+  const metering = useAppSelector(selectedMeterSelector);
 
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
-  const {handleSubmit, control, formState: {errors, isDirty}, reset} = useForm({mode: 'onBlur', defaultValues: {...meteringPoint}, values: {...meteringPoint}});
+  const {handleSubmit, control, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
 
   // useEffect(() => {
   //   watch((data) => console.log(data));
@@ -49,8 +50,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
       <IonList>
         <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()} placeholder="Tarif"
                     disabled={false}/>
-        <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} rules={{required: true, regex: /AT[0-9]{32}/}}
-                   type="text" readonly={true}/>
+        <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} type="text" readonly={true}/>
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter}></CheckboxComponent>
         {withWechselrichter && (
@@ -61,10 +61,10 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
       </IonList>
       <IonList>
         <IonListHeader>Adresse</IonListHeader>
-        <InputForm name={"street"} label="Straße" control={control} rules={{required: true}} type="text"/>
-        <InputForm name={"streetNumber"} label="Hausnummer" control={control} rules={{required: true}} type="text"/>
-        <InputForm name={"zip"} label="Postleitzahl" control={control} rules={{required: true}} type="text"/>
-        <InputForm name={"city"} label="Ort" control={control} rules={{required: true}} type="text"/>
+        <InputForm name={"street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.street}/>
+        <InputForm name={"streetNumber"} label="Hausnummer" control={control} rules={{required: "Hausnummer fehlt"}} type="text" error={errors.streetNumber}/>
+        <InputForm name={"zip"} label="Postleitzahl" control={control} rules={{required: "Postleitzahl fehlt"}} type="text" error={errors.zip}/>
+        <InputForm name={"city"} label="Ort" control={control} rules={{required: "Ortsangabe fehlt"}} type="text" error={errors.city}/>
       </IonList>
 
     </form>

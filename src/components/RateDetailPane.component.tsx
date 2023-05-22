@@ -38,7 +38,7 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({selectedRate
             <IonFooter>
               <IonToolbar className={"ion-padding-horizontal"}>
                 <IonButton fill="clear" slot="start">Zurück</IonButton>
-                <IonButton form="change-rate-submit-id" type="submit" slot="end">Änderungen speichern</IonButton>
+                <IonButton form={submitId} type="submit" slot="end">Änderungen speichern</IonButton>
               </IonToolbar>
             </IonFooter>
           </div>

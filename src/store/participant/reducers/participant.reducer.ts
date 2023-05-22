@@ -58,11 +58,11 @@ export const reducer = createReducer(initialState, builder =>
 
       const modParticipant = state.selectedParticipant;
       const changedParticipant = {...modParticipant, meters: [...modParticipant.meters.filter(m => m.meteringPoint !== meter.meteringPoint), ...[meter]] }
-      return adapter.updateOne(state, {id: modParticipant.id, changes: changedParticipant})
+      return adapter.updateOne({...state, selectedMeter: meter.meteringPoint}, {id: modParticipant.id, changes: changedParticipant})
     })
     .addCase(confirmParticipant.fulfilled, (state, action) => {
       return adapter.updateOne({...state, selectedParticipant: {} as EegParticipant},
-        { id: action.payload.participantId, changes: {status: "ACTIVE"} } )
+        { id: action.payload.id, changes: action.payload } )
 
     })
     .addCase(updateParticipant.fulfilled, (state, action) => {

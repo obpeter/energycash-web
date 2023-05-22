@@ -26,6 +26,8 @@ import {
 import './Menu.css';
 import React from "react";
 import {eegChatIcon} from "../eegIcons";
+import {useAppSelector} from "../store";
+import {eegSelector} from "../store/eeg";
 
 interface AppPage {
   url: string;
@@ -34,43 +36,42 @@ interface AppPage {
   title: string;
 }
 
-const appPages: AppPage[] = [
-  {
-    title: 'Dashboard',
-    url: '/page/dashboard',
-    iosIcon: eegChatIcon,
-    mdIcon: eegChatIcon
-  },
-  {
-    title: 'Viere',
-    url: '/page/eeg',
-    iosIcon: newspaper,
-    mdIcon: newspaper
-  },
-  {
-    title: 'Mitglieder',
-    url: '/page/participants',
-    iosIcon: people,
-    mdIcon: people
-  },
-  {
-    title: 'Tarife',
-    url: '/page/rates',
-    iosIcon: wallet,
-    mdIcon: walletSharp
-  },
-  {
-    title: 'Profil',
-    url: '/page/Trash',
-    iosIcon: person,
-    mdIcon: person
-  }
-];
-
-const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-
 const Menu: React.FC = () => {
   const location = useLocation();
+  const eeg = useAppSelector(eegSelector);
+
+  const appPages : AppPage[] = [
+    {
+      title: 'Dashboard',
+      url: '/page/dashboard',
+      iosIcon: eegChatIcon,
+      mdIcon: eegChatIcon
+    },
+    {
+      title: eeg ? eeg.name : "Meine EEG",
+      url: '/page/eeg',
+      iosIcon: newspaper,
+      mdIcon: newspaper
+    },
+    {
+      title: 'Mitglieder',
+      url: '/page/participants',
+      iosIcon: people,
+      mdIcon: people
+    },
+    {
+      title: 'Tarife',
+      url: '/page/rates',
+      iosIcon: wallet,
+      mdIcon: walletSharp
+    },
+    {
+      title: 'Profil',
+      url: '/page/profiles',
+      iosIcon: person,
+      mdIcon: person
+    }
+  ];
 
   return (
     <IonMenu contentId="main" type="overlay">
