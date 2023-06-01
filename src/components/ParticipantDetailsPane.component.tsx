@@ -17,7 +17,16 @@ import {
   IonToggle,
   IonToolbar, useIonToast
 } from "@ionic/react";
-import {add, caretForwardOutline, documentTextOutline, person, star, syncOutline, trashBin} from "ionicons/icons";
+import {
+  add,
+  caretForwardOutline,
+  documentTextOutline,
+  logoEuro,
+  person,
+  star,
+  syncOutline,
+  trashBin
+} from "ionicons/icons";
 import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../eegIcons";
 import {
   Bar,
@@ -48,8 +57,9 @@ import participants from "../pages/Participants";
 import {selectedTenant} from "../store/eeg";
 import AllowParticipantDialog from "./dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
+import InvoiceDocumentComponent from "./InvoiceDocument.component";
 
-type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm"
+type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm"
 // interface DynamicComponentProps {
 //   componentKey: DynamicComponentKey;
 //   args: any
@@ -198,6 +208,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
         } else {
           return <></>
         }
+      case "invoiceForm":
+        return <InvoiceDocumentComponent tenant={tenant} participant={selectedParticipant}/>
       case "documentForm":
         return <></>
       default:
@@ -270,6 +282,15 @@ const ParticipantDetailsPaneComponent: FC = () => {
               </IonItem>
             </div>
             <div>
+              <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "invoiceForm"})}
+                       onClick={() => setActiveMenu("invoiceForm")}>
+                <IonIcon icon={logoEuro} slot="start"></IonIcon>
+                <IonLabel>
+                  <div className={"detail-header"}>Meine Rechnungen</div>
+                </IonLabel>
+              </IonItem>
+            </div>
+            <div>
               <IonItem lines="full" className={"eeg-item-box"}>
                 <IonIcon icon={eegShieldCrown} slot="start"></IonIcon>
                 <div>
@@ -334,7 +355,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
               {/*    <div className={"detail-subheader"}>mit Energieprovider</div>*/}
               {/*  </div>*/}
               {/*</IonItem>*/}
-              <div style={{marginLeft: "20px"}}><h4>Verbrauch</h4></div>
+              <div style={{marginLeft: "20px"}}><h4>Energiedaten</h4></div>
               {/*<div style={{display: "flex", height: "300px", width: "100%"}}>*/}
               {isMeterActive() && <div style={{height: "300px", width: "100%"}}>
                 <ResponsiveContainer width="90%" height={300}>
@@ -370,7 +391,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
                     <Tooltip formatter={(value) => Number(value).toFixed(3) + " kWh"}/>
                     <Legend/>
                     <Bar name="EEG" dataKey="distributed" fill="#8884d8"/>
-                    <Bar name="Netz" dataKey="consumed" fill="#82ca9d"/>
+                    <Bar name="EVU" dataKey="consumed" fill="#82ca9d"/>
                   </BarChart>
 
                 </ResponsiveContainer>

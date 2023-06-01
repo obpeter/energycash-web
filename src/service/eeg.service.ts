@@ -2,7 +2,12 @@ import {Eeg, EegTariff} from "../models/eeg.model";
 import {EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
-import {Metering, MeteringEnergyGroupType, ParticipantBillType} from "../models/meteringpoint.model";
+import {
+  ClearingPreviewRequest, ClearingPreviewResponse, InvoiceDocumentResponse,
+  Metering,
+  MeteringEnergyGroupType,
+  ParticipantBillType
+} from "../models/meteringpoint.model";
 import {EegEnergyReport} from "../models/energy.model";
 import {
   eegGraphqlQuery,
@@ -44,7 +49,7 @@ class EegService {
     });
   }
 
-  async updateEeg(tenant: string, eeg: Eeg): Promise<Eeg> {
+  async updateEeg(tenant: string, eeg: Record<string, any>): Promise<Record<string, any>> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg`, {
       method: 'POST',
@@ -167,16 +172,18 @@ class EegService {
     }).then(res => res.json());
   }
 
-  async fetchReport(tenant: string, year: number, month: number, token?: string): Promise<EegEnergyReport> {
+  async fetchReport(tenant: string, year: number, segment: number, type: string, token?: string): Promise<EegEnergyReport> {
     if (!token) {
       token = await this.authClient.getToken();
     }
-    return await fetch(`${ENERGY_API_SERVER}/eeg/${year}/${month}`, {
-      method: 'GET',
+    return await fetch(`${ENERGY_API_SERVER}/eeg/report`, {
+      method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
+      body: JSON.stringify({type: type, year: year, segment: segment})
     }).then(res => res.json());
 
     //   return await Http.post({
@@ -228,17 +235,38 @@ class EegService {
     //   })
   }
 
-  async fetchEnergyBill(tenant: string, energyGroup: MeteringEnergyGroupType[]): Promise<ParticipantBillType[]> {
+  async startEnergyBill(tenant: string, invoiceRequest: ClearingPreviewRequest): Promise<ClearingPreviewResponse> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/preview`, {
+    return await fetch(`${BILLING_API_SERVER}/cash/billing`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json',
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(energyGroup)
+      body: JSON.stringify(invoiceRequest)
     }).then(res => res.json());
+  }
+
+  async fetchInvoiceDocuments(tenant: string): Promise<InvoiceDocumentResponse[]> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${BILLING_API_SERVER}/cash/files/tenant/${tenant.toUpperCase()}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      },
+    }).then(res => res.json());
+  }
+
+  async downloadInvoiceDocument(tenant: string, filedataId: string): Promise<Blob> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${BILLING_API_SERVER}/cash/fileData/${filedataId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(res => res.blob());
   }
 
   async syncMeteringPointList(tenant: string): Promise<EegEnergyReport> {

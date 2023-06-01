@@ -24,6 +24,7 @@
     "@types/uuid": "^9.0.1",
     "classnames": "^2.3.2",
     "history": "^4.9.0",
+    "http-proxy-middleware": "^2.0.6",
     "ionicons": "^7.0.0",
     "react": "^18.2.0",
     "react-datepicker": "^4.11.0",

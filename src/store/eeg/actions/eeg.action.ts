@@ -14,10 +14,10 @@ export const fetchEegModel = createAsyncThunk(
 
 export const updateEegModel = createAsyncThunk(
   `${featureKey}/updateEeg`,
-  async (arg: { tenant: string, eeg: Eeg }) => {
+  async (arg: { tenant: string, eeg: Record<string, any> }) => {
     const { tenant, eeg } = arg;
     const result = await eegService.updateEeg(tenant, eeg);
-    return { eeg: result};
+    return { tenant: tenant, eeg: result};
   }
 )
 

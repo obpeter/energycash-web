@@ -93,7 +93,8 @@ export const energySeriesByMeter = (meter: string) => createSelector(
   (meta, entities:EnergyReport[]) =>
     entities.map(r =>
       (meta && r.allocated.length > meta.sourceIdx) ?
-        { allocated: r.allocated[meta.sourceIdx], consumed: r.consumed[meta.sourceIdx] } as {allocated: number, consumed: number} :
+        { allocated: meta.dir === "CONSUMPTION" ? r.allocated[meta.sourceIdx] : r.distributed[meta.sourceIdx],
+          consumed: meta.dir === "CONSUMPTION" ? r.consumed[meta.sourceIdx] : r.produced[meta.sourceIdx] } as {allocated: number, consumed: number} :
         { allocated: 0, consumed: 0 } as {allocated: number, consumed: number})
 )
 
@@ -109,6 +110,6 @@ export const meteringEnergyGroup = createSelector(
         allocation = report.distributed[m.sourceIdx]
       }
     }
-    return {meteringPoint: m.name, allocation: allocation} as MeteringEnergyGroupType
+    return {meteringPoint: m.name, allocationKWh: allocation} as MeteringEnergyGroupType
   })
 )

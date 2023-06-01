@@ -5,7 +5,7 @@ export interface EnergyMeta {
   name: string
   period_start: string
   period_end: string
-  dir: string
+  dir: "GENERATION" | "CONSUMPTION"
 }
 
 export interface EnergyReport {
@@ -39,5 +39,5 @@ export interface ConsumerReport extends ProducerReport{
 export interface SelectedPeriod {
   type: string
   year: number
-  month: number
+  segment: number
 }

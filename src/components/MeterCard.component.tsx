@@ -6,7 +6,6 @@ import {Metering} from "../models/meteringpoint.model";
 import cn from "classnames"
 
 import "./Member.component.css";
-import {useHistory} from "react-router";
 import {useAppSelector} from "../store";
 import {meteringReportSelector} from "../store/energy";
 import {ConsumerReport, ProducerReport} from "../models/energy.model";
@@ -32,8 +31,6 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const tariff = useAppSelector(selectRateById(meter.tariffId))
   const bill = useAppSelector(selectBillByMeter(participant.id, meter.meteringPoint))
 
-  // const {showAmount} = useContext(MemberViewContext)
-
   const ratio = (own: number, total: number) => {
     return 100 - Math.round((own / total) * 100);
   }
@@ -42,8 +39,10 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
     // console.log("report for ratio: ", report);
     if (report) {
       if ("consumed" in report) {
+        if (report.consumed === 0) return 0
         return Math.round((report.allocated / report.consumed) * 100);
       } else {
+        if (report.total_production === 0) return 0
         return Math.round((report.allocated / report.total_production) * 100);
       }
     }
@@ -53,16 +52,13 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const isGenerator = () => meter.direction === 'GENERATOR';
   const isMeterPending = () => isPending() || meter.status === 'NEW' || meter.status === 'PENDING';
 
-  // useEffect(() => {
-  //   console.log("Report: ", meter.meteringPoint, report)
-  // }, [report])
-
   const meterValue = () => {
     if (report && report.allocated) {
       if (showCash && tariff) {
-        return (<><span>{bill}</span><span style={{fontSize:"12px"}}> €</span></>);
+        return (<><span>{bill.toFixed(2)}</span><span style={{fontSize:"12px"}}> €</span></>);
       }
-      return (<><span>{(Math.round(report?.allocated! * 10) / 10)}</span><span style={{fontSize:"10px"}}> kWh</span></>);
+      // return (<><span>{(Math.round(report?.allocated! * 10) / 10)}</span><span style={{fontSize:"10px"}}> kWh</span></>);
+      return (<><span>{report ? report?.allocated!.toFixed(2) : 0}</span><span style={{fontSize:"10px"}}> kWh</span></>);
     }
     return (<></>);
   }
@@ -85,7 +81,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
                 { showCash ? (
                   <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator()}, {"consumer-text": isGenerator()})}>{meterValue()}</IonLabel>
                 ) : (
-                  <IonLabel className={cn("ion-text-end", {"producer-text": isGenerator()}, {"consumer-text": !isGenerator()})}>{meterValue()}</IonLabel>
+                  <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator()}, {"consumer-text": isGenerator()})}>{meterValue()}</IonLabel>
                 )}
               </div>
             </IonCol>

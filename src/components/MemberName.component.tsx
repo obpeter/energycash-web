@@ -12,6 +12,8 @@ import {EegParticipant} from "../models/members.model";
 import {useHistory} from "react-router";
 import {amountInEuro} from "../util/TariffHelper";
 import {EegTariff} from "../models/eeg.model";
+import {useAppSelector} from "../store";
+import {selectBillByParticipant} from "../store/billing";
 
 
 interface MemberNameComponentProps {
@@ -25,20 +27,15 @@ interface MemberNameComponentProps {
 
 const MemberNameComponent: FC<MemberNameComponentProps> =
   ({participant, isChecked, showAmount, tariff, onCheck, onSelect}) => {
+
+  const bill = useAppSelector(selectBillByParticipant(participant.id))
   const isPending = () => participant.status === 'PENDING';
 
-  const history = useHistory();
-
-  // const showDetails = (e: React.MouseEvent<HTMLIonCardElement, MouseEvent>) => {
-  //   e.preventDefault();
-  //   history.push(`/participant/detail/${participant.id}`)
-  // }
   const euroAmount = () => {
-    if (tariff) {
-      const euro = amountInEuro(0, tariff)
-      return euro > 0 ? euro + " €" : ""
+    if (bill) {
+      return "" /*+ bill.toFixed(2) + " €"*/
     }
-    return "";
+    return ""
   }
 
   return (

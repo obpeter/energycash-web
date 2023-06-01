@@ -46,7 +46,7 @@ const MemberComponent: FC<MemberProps> = ( {participant,
 
   const memberSum = () => {
     if (memberBill) {
-      const sum =  memberBill.amount + memberBill.meteringPoints.reduce((i,s) => i + s.amount, 0);
+      const sum =  /*memberBill.amount +*/ memberBill.meteringPoints.reduce((i,s) => i + s.amount, 0);
       return Math.round(sum * 100) / 100;
     }
     return 0;

@@ -6,9 +6,9 @@ import {SelectedPeriod} from "../../../models/energy.model";
 
 export const fetchEnergyReport = createAsyncThunk(
   `${featureKey}/fetch`,
-  async (arg: { tenant: string, year: number, month: number, token?: string }) => {
-    const { token, tenant, year, month } = arg;
-    const result = await eegService.fetchReport(tenant, year, month, token);
+  async (arg: { tenant: string, year: number, segment: number, type: string, token?: string }) => {
+    const { token, tenant, year, segment, type } = arg;
+    const result = await eegService.fetchReport(tenant, year, segment, type, token);
     return { report: result };
   }
 )

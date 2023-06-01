@@ -92,8 +92,8 @@ http://ionicframework.com/docs/theming/ */
   /*--ion-toolbar-background: #6100ec;*/
   --eeg-background-color: #f8fae3;
 
-  --eeg-background-producer: #368060;
-  --eeg-background-consumer: #B00054;
+  --eeg-background-consumer: #368060;
+  --eeg-background-producer: #B00054;
   --ion-item-background: #FFFCF7;
 }
 
@@ -104,9 +104,9 @@ http://ionicframework.com/docs/theming/ */
     --ion-color-step-500: #dcdcdc;
     --eeg-background-color: #f8fae3;
 
-    --eeg-background-producer: #368060;
-    --eeg-background-consumer: #B00054;
-    --ion-item-background: #FFFCF7;
+    /*--eeg-background-producer: #368060;*/
+    /*--eeg-background-consumer: #B00054;*/
+    /*--ion-item-background: #FFFCF7;*/
 
     /*--ion-background-color: #F9F7EC;*/
     /*--ion-background-color-rgb: 249,247,236;*/

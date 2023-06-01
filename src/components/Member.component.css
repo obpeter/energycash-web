@@ -76,11 +76,11 @@
 }
 
 .producer-text {
-    color: var(--eeg-background-producer);
+    color: var(--eeg-background-consumer);
 }
 
 .consumer-text {
-    color: var(--eeg-background-consumer);
+    color: var(--eeg-background-producer);
 }
 
 .member-card-select-box {

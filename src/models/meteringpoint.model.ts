@@ -17,9 +17,30 @@ export interface Metering {
   status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED"
 };
 
+export interface ClearingPreviewRequest {
+  tenantId: string;
+  clearingPeriodType: string;
+  clearingPeriodIdentifier: string;
+  allocations: MeteringEnergyGroupType[];
+  preview: boolean;
+}
+
+export interface ClearingPreviewResponse {
+  participantAmounts: ParticipantBillType[];
+}
+
+export interface InvoiceDocumentResponse {
+  name: string;
+  mimeType: string;
+  tenantId: string;
+  fileDataId: string;
+  billingDocumentId: string;
+  participantId: string;
+}
+
 export interface MeteringEnergyGroupType {
   meteringPoint: string;
-  allocation: number;
+  allocationKWh: number;
 }
 
 export interface MeteringBillType {

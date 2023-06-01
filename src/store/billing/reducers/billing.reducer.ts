@@ -7,6 +7,6 @@ export const reducer = createReducer(initialState, builder =>
     .addCase(fetchEnergyBills.fulfilled, (state, action) => {
       console.log("Reducer Billing. Payload: ", action.payload)
       const {billing} = action.payload
-      return adapter.setAll(state, billing)
+      return adapter.setAll(state, billing.participantAmounts)
     })
 );

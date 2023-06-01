@@ -82,7 +82,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     if (credit > 0) {
       return (
         <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
-          <div style={{padding: "5px"}}>Gutschriften</div>
+          <div style={{padding: "5px"}}>Energielieferung netto:</div>
           <div style={{padding: "5px"}}>{credit.toFixed(2)} €</div>
         </div>
       )
@@ -93,7 +93,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     if (debit < 0) {
       return (
         <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
-          <div style={{padding: "5px"}}>Kosten</div>
+          <div style={{padding: "5px"}}>Energiebezug netto:</div>
           <div style={{padding: "5px"}}>{debit.toFixed(2)} €</div>
         </div>
       )
@@ -105,7 +105,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     if (memberBill) {
       const [credit, debit] = memberBill.meteringPoints.reduce(([c,d], m) =>
           m.amount > 0 ? [c + m.amount, d] : [c, d + m.amount],
-        [0, memberBill.amount] as [credit: number, debit: number])
+        [0, 0] as [credit: number, debit: number])
       return (
         <div style={{width: "100%"}}>
           {getCreditLine(credit)}
@@ -155,7 +155,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
                 {memberBill ? <>
                   <IonItem lines="none" fill={"outline"} style={{"--min-height": "32px", fontSize: "14px"}}>
                     <IonIcon style={{marginTop: "5px", marginBottom: "5px"}} icon={eegSumSign} slot="start"></IonIcon>
-                    <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, memberBill.amount).toFixed(2)}</span> €
+                    <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, 0).toFixed(2)}</span> €
                   </IonItem></> : <></>}
               </div>
             </IonRow>

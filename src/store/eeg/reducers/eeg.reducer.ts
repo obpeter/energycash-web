@@ -16,8 +16,9 @@ export const reducer = createReducer(initialState, builder =>
       return { ...state, isFetching: false };
     })
     .addCase(updateEegModel.fulfilled, (state, action) => {
-      const { eeg } = action.payload;
-      return adapter.setOne({ ...state, isFetching: false }, eeg)
+      const { tenant, eeg } = action.payload;
+      console.log("Update EEG MODEL PARTIAL: ", eeg);
+      return adapter.updateOne(state, {id: tenant, changes: eeg})
     })
     .addCase(updateEegModel.rejected, state => {
       return { ...state, isFetching: false };

@@ -19,7 +19,7 @@ import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
 import {SelectedPeriod} from "../models/energy.model";
 import PeriodSelectorComponent from "./PeriodSelector.component";
 import MemberComponent from "./Member.component";
-import {Metering, ParticipantBillType} from "../models/meteringpoint.model";
+import {ClearingPreviewRequest, Metering, ParticipantBillType} from "../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
 import {MemberViewContext} from "../store/hook/MemberViewProvider";
@@ -29,7 +29,7 @@ import SlideButtonComponent from "./SlideButton.component";
 import {useAppDispatch, useAppSelector} from "../store";
 import {billingSelector, fetchEnergyBills} from "../store/billing";
 import {eegSelector, selectedTenant} from "../store/eeg";
-import {fetchEnergyReport, meteringEnergyGroup} from "../store/energy";
+import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../store/energy";
 import ButtonGroup from "./ButtonGroup.component";
 import {add, cloudUploadOutline, downloadOutline, flash, person} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../eegIcons";
@@ -162,8 +162,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         ],
         onDidDismiss: (e: CustomEvent) => {
           if (e.detail.role === 'confirm') {
+            const invoiceRequest = {allocations: energyMeterGroup, tenantId: tenant, preview: true, clearingPeriodIdentifier: "Preview", clearingPeriodType: "YM"} as ClearingPreviewRequest
             dispatcher(
-              fetchEnergyBills({tenant, energyMeterGroup}))
+              fetchEnergyBills({tenant, invoiceRequest}))
               .then(() => toggleShowAmount(true));
           } else {
             toggleShowAmount(false);
@@ -179,7 +180,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     dispatcher(fetchEnergyReport({
       tenant: tenant!,
       year: selectedPeriod.year,
-      month: selectedPeriod.month
+      segment: selectedPeriod.segment,
+      type: selectedPeriod.type,
     }))
     // setUsedPeriod(idx)
   }
@@ -213,6 +215,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   }
 
   const [reportPopover, dismissReport] = useIonPopover(DatepickerPopover, {
+    tenant: tenant,
     onDismiss: (startDate: Date, endDate: Date) => {
       loading({message: "Daten exportieren ..."})
       onExport([startDate, endDate])
@@ -259,6 +262,18 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     }
   }
 
+  const onSubmitBills = () => {
+    if (activePeriod) {
+      const invoiceRequest = {
+        allocations: energyMeterGroup,
+        tenantId: tenant,
+        preview: false,
+        clearingPeriodIdentifier: "Rechnung_"+activePeriod.type+"-"+activePeriod.segment,
+        clearingPeriodType: activePeriod.type} as ClearingPreviewRequest;
+      eegService.startEnergyBill(tenant, invoiceRequest);
+    }
+  }
+
   const popoverRef = useRef<HTMLIonToolbarElement>(null)
   return (
     <div className={"participant-pane"}>
@@ -267,10 +282,11 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         <div className={"pane-content"}>
           <IonToolbar color="eeglight" style={{"--min-height": "56px"}} ref={popoverRef}>
             <IonButtons slot="end">
-              <IonButton
+              {eeg && !eeg.online && <IonButton
                 color="primary"
                 shape="round"
                 fill={"solid"}
+                aria-label="Favorite"
                 style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
                 onClick={(e: any) =>
                   uploadPopover({
@@ -284,7 +300,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                 }
               >
                 <IonIcon slot="icon-only" icon={cloudUploadOutline}></IonIcon>
-              </IonButton>
+              </IonButton>}
               <IonButton
                 // id="open-datepicker-dialog"
                 color="primary"
@@ -294,6 +310,10 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                 onClick={(e: any) =>
                   reportPopover({
                     event: e,
+                    size: "auto",
+                    side: "bottom",
+                    alignment: "start",
+                    cssClass: "upload-popover",
                     // onDidDismiss: (e: CustomEvent) => onExport(e.detail.data),
                   })
                 }
@@ -353,8 +373,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
               </IonRow>
               <IonRow>
                 <IonCol size="12">
-                  <IonButton expand="block"
-                             disabled>{`RECHNUNG VERSENDEN (${billingInfo.length})`}</IonButton>
+                  <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onSubmitBills()}>{`RECHNUNG VERSENDEN (${billingInfo.length})`}</IonButton>
                 </IonCol>
               </IonRow>
             </div>

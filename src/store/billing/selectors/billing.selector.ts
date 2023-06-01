@@ -33,3 +33,8 @@ export const selectBillByMeter = (id: string, meter: string) => createSelector(
     return 0
   }
 )
+
+export const selectBillByParticipant = (id: string) => createSelector(
+  selectBillById(id),
+  entries => entries?.amount
+)

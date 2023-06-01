@@ -7,12 +7,14 @@ export interface Eeg {
   salesTax: string;
   taxNumber: string;
   settlement: string;
-  settlementInterval: string;
+  settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
+  allocationMode: "DYNAMIC" | "STATIC"
   communityId: string;
   address: Address;
   contact: Contact;
   accountInfo: AccountInfo;
   optionals: Optionals;
+  online: boolean;
 }
 
 export interface Address {
@@ -109,4 +111,19 @@ export enum MONTHNAME {
   Oktober,
   November,
   Dezember
+}
+
+export enum MONTHNAMESHORT {
+  Jan = 1,
+  Feb,
+  Mär,
+  Apr,
+  Mai,
+  Jun,
+  Jul,
+  Aug,
+  Sep,
+  Okt,
+  Nov,
+  Dez
 }

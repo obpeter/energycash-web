@@ -1,6 +1,6 @@
 import React, {createContext, FC, ReactNode, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../index";
-import {fetchEegModel, selectedTenant, selectTenant} from "../eeg";
+import {eegSelector, fetchEegModel, selectedTenant, selectTenant} from "../eeg";
 import {useKeycloak, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
 import {fetchParticipantModel} from "../participant";
@@ -18,6 +18,8 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const tenant = useAppSelector(selectedTenant)
 
+  const eeg = useAppSelector(eegSelector);
+
 
   useEffect(() => {
     // console.log("APP STATE CHANGED: ", state)
@@ -32,6 +34,35 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
       }
     }
   }, [tenants])
+
+  useEffect(() => {
+    if (eeg) {
+      eegService.fetchLastReportEntryDate(tenant).then(lastReportDate => {
+        if (lastReportDate && lastReportDate.length > 0) {
+          const [date, time] = lastReportDate.split(" ");
+          const [day, month, year] = date.split(".");
+          let period = "Y"
+          let segment = 0
+          switch (eeg.settlementInterval) {
+            case "MONTHLY":
+              period = "YM"+month
+              segment = parseInt(month, 10)
+              break;
+            case "BIANNUAL":
+              period = "YH"
+              segment = (parseInt(month, 10) < 7 ? 1 : 2)
+              break;
+            case "QUARTER":
+              const m = parseInt(month, 10)
+              period = "YQ"
+              segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
+              break
+          }
+          dispatch(fetchEnergyReport({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period}))
+        }
+      })
+    }
+  },[eeg])
 
   const init = async () => {
     let initTenant = tenant
@@ -50,14 +81,14 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
           dispatch(fetchEegModel({token: token, tenant: initTenant!})),
           dispatch(fetchRatesModel({token: token, tenant: initTenant!})),
           dispatch(fetchParticipantModel({token: token, tenant: initTenant!})),
-          eegService.fetchLastReportEntryDate(initTenant, token).then(lastReportDate => {
-            if (lastReportDate && lastReportDate.length > 0) {
-              const [date, time] = lastReportDate.split(" ");
-              const [day, month, year] = date.split(".")
-              // dispatch(setSelectedPeriod({type: "MRP", month: Number(month), year: Number(year)}))
-              dispatch(fetchEnergyReport({tenant: initTenant!, year: parseInt(year, 10), month: parseInt(month, 10), token}))
-            }
-          }),
+          // eegService.fetchLastReportEntryDate(initTenant, token).then(lastReportDate => {
+          //   if (lastReportDate && lastReportDate.length > 0) {
+          //     const [date, time] = lastReportDate.split(" ");
+          //     const [day, month, year] = date.split(".")
+          //     // dispatch(setSelectedPeriod({type: "MRP", month: Number(month), year: Number(year)}))
+          //     dispatch(fetchEnergyReport({tenant: initTenant!, year: parseInt(year, 10), month: parseInt(month, 10), token}))
+          //   }
+          // }),
         ])
       })
     }
