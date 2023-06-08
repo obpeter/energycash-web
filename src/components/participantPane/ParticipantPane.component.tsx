@@ -1,6 +1,6 @@
 import React, {FC, startTransition, useContext, useEffect, useRef, useState} from "react";
 
-import {EegParticipant} from "../models/members.model";
+import {EegParticipant} from "../../models/members.model";
 import {
   CheckboxCustomEvent,
   IonButton,
@@ -16,31 +16,31 @@ import {
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {SelectedPeriod} from "../models/energy.model";
-import PeriodSelectorComponent from "./PeriodSelector.component";
+import {SelectedPeriod} from "../../models/energy.model";
+import PeriodSelectorComponent from "../PeriodSelector.component";
 import MemberComponent from "./Member.component";
-import {ClearingPreviewRequest, Metering, ParticipantBillType} from "../models/meteringpoint.model";
+import {ClearingPreviewRequest, Metering, ParticipantBillType} from "../../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
-import {ParticipantContext} from "../store/hook/ParticipantProvider";
-import {MemberViewContext} from "../store/hook/MemberViewProvider";
+import {ParticipantContext} from "../../store/hook/ParticipantProvider";
+import {MemberViewContext} from "../../store/hook/MemberViewProvider";
 
 import "./ParticipantPane.component.scss"
-import SlideButtonComponent from "./SlideButton.component";
-import {useAppDispatch, useAppSelector} from "../store";
-import {billingSelector, fetchEnergyBills} from "../store/billing";
-import {eegSelector, selectedTenant} from "../store/eeg";
-import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../store/energy";
-import ButtonGroup from "./ButtonGroup.component";
+import SlideButtonComponent from "../SlideButton.component";
+import {useAppDispatch, useAppSelector} from "../../store";
+import {billingSelector, fetchEnergyBills} from "../../store/billing";
+import {eegSelector, selectedTenant} from "../../store/eeg";
+import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
+import ButtonGroup from "../ButtonGroup.component";
 import {add, cloudUploadOutline, downloadOutline, flash, person} from "ionicons/icons";
-import {eegPlug, eegSolar} from "../eegIcons";
-import {selectedParticipantSelector, selectMetering, selectParticipant} from "../store/participant";
+import {eegPlug, eegSolar} from "../../eegIcons";
+import {selectedParticipantSelector, selectMetering, selectParticipant} from "../../store/participant";
 import cn from "classnames";
-import {isParticipantActivated} from "../util/Helper.util";
-import DatepickerComponent from "./dialogs/datepicker.component";
-import DatepickerPopover from "./dialogs/datepicker.popover";
-import {ExcelReportRequest, InvestigatorCP} from "../models/reports.model";
-import {eegService} from "../service/eeg.service";
-import UploadPopup from "./dialogs/upload.popup";
+import {isParticipantActivated} from "../../util/Helper.util";
+import DatepickerComponent from "../dialogs/datepicker.component";
+import DatepickerPopover from "../dialogs/datepicker.popover";
+import {ExcelReportRequest, InvestigatorCP} from "../../models/reports.model";
+import {eegService} from "../../service/eeg.service";
+import UploadPopup from "../dialogs/upload.popup";
 
 interface ParticipantPaneProps {
   participants: EegParticipant[];
@@ -68,8 +68,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const [loading, dismissLoading] = useIonLoading();
 
   const {
-    enableBilling,
-    setEnableBilling,
+    billingEnabled,
+    setBillingEnabled,
     checkedParticipant,
     setCheckedParticipant,
     detailsPageOpen,
@@ -93,7 +93,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
       const nextBillingEnabled = Object.entries(checkedParticipant).reduce((r, e) => (isParticipantActivated(participants, e[0]) && e[1]) || r, false)
       // console.log("Show Billing: ", nextBillingEnabled);
 
-      setEnableBilling(nextBillingEnabled)
+      setBillingEnabled(nextBillingEnabled)
       if (!nextBillingEnabled)
         toggleShowAmount(false)
     }
@@ -348,7 +348,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                   showDetailsPage={showDetailsPage}
                 >
                   {hideMeter || p.meters.filter((m) => {
-                    if (m.direction === 'GENERATOR' && hideProducers)
+                    if (m.direction === 'GENERATION' && hideProducers)
                       return false;
                     if (m.direction === 'CONSUMPTION' && hideConsumers)
                       return false;
@@ -380,7 +380,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
           }
           <div className={"button-bar"}>
             <div style={{marginLeft: "20px"}}>
-              <SlideButtonComponent checked={showAmount} disabled={!enableBilling}
+              <SlideButtonComponent checked={showAmount} disabled={!billingEnabled}
                                     setChecked={(c) => activateBilling(c)}></SlideButtonComponent>
             </div>
             <div style={{marginRight: "20px", display: "flex", flexDirection: "row"}}>

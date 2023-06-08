@@ -17,8 +17,10 @@ export interface ParicipantState {
   detailsPageOpen: boolean
   showDetailsPage: (participant: EegParticipant) => void
   closeDetailPage: (open: boolean) => void
-  enableBilling: boolean
-  setEnableBilling: (enabled: boolean) => void
+  billingEnabled: boolean
+  setBillingEnabled: (enabled: boolean) => void
+  showAddMeterPane: boolean
+  setShowAddMeterPane: (show: boolean) => void
   checkedParticipant: Record<string, boolean>
   setCheckedParticipant: (participantId: string, checked: boolean) => void
 }
@@ -33,8 +35,10 @@ const initialState: ParicipantState = {
   detailsPageOpen: false,
   showDetailsPage: (p: EegParticipant) => {},
   closeDetailPage: (open: boolean) => {},
-  enableBilling: false,
-  setEnableBilling: (enabled: boolean) => {},
+  billingEnabled: false,
+  setBillingEnabled: (enabled: boolean) => {},
+  showAddMeterPane: false,
+  setShowAddMeterPane: (show: boolean) => {},
   checkedParticipant: {},
   setCheckedParticipant: (participantId: string, checked: boolean) => {}
 }
@@ -48,8 +52,9 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
   // const rates = useAppSelector(ratesSelector);
 
   const [state, setState] = useState<ParicipantState>(initialState);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState<boolean>(false);
   const [enableBilling, setEnableBilling] = useState<boolean>(false)
+  const [showAddMeterPane, setShowAddMeterPane] = useState<boolean>(false)
   const [checkedParticipants, setCheckedParticipants] = useState<Record<string, boolean>>({})
 
   const newRateFn = () => {
@@ -90,9 +95,11 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
     selectRate: selectRateFn,
     showDetailsPage: showDetailPageFn,
     closeDetailPage: closeDetailPageFn,
-    enableBilling: enableBilling,
-    setEnableBilling: setEnableBilling,
+    billingEnabled: enableBilling,
+    setBillingEnabled: setEnableBilling,
     checkedParticipant: checkedParticipants,
+    showAddMeterPane: showAddMeterPane,
+    setShowAddMeterPane: setShowAddMeterPane,
     setCheckedParticipant: (participantId: string, checked: boolean) => { setCheckedParticipants((s) => {
       const newS = {...s}
       if (!checked) {

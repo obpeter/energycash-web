@@ -1,17 +1,17 @@
 import React, {FC} from "react";
 import {IonCard, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from "@ionic/react";
-import {eegPlug, eegSolar} from "../eegIcons";
-import {EegParticipant} from "../models/members.model";
-import {Metering} from "../models/meteringpoint.model";
+import {eegPlug, eegSolar} from "../../eegIcons";
+import {EegParticipant} from "../../models/members.model";
+import {Metering} from "../../models/meteringpoint.model";
 import cn from "classnames"
 
 import "./Member.component.css";
-import {useAppSelector} from "../store";
-import {meteringReportSelector} from "../store/energy";
-import {ConsumerReport, ProducerReport} from "../models/energy.model";
-import {selectRateById} from "../store/rate";
-import {selectBillByMeter} from "../store/billing";
-import {formatMeteringPointString} from "../util/Helper.util";
+import {useAppSelector} from "../../store";
+import {meteringReportSelector} from "../../store/energy";
+import {ConsumerReport, ProducerReport} from "../../models/energy.model";
+import {selectRateById} from "../../store/rate";
+import {selectBillByMeter} from "../../store/billing";
+import {formatMeteringPointString} from "../../util/Helper.util";
 
 interface MeterCardComponentProps {
   participant:EegParticipant;
@@ -49,7 +49,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
     return 0
   }
   const isPending = () => participant.status === 'PENDING';
-  const isGenerator = () => meter.direction === 'GENERATOR';
+  const isGenerator = () => meter.direction === 'GENERATION';
   const isMeterPending = () => isPending() || meter.status === 'NEW' || meter.status === 'PENDING';
 
   const meterValue = () => {

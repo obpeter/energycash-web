@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useRef, useState} from "react";
-import {EegParticipant} from "../models/members.model";
+import {EegParticipant} from "../../models/members.model";
 import cn from "classnames";
 
 import "./ParticipantDetailsPane.compoenent.css"
@@ -27,7 +27,7 @@ import {
   syncOutline,
   trashBin
 } from "ionicons/icons";
-import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../eegIcons";
+import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
 import {
   Bar,
   BarChart,
@@ -40,24 +40,24 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import {useAppDispatch, useAppSelector} from "../store";
-import {energySeriesByMeter} from "../store/energy";
-import {Metering} from "../models/meteringpoint.model";
-import MemberFormComponent from "./MemberForm.component";
-import MeterFormComponent from "./MeterForm.component";
+import {useAppDispatch, useAppSelector} from "../../store";
+import {energySeriesByMeter} from "../../store/energy";
+import {Metering} from "../../models/meteringpoint.model";
+import MemberFormComponent from "../MemberForm.component";
+import MeterFormComponent from "../MeterForm.component";
 import {
   confirmParticipant,
   selectedMeterIdSelector,
   selectedParticipantSelector,
   selectMetering,
   selectParticipant, updateParticipant
-} from "../store/participant";
-import {formatMeteringPointString} from "../util/Helper.util";
-import participants from "../pages/Participants";
-import {selectedTenant} from "../store/eeg";
-import AllowParticipantDialog from "./dialogs/AllowParticipant.dialog";
+} from "../../store/participant";
+import {formatMeteringPointString} from "../../util/Helper.util";
+import participants from "../../pages/Participants";
+import {selectedTenant} from "../../store/eeg";
+import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
-import InvoiceDocumentComponent from "./InvoiceDocument.component";
+import InvoiceDocumentComponent from "../InvoiceDocument.component";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm"
 // interface DynamicComponentProps {
@@ -115,7 +115,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const isMeterActive = () => selectedMeter?.status === "ACTIVE"
   const isMeterPending = () => selectedMeter?.status === "PENDING"
 
-  const isGenerator = () => selectedMeter?.direction === 'GENERATOR';
+  const isGenerator = () => selectedMeter?.direction === 'GENERATION';
 
   // useEffect(() => {
   //   console.log("select Details", selectedParticipant);
@@ -259,7 +259,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
       <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
         <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
           <div className={"details-box"}>
-            {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (<div style={{background: "white"}}>
+            {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (
+            <div>
               <AllowParticipantDialog trigger="open-participant-allow-dialog" participant={selectedParticipant} onDismiss={onWillDismiss}/>
               <IonCard color="warning-light">
                 <IonItem lines="none" color="warning-light">
@@ -403,10 +404,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
         </div>
         <div className="pane-content-details">
           <div className="pane-content-details-content">
-            {/*<MemberFormComponent participant={selectedParticipant} formId={""} onSubmit={(e) => console.log("update", e)}/>*/}
             {dynamicComponent(activeMenu)}
-            {/*{detailC("COMPONENT_A", {participant: selectedParticipant, formId:"", onSubmit: (e:any) => console.log("update", e)})}*/}
-            {/*<MemberFormComponent participant={selectedParticipant} formId={""} onSubmit={(e) => console.log("update", e)}/>*/}
           </div>
         </div>
       </div>

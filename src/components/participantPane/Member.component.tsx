@@ -1,5 +1,5 @@
 import React, {FC, ReactNode} from "react";
-import {EegParticipant} from "../models/members.model";
+import {EegParticipant} from "../../models/members.model";
 import {
   CheckboxCustomEvent,
   IonCol,
@@ -10,11 +10,11 @@ import {
 } from "@ionic/react";
 
 import "./Member.component.css";
-import {eegSumSign} from "../eegIcons";
+import {eegSumSign} from "../../eegIcons";
 import MemberNameComponent from "./MemberName.component";
-import {ParticipantBillType} from "../models/meteringpoint.model";
-import {useAppSelector} from "../store";
-import {selectBillById} from "../store/billing";
+import {ParticipantBillType} from "../../models/meteringpoint.model";
+import {useAppSelector} from "../../store";
+import {selectBillById} from "../../store/billing";
 
 interface MemberProps {
   participant: EegParticipant;

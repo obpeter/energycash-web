@@ -1,15 +1,16 @@
 import React, {FC, useContext} from "react";
 import {IonContent, IonPage, SelectCustomEvent} from "@ionic/react";
-import ParticipantPaneComponent from "../components/ParticipantPane.component";
+import ParticipantPaneComponent from "../components/participantPane/ParticipantPane.component";
 
 import "./Participants.css"
 import {useAppDispatch, useAppSelector} from "../store";
 import {participantsSelector, selectedParticipantSelector} from "../store/participant";
 import {periodsSelector, selectedPeriodSelector} from "../store/energy";
 import {selectedTenant} from "../store/eeg";
-import ParticipantDetailsPaneComponent from "../components/ParticipantDetailsPane.component";
-import ParticipantInvoiceDetailsComponent from "../components/ParticipantInvoiceDetails.component";
+import ParticipantDetailsPaneComponent from "../components/participantPane/ParticipantDetailsPane.component";
+import ParticipantInvoiceDetailsComponent from "../components/participantPane/ParticipantInvoiceDetails.component";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
+import AddMeterPaneComponent from "../components/participantPane/AddMeterPane.component";
 
 const Participants: FC = () => {
   const dispatcher = useAppDispatch();
@@ -21,16 +22,21 @@ const Participants: FC = () => {
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
 
   const {
-    enableBilling
+    billingEnabled,
+    showAddMeterPane,
   } = useContext(ParticipantContext);
 
   function showParticipantDetails() {
     if (selectedParticipant) {
-      if (enableBilling) {
+      if (billingEnabled) {
         return (
           <ParticipantInvoiceDetailsComponent />
         )
-      } else {
+      } else if (showAddMeterPane) {
+        return (
+          <AddMeterPaneComponent />
+        )
+      }else {
         return (
           <ParticipantDetailsPaneComponent />
         )

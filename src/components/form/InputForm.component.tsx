@@ -10,8 +10,21 @@ import {TextFieldTypes} from "@ionic/core";
 // }
 
 
-const InputForm: (React.FC<{ control: Control<any, any>, name: string, rules?: object, error?:  FieldError, label: string, type?: TextFieldTypes, disabled?: boolean, readonly?: boolean,
-  inputmode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined}>) =
+interface InputFormProps {
+  control: Control<any, any>,
+  name: string,
+  label: string,
+  rules?: object,
+  error?:  FieldError,
+  type?: TextFieldTypes,
+  disabled?: boolean,
+  readonly?: boolean,
+  inputmode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined,
+  counter?: boolean,
+  maxlength?: number
+}
+
+const InputForm: (React.FC<InputFormProps>) =
   ({ control, name,rules, error,...rest}) => {
   return (
     <div className={"form-element"}>

@@ -94,7 +94,11 @@ http://ionicframework.com/docs/theming/ */
 
   --eeg-background-consumer: #368060;
   --eeg-background-producer: #B00054;
-  --ion-item-background: #FFFCF7;
+  --eeg-surface-color: #FFFCF6;
+
+  /*--ion-item-background: #FFFCF7;*/
+  /*--ion-item-background: #F9F7EC;*/
+  --ion-item-background: transparent;
 }
 
 
@@ -135,7 +139,6 @@ http://ionicframework.com/docs/theming/ */
     --ion-color-step-950: #294f49;
     /*--ion-border-color: rgba(0, 0, 0, 0.13);*/
 
-    --eeg-surface-color: #FFFCF6;
   }
 
   ion-item {

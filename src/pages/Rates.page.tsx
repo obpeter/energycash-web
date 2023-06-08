@@ -1,17 +1,11 @@
 import React, {FC, useEffect, useState} from "react";
-import EegWebContentPaneComponent from "../components/EegWebContentPane.component";
 import {useAppDispatch, useAppSelector} from "../store";
 import {ratesSelector, saveNewRate, updateRate} from "../store/rate";
 import RateCardComponent from "../components/RateCard.component";
 import {
   IonButton, IonButtons,
   IonContent,
-  IonFab,
-  IonFabButton,
-  IonFooter,
   IonIcon,
-  IonItem,
-  IonLabel,
   IonPage,
   IonToolbar
 } from "@ionic/react";
@@ -20,11 +14,10 @@ import cn from "classnames";
 import {v4} from 'uuid';
 
 import "./Rates.scss"
-import {add, trashBin} from "ionicons/icons";
-import RateComponent from "../components/Rate.component";
+import {add} from "ionicons/icons";
 import RateDetailPaneComponent from "../components/RateDetailPane.component";
 import {selectedTenant} from "../store/eeg";
-import RateProvider, {useRateType} from "../store/hook/Rate.provider";
+import {useRateType} from "../store/hook/Rate.provider";
 
 const RatesPage: FC = () => {
 
@@ -45,7 +38,6 @@ const RatesPage: FC = () => {
   const onSelect = (rate: EegTariff) => {
     setRateType(rate.type)
     setSelectedRate(rate)
-    console.log("SELECT RATE: ", rate)
   }
 
   const onNew = () => {

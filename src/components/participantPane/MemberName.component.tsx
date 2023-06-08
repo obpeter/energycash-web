@@ -1,19 +1,21 @@
-import React, {FC, useContext} from "react";
+import React, {BaseSyntheticEvent, FC, MouseEventHandler, useContext} from "react";
 import {
-  CheckboxCustomEvent,
+  CheckboxCustomEvent, IonButton,
   IonCheckbox,
   IonCol,
   IonIcon,
   IonItem,
   IonLabel,
 } from "@ionic/react";
-import {eegExclamation} from "../eegIcons";
-import {EegParticipant} from "../models/members.model";
+import {eegExclamation} from "../../eegIcons";
+import {EegParticipant} from "../../models/members.model";
 import {useHistory} from "react-router";
-import {amountInEuro} from "../util/TariffHelper";
-import {EegTariff} from "../models/eeg.model";
-import {useAppSelector} from "../store";
-import {selectBillByParticipant} from "../store/billing";
+import {amountInEuro} from "../../util/TariffHelper";
+import {EegTariff} from "../../models/eeg.model";
+import {useAppSelector} from "../../store";
+import {selectBillByParticipant} from "../../store/billing";
+import {add, addCircle} from "ionicons/icons";
+import {ParticipantContext} from "../../store/hook/ParticipantProvider";
 
 
 interface MemberNameComponentProps {
@@ -29,6 +31,9 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
   ({participant, isChecked, showAmount, tariff, onCheck, onSelect}) => {
 
   const bill = useAppSelector(selectBillByParticipant(participant.id))
+  const {
+    setShowAddMeterPane,
+  } = useContext(ParticipantContext);
   const isPending = () => participant.status === 'PENDING';
 
   const euroAmount = () => {
@@ -36,6 +41,10 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
       return "" /*+ bill.toFixed(2) + " €"*/
     }
     return ""
+  }
+
+  const onAdd = (e?: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
+    setShowAddMeterPane(true)
   }
 
   return (
@@ -55,12 +64,17 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
               </div>
             </IonLabel>
           ) : (
+            <>
             <IonLabel style={{margin: "0px"}}>
               <div style={{display: "flex", justifyContent: "space-between"}}>
                 <span>{participant.firstname} {participant.lastname}</span>
                 {showAmount && <span>{euroAmount()}</span>}
               </div>
             </IonLabel>
+            <IonButton slot="end" fill="clear" onClick={onAdd}>
+              <IonIcon slot="icon-only" icon={add}/>
+            </IonButton>
+            </>
           )}
         </IonItem>
       </IonCol>

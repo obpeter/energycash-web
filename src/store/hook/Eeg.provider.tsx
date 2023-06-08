@@ -1,20 +1,39 @@
-import React, {createContext, FC, ReactNode, useEffect, useState} from "react";
+import React, {createContext, FC, ReactNode, useContext, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../index";
 import {eegSelector, fetchEegModel, selectedTenant, selectTenant} from "../eeg";
-import {useKeycloak, useTenants} from "./AuthProvider";
+import {KeycloakContext, useKeycloak, useRoles, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
 import {fetchParticipantModel} from "../participant";
 import {fetchEnergyReport, setSelectedPeriod} from "../energy";
 import {eegService} from "../../service/eeg.service";
 import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
+import {Eeg, EegTariff} from "../../models/eeg.model";
+import {EegParticipant} from "../../models/members.model";
 
-export const EegContext = createContext(false)
+
+export interface EegState {
+  eeg: Eeg | undefined
+  isAdmin: () => boolean
+  isOwner: () => boolean
+  isUser: () => boolean
+}
+
+const initialState: EegState = {
+  eeg: undefined,
+  isAdmin: () => false,
+  isOwner: () => false,
+  isUser: () => false,
+}
+
+
+export const EegContext = createContext(initialState)
 
 export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const dispatch = useAppDispatch();
   const {keycloak} = useKeycloak();
   const tenants = useTenants();
+  const roles = useRoles();
 
   const tenant = useAppSelector(selectedTenant)
 
@@ -45,7 +64,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
           let segment = 0
           switch (eeg.settlementInterval) {
             case "MONTHLY":
-              period = "YM"+month
+              period = "YM"
               segment = parseInt(month, 10)
               break;
             case "BIANNUAL":
@@ -111,9 +130,21 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     console.log("View will Enter")
   })
 
+  const value = {
+    eeg: eeg,
+    isAdmin: () => roles.findIndex(r => r === "/EEG_ADMIN") >= 0,
+    isOwner: () => roles.findIndex(r => r === "/EEG_OWNER") >= 0,
+    isUser: () => roles.findIndex(r => r === "/EEG_USER") >= 0,
+  } as EegState
+
   return (
-    <EegContext.Provider value={true}>
+    <EegContext.Provider value={value}>
       {children}
     </EegContext.Provider>
   )
+}
+
+export const useAccessGroups = () => {
+  const {isAdmin, isUser, isOwner} = useContext(EegContext);
+  return {isAdmin, isUser, isOwner};
 }

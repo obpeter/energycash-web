@@ -32,12 +32,14 @@ export class KeycloakService {
   realmAccess?: rolesType;
   resourceAccess?: accountType;
   tenants: string[]
+  accessGroups: string[];
 
   onAuthSuccess?: () => void;
 
   public constructor(config: KeycloakConfig) {
     this.config = config;
     this.tenants = [];
+    this.accessGroups = [];
   }
 
   private getLocalStorage(key: string): string | undefined {
@@ -143,6 +145,7 @@ export class KeycloakService {
       this.realmAccess = this.tokenParsed.realm_access;
       this.resourceAccess = this.tokenParsed.resource_access;
       this.tenants = this.tokenParsed.tenant;
+      this.accessGroups = this.tokenParsed.access_groups;
 
       this.onAuthSuccess && this.onAuthSuccess();
     }

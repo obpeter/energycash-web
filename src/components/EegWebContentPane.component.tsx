@@ -1,17 +1,16 @@
 import React, {FC} from "react";
 
+import '../styles/Pane.style.scss'
+
 interface EegWebContentPaneComponentProps {
   children: React.ReactNode
 }
 
-
 const EegWebContentPaneComponent: FC<EegWebContentPaneComponentProps> = ({children}) => {
   return (
-    <div className={"eeg-content-pane"}>
-      <div className={"eeg-pane-body"}>
-        <div className={"eeg-pane-content"}>
-          {children}
-        </div>
+    <div className={"details-body"} style={{height: "100%", display: "flex", flexDirection: "column"}}>
+      <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
+        {children}
       </div>
     </div>
   )

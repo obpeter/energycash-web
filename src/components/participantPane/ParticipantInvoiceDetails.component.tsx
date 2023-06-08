@@ -1,16 +1,16 @@
 import React, {FC, useContext, useEffect, useState} from "react";
-import {useAppSelector} from "../store";
-import {ratesSelector} from "../store/rate";
-import {selectBillById} from "../store/billing";
-import {selectedParticipantSelector} from "../store/participant";
-import {ParticipantContext} from "../store/hook/ParticipantProvider";
-import {toRecord} from "../util/Helper.util";
-import RateCardComponent from "./RateCard.component";
+import {useAppSelector} from "../../store";
+import {ratesSelector} from "../../store/rate";
+import {selectBillById} from "../../store/billing";
+import {selectedParticipantSelector} from "../../store/participant";
+import {ParticipantContext} from "../../store/hook/ParticipantProvider";
+import {toRecord} from "../../util/Helper.util";
+import RateCardComponent from "../RateCard.component";
 import MeterCardComponent from "./MeterCard.component";
 import {IonButton, IonGrid, IonIcon, IonItem, IonLabel, IonRow, IonToolbar} from "@ionic/react";
-import {eegSumSign} from "../eegIcons";
+import {eegSumSign} from "../../eegIcons";
 import {closeOutline} from "ionicons/icons";
-import {EegParticipant} from "../models/members.model";
+import {EegParticipant} from "../../models/members.model";
 
 
 type RateModelGroup = Record<string, Record<string, number>>

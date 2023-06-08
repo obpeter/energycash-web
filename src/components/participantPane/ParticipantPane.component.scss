@@ -1,38 +1,11 @@
 
+@import '../../styles/Pane.style';
+
 .participant-pane {
     position: relative;
     height: 100%;
     width: 400px;
     box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.pane-body {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-.pane-footer {
-    & .button-bar {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        /*background: red;*/
-        height: 80px;
-        margin-top: auto;
-        box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2);
-        background: var(--ion-color-eeglight, #fff);
-    }
-}
-
-.pane-content {
-    overflow-y: auto;
-    height: 100%;
-    & .fixed-header {
-        background: var(--ion-color-eeglight);
-        box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.06), 0px 2px 4px rgba(0, 0, 0, 0.1);
-    }
 }
 
 .participant {

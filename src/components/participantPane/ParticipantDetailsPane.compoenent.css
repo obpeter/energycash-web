@@ -16,6 +16,7 @@
 }
 
 .pane-content-details-content {
+    background: var(--ion-color-eeglight);
     position: absolute;
     bottom: 0;
     height: 100%;

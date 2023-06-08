@@ -33,7 +33,7 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({meteri
 
   const onChangeDirection = (s: number) => {
     setSelectedDirection(s)
-    setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATOR");
+    setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATION");
   }
 
   const getRatesOption = () => {
@@ -97,7 +97,7 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({meteri
             </IonGrid>
             <IonList>
               <SelectForm name={`tariffId`} label="Tarif" control={control} options={getRatesOption()}
-                          placeholder="Tarif" disabled={false} rules={{required: "Tarif fehlt"}} error={errors.tariffId}/>
+                          placeholder="Tarif" disabled={false} error={errors.tariffId}/>
               <InputForm name={`meteringPoint`} label="Zählpunkt" control={control}
                          rules={{required: "Zählpunktnummer fehlt",
                            minLength: {value: 33, message: "MIN-Zählpunktnummer beginnt mit AT gefolgt von 33 Nummern" },

@@ -2,7 +2,7 @@ import {Address} from "./eeg.model";
 
 export interface Metering {
   meteringPoint: string;
-  direction: "GENERATOR" | "CONSUMPTION";
+  direction: "GENERATION" | "CONSUMPTION";
   ownValue: number;
   totalValue: number;
   participantId: string;

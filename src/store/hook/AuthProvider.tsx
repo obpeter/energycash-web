@@ -15,12 +15,14 @@ export interface AuthClient {
   refreshToken?: string
   idToken?: string
   tenants: string[]
+  accessGroups: string[]
 }
 
 export type AuthContextInterface<T extends AuthClient> = {
   authClient?: T;
   isAuthenticated: boolean;
   tenants: string[];
+  roles: string[];
 }
 
 // export const authContextDefaults: AuthContextInterface = {
@@ -36,6 +38,7 @@ export function createAuthContext<T extends AuthClient>(
   return createContext({
     isAuthenticated: false,
     tenants: [],
+    roles: [],
     ...initialContext,
   })
 }
@@ -51,6 +54,7 @@ type AuthProviderState = {
   initialized: boolean
   isAuthenticated: boolean
   tenants: string[]
+  roles: string[]
 }
 
 
@@ -60,6 +64,7 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
     initialized: false,
     isAuthenticated: false,
     tenants: [],
+    roles: [],
   }
 
   return class AuthProvider extends PureComponent<AuthProviderProps<T>, AuthProviderState> {
@@ -93,6 +98,7 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
         isAuthenticated: authenticated,
         initialized: true,
         tenants: authClient.tenants,
+        roles: authClient.accessGroups,
       });
 
       console.log("UpdateState: ", this.state, "tenants", authClient);
@@ -100,14 +106,14 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
 
     render() {
       const { children, authClient } = this.props
-      const { initialized, isAuthenticated, tenants } = this.state
+      const { initialized, isAuthenticated, tenants, roles } = this.state
 
       if (!initialized) {
         return <></>
       }
 
       return (
-        <AuthContext.Provider value={{authClient, isAuthenticated, tenants}}>
+        <AuthContext.Provider value={{authClient, isAuthenticated, tenants, roles}}>
           {children}
         </AuthContext.Provider>
       )
@@ -129,4 +135,9 @@ export const useKeycloak = () => {
 export const useTenants = () => {
   const {tenants} = useContext(KeycloakContext);
   return tenants;
+}
+
+export const useRoles = () => {
+  const {roles} = useContext(KeycloakContext);
+  return roles;
 }

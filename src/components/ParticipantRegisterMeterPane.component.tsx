@@ -13,7 +13,7 @@ import {
 } from "@ionic/react";
 import {add, star} from "ionicons/icons";
 import {EegParticipant} from "../models/members.model";
-import MeterCardComponent from "./MeterCard.component";
+import MeterCardComponent from "./participantPane/MeterCard.component";
 import ToggleButtonComponent from "./ToggleButton.component";
 import {eegPlug} from "../eegIcons";
 import SelectFormNative from "./form/SelectFormNative.component";

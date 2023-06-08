@@ -280,15 +280,30 @@ class EegService {
     }).then(res => res.json());
   }
 
-  async syncMeteringPoint(tenant: string, meter: Metering): Promise<EegEnergyReport> {
+  async syncMeteringPoint(tenant: string, participantId: string, meter: string, direction: string, from: number, to: number): Promise<EegEnergyReport> {
     const token = await this.authClient.getToken();
-    return await fetch(`${API_API_SERVER}/eeg/sync/meterpoint`, {
+
+    const body = {meteringPoint: meter, direction: direction, from: from, to: to}
+    return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/syncenergy`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json'
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(meter)
+      body: JSON.stringify(body)
+    }).then(res => res.json());
+  }
+
+  async registerMeteringPoint(tenant: string, participantId: string, meter: string, direction: string): Promise<EegEnergyReport> {
+    const token = await this.authClient.getToken();
+    const body = {meteringPoint: meter, direction: direction}
+    return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/register`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
     }).then(res => res.json());
   }
 

@@ -66,9 +66,9 @@ export const updateParticipant = createAsyncThunk(
 
 export const registerMeteringpoint = createAsyncThunk(
   `${featureKey}/meter/create`,
-  async (arg: { tenant: string, participant: string, meter: Metering }) => {
-    const {participant, tenant, meter} = arg
-    return await eegService.createMeteringPoint(tenant, participant, meter);
+  async (arg: { tenant: string, participantId: string, meter: Metering }) => {
+    const {participantId, tenant, meter} = arg
+    return await eegService.createMeteringPoint(tenant, participantId, meter);
   }
 )
 

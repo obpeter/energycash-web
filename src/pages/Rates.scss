@@ -1,3 +1,5 @@
+@import "../styles/Cards.style";
+
 .ratePane {
   position: relative;
   min-width: 400px;
@@ -11,24 +13,5 @@
 }
 
 .rates {
-  position: relative;
-  padding: 10px 15px 10px 10px;
-  margin-left: 5px;
-  border-radius: 5px 0 0 5px;
-
-  &.selected {
-    background: #EAE7D9;
-    box-shadow: inset 0px 4px 5px rgba(0, 0, 0, 0.14), inset 0px 1px 10px rgba(0, 0, 0, 0.12), inset 0px 2px 4px rgba(0, 0, 0, 0.2);
-    &:after {
-      content: "";
-      display: block;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      top: 0;
-      width: 10px;
-      background: #79DFB4;
-      border-radius: 5px 0 0 5px;
-    }
-  }
+  @include eeg-cards;
 }

@@ -112,6 +112,8 @@ const EegPage: FC = () => {
 
                     <InputFormComponent name={"rcNumber"} label="RC Nummer" control={control} rules={{}} type="text"
                                         readonly={true}/>
+                    <InputFormComponent name={"communityId"} label="Gemeinschafts-Id" control={control} rules={{}} type="text"
+                                        readonly={true}/>
 
                     {/*<InputFormComponent name={"legal"} label="Rechtsform" control={control} rules={{}} type="text"*/}
                     {/*                    readonly={true}/>*/}
