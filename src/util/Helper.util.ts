@@ -1,10 +1,11 @@
 import {EegParticipant} from "../models/members.model";
+import {EegEnergyReport, ReportType, SelectedPeriod} from "../models/energy.model";
 
 
 export const formatedName = (participant: EegParticipant) => {
   let title = ""
-  if (participant.titlePrefix && participant.titlePrefix.length > 0) {
-    title = participant.titlePrefix + " ";
+  if (participant.titleBefore && participant.titleBefore.length > 0) {
+    title = participant.titleBefore + " ";
   }
 
   return title + `${participant.firstname} ${participant.lastname}`
@@ -41,4 +42,63 @@ export const getPeriodSegment = (period: string, month: number) => {
     default:
       return 0
   }
+}
+
+export const createNewPeriod = (period: SelectedPeriod | undefined, target: ReportType, currentSegmentIdx: number) => {
+  if (period !== undefined) {
+    switch (target) {
+      case 'Y':
+        return {type: target, segment: 0, year: period.year}
+      case 'YM':
+        switch (period.type) {
+          case 'Y':
+            return {type: target, segment: currentSegmentIdx, year: period.year}
+          case 'YH':
+            return {type: target, segment: currentSegmentIdx, year: period.year}
+          case 'YQ':
+            return {type: target, segment: currentSegmentIdx, year: period.year}
+          default:
+            return period
+        }
+      case 'YQ':
+        switch (period.type) {
+          case 'Y':
+            return {type: target, segment: Math.ceil(currentSegmentIdx / 3), year: period.year}
+          case 'YH':
+            return {type: target, segment: Math.ceil(currentSegmentIdx / 3), year: period.year}
+          case 'YM':
+            return {type: target, segment: Math.ceil(period.segment / 3), year: period.year}
+          default:
+            return period
+        }
+      case 'YH':
+        switch (period.type) {
+          case 'Y':
+            return {type: target, segment: Math.min(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
+          case 'YQ':
+            return {type: target, segment: Math.min(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
+          case 'YM':
+            return {type: target, segment: Math.min(1, Math.ceil(period.segment / 6)), year: period.year}
+          default:
+            return period
+        }
+      default: return period
+    }
+  }
+  return undefined
+}
+
+export function findPartial<O extends object, OT extends keyof object>(obj: O, key: string): Partial<O> {
+  let result = {}
+  Object.keys(obj).forEach(k => {
+    if (typeof obj[k as OT] === 'object') {
+      const sub = findPartial(obj[k as OT], key)
+      if (Object.keys(sub).length !== 0) {
+        result = {[k]: sub}
+      }
+    } else if (k === key) {
+      result = {[k]: obj[k as OT]}
+    }
+  })
+  return result
 }

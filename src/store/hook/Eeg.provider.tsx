@@ -16,6 +16,7 @@ export interface EegState {
   isAdmin: () => boolean
   isOwner: () => boolean
   isUser: () => boolean
+  refresh: () => void
 }
 
 const initialState: EegState = {
@@ -23,6 +24,7 @@ const initialState: EegState = {
   isAdmin: () => false,
   isOwner: () => false,
   isUser: () => false,
+  refresh: () => {},
 }
 
 
@@ -38,7 +40,6 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   const tenant = useAppSelector(selectedTenant)
 
   const eeg = useAppSelector(eegSelector);
-
 
   useEffect(() => {
     // console.log("APP STATE CHANGED: ", state)
@@ -135,6 +136,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     isAdmin: () => roles.findIndex(r => r === "/EEG_ADMIN") >= 0,
     isOwner: () => roles.findIndex(r => r === "/EEG_OWNER") >= 0,
     isUser: () => roles.findIndex(r => r === "/EEG_USER") >= 0,
+    refresh: async () => await init()
   } as EegState
 
   return (
@@ -147,4 +149,9 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 export const useAccessGroups = () => {
   const {isAdmin, isUser, isOwner} = useContext(EegContext);
   return {isAdmin, isUser, isOwner};
+}
+
+export const useRefresh = () => {
+  const {refresh} = useContext(EegContext);
+  return {refresh};
 }

@@ -50,7 +50,7 @@ const selectReport = createSelector(
 export const meteringReportSelector = (meterId: string, reportId: string) => createSelector(
   selectMeta(meterId),
   selectReport,
-  (meta, report) => {
+  (meta, report): ConsumerReport | ProducerReport | undefined => {
     if (meta && report) {
       if (meta.dir === "CONSUMPTION") {
         return {
@@ -101,15 +101,15 @@ export const energySeriesByMeter = (meter: string) => createSelector(
 export const meteringEnergyGroup = createSelector(
   selectAllMeta,
   selectReport,
-  (entities, report) => entities.map((m) => {
+  (entities, report) => entities.reduce((e, m) => {
     let allocation = 0.0
     if (report) {
       if (m.dir === "CONSUMPTION") {
         allocation = report.allocated[m.sourceIdx]
       } else {
-        allocation = report.distributed[m.sourceIdx]
+        allocation = report.produced[m.sourceIdx] - report.distributed[m.sourceIdx]
       }
     }
-    return {meteringPoint: m.name, allocationKWh: allocation} as MeteringEnergyGroupType
-  })
+    return {...e, [m.name]: allocation} //{meteringPoint: m.name, allocationKWh: allocation} as MeteringEnergyGroupType
+  }, {} as Record<string, number>)
 )

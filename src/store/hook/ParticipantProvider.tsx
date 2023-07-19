@@ -84,6 +84,13 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
     setDetailOpen(state);
   }
 
+  const setEnableBillingFn = (state: boolean) => {
+    setEnableBilling(state);
+    // if (!state) {
+    //   setCheckedParticipants({})
+    // }
+  }
+
   const value = {
     // participants: participants,
     // selectedParticipant: state.selectedParticipant,
@@ -96,7 +103,7 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
     showDetailsPage: showDetailPageFn,
     closeDetailPage: closeDetailPageFn,
     billingEnabled: enableBilling,
-    setBillingEnabled: setEnableBilling,
+    setBillingEnabled: setEnableBillingFn,
     checkedParticipant: checkedParticipants,
     showAddMeterPane: showAddMeterPane,
     setShowAddMeterPane: setShowAddMeterPane,

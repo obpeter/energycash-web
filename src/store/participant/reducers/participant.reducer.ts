@@ -24,7 +24,7 @@ export const reducer = createReducer(initialState, builder =>
     })
     .addCase(saveNewParticipant.fulfilled, (state, action) => {
       const {participant} = action.payload;
-      return adapter.addOne({...state, selectedParticipant: {} as EegParticipant}, participant);
+      return adapter.addOne({...state, selectedParticipant: participant}, participant);
     })
     .addCase(chancelNewParticipant.fulfilled, (state, action) => {
       return {...state, selectedParticipant: {} as EegParticipant};
@@ -38,7 +38,7 @@ export const reducer = createReducer(initialState, builder =>
       // return s
     })
     .addCase(createParticipant.fulfilled, (state, action) => {
-      return adapter.addOne({...state, selectedParticipant: {} as EegParticipant, isFetching: false}, action.payload);
+      return adapter.addOne({...state, selectedParticipant: action.payload, isFetching: false}, action.payload);
     })
     .addCase(createParticipant.rejected, (state, action) => {
       return {...state, selectedParticipant: {} as EegParticipant, isFetching: false}
@@ -50,8 +50,9 @@ export const reducer = createReducer(initialState, builder =>
       return {...state, selectedMeter: action.payload}
     })
     .addCase(registerMeteringpoint.fulfilled, (state, action) => {
-      return adapter.updateOne({...state, selectedParticipant: {} as EegParticipant},
-        { id: state.selectedParticipant.id, changes: {...state.selectedParticipant} as EegParticipant } )
+      return adapter.updateOne({...state },
+        { id: action.payload.participantId,
+          changes: {meters: [...(state.entities[action.payload.participantId] ? state.entities[action.payload.participantId]!.meters : []), action.payload.meter] } })
     })
     .addCase(updateMeteringPoint.fulfilled, (state, action) => {
       const {meter, participantId} = action.payload;
