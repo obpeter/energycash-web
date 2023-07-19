@@ -1,6 +1,8 @@
 import {fetchEegModel, selectTenant, updateEegModel} from "../actions/eeg.action";
 import {createReducer} from "@reduxjs/toolkit";
 import {adapter, initialState} from "../states/eeg.state";
+import {findPartial} from "../../../util/Helper.util";
+import {Eeg} from "../../../models/eeg.model";
 
 export const reducer = createReducer(initialState, builder =>
   builder
@@ -17,7 +19,6 @@ export const reducer = createReducer(initialState, builder =>
     })
     .addCase(updateEegModel.fulfilled, (state, action) => {
       const { tenant, eeg } = action.payload;
-      console.log("Update EEG MODEL PARTIAL: ", eeg);
       return adapter.updateOne(state, {id: tenant, changes: eeg})
     })
     .addCase(updateEegModel.rejected, state => {
