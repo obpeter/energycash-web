@@ -1,4 +1,4 @@
-import React, {ChangeEvent, FC, useState} from "react";
+import React, {ChangeEvent, FC, forwardRef, useState} from "react";
 import {IonButton, IonCol, IonContent, IonGrid, IonIcon, IonInput, IonItem, IonLabel, IonRow} from "@ionic/react";
 import {people, star} from "ionicons/icons";
 import ToggleButtonComponent from "../ToggleButton.component";

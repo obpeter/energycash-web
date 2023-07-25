@@ -15,13 +15,13 @@ module.exports = function(app) {
         createProxyMiddleware(['/cash'], {
             target: 'http://localhost:9090',
             changeOrigin: true,
-            pathRewrite: {'^/cash' : '/api'},
+            pathRewrite: {'^/cash' : ''},
         })
     );
     app.use(
         createProxyMiddleware( ['/api'], {
             target: 'http://localhost:9080',
-            pathRewrite: {'^/api' : '/'},
+            pathRewrite: {'^/api' : ''},
             changeOrigin: true,
         })
     );

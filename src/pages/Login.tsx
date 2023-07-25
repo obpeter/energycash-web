@@ -70,10 +70,10 @@ const Login: FC = () => {
                         <IonRow>
                           <IonCol size="6">
                             <IonItem lines="none" style={{"--padding-start": "0", "--inner-padding-end": "0"}}>
-                              <IonCheckbox slot="start" {...register("stayLoggedIn")}
-                                           className="ion-no-margin ion-margin-end"></IonCheckbox>
-                              <IonLabel
-                                style={{fontSize: "14px", letterSpacing: "0.01px"}}>{"Eingeloggt bleiben"}</IonLabel>
+                              <IonCheckbox slot="start" {...register("stayLoggedIn")} labelPlacement="end"
+                                           className="ion-no-margin ion-margin-end">{"Eingeloggt bleiben"}</IonCheckbox>
+{/*                              <IonLabel
+                                style={{fontSize: "14px", letterSpacing: "0.01px"}}>{"Eingeloggt bleiben"}</IonLabel>*/}
                             </IonItem>
                           </IonCol>
                           <IonCol size="6">

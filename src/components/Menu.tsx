@@ -27,20 +27,23 @@ import {
 } from 'ionicons/icons';
 import './Menu.css';
 import React, {useRef} from "react";
-import {eegChatIcon, eegProcess} from "../eegIcons";
+import {eegChartBubble, eegChatIcon, eegProcess} from "../eegIcons";
 import {useAppSelector} from "../store";
 import {eegSelector} from "../store/eeg";
+import {useAccessGroups} from "../store/hook/Eeg.provider";
 
 interface AppPage {
   url: string;
   iosIcon: string;
   mdIcon: string;
   title: string;
+  forOnline?: boolean;
 }
 
 const Menu: React.FC = () => {
   const location = useLocation();
   const eeg = useAppSelector(eegSelector);
+  const {isAdmin} = useAccessGroups()
 
   const appPages: AppPage[] = [
     {
@@ -73,12 +76,17 @@ const Menu: React.FC = () => {
       iosIcon: person,
       mdIcon: person
     },
+  ];
+
+  const adminPages: AppPage[] = [
     {
       title: 'Prozesse',
       url: '/page/processes',
       iosIcon: eegProcess,
-      mdIcon: eegProcess
-    }];
+      mdIcon: eegProcess,
+      forOnline: true,
+    },
+  ];
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
   // TEST
@@ -120,6 +128,10 @@ const Menu: React.FC = () => {
           color="primary"><IonTitle>EEG <span style={{color: "#79DFB4"}}>Faktura</span></IonTitle></IonToolbar>
       </IonHeader>
       <IonContent>
+        <IonItem button lines="full" routerLink={"/page/notifications"} routerDirection="none">
+          <IonIcon aria-hidden="true" slot="start" ios={eegChartBubble} md={eegChartBubble}/>
+          <IonLabel>Messages</IonLabel>
+        </IonItem>
         <IonList id="inbox-list">
           {appPages.map((appPage, index) => {
             return (
@@ -131,6 +143,17 @@ const Menu: React.FC = () => {
                 </IonItem>
               </IonMenuToggle>
             );
+          })}
+          {isAdmin() && adminPages.filter(p => !(p.forOnline && p.forOnline !== eeg?.online)).map((adminPage, adminIdx) => {
+            return (
+              <IonMenuToggle key={appPages.length + adminIdx} autoHide={false}>
+                <IonItem className={location.pathname === adminPage.url ? 'selected' : ''} routerLink={adminPage.url}
+                         routerDirection="none" lines="none" detail={false}>
+                  <IonIcon aria-hidden="true" slot="start" ios={adminPage.iosIcon} md={adminPage.mdIcon}/>
+                  <IonLabel>{adminPage.title}</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+            )
           })}
         </IonList>
 

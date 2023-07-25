@@ -5,6 +5,7 @@ NPMBUILD=$(NPMCMD) run build
 
 BINARY_NAME=vfeeg-web
 DOCKER=docker
+VERSION=v0.2.0
 
 all: test build
 build:
@@ -14,10 +15,10 @@ run:
 	$(NPMCMD) run build
 
 docker-clean:
-	$(DOCKER) rmi ghcr.io/vfeeg-development/$(BINARY_NAME):latest
+	$(DOCKER) rmi ghcr.io/vfeeg-development/$(BINARY_NAME):$(VERSION)
 
 docker:
-	$(DOCKER) build -t ghcr.io/vfeeg-development/$(BINARY_NAME):latest .
+	$(DOCKER) build -t ghcr.io/vfeeg-development/$(BINARY_NAME):$(VERSION) .
 
 push: docker
-	$(DOCKER) push ghcr.io/vfeeg-development/$(BINARY_NAME):latest
+	$(DOCKER) push ghcr.io/vfeeg-development/$(BINARY_NAME):$(VERSION)

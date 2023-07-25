@@ -5,7 +5,7 @@ import {SelectedPeriod} from "../../../models/energy.model";
 
 const reportIdToPeriod = (id: string):SelectedPeriod => {
   const [type, year, month] = id.split('/')
-  return {type: type, year: Number(year), segment: Number(month)}
+  return {type: type as 'YH' | "YQ" | 'YM' | 'Y', year: Number(year), segment: Number(month)}
 }
 
 export const reducer = createReducer(initialState, builder =>

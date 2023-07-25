@@ -27,17 +27,33 @@ export interface EegEnergyReport {
   eeg: EnergyReportModel
 }
 
-export interface ProducerReport {
+export interface BaseReport {
   allocated: number
   total_production: number
 }
 
-export interface ConsumerReport extends ProducerReport{
+export interface ConsumerReport extends BaseReport {
   consumed: number
 }
 
+export interface ProducerReport extends BaseReport {
+  produced: number
+}
+
+export type ReportType = 'YH' | "YQ" | 'YM' | 'Y'
 export interface SelectedPeriod {
-  type: string
+  type: ReportType
   year: number
   segment: number
+}
+
+export interface EnergySeries {
+  segmentIdx: number,
+  allocated: number,
+  consumed: number,
+}
+
+export interface MeterEnergySeries {
+  period: SelectedPeriod,
+  series: EnergySeries[],
 }

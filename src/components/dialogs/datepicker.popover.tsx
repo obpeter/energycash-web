@@ -1,8 +1,8 @@
-import React, {FC, useState} from "react";
+import React, {FC, forwardRef, useState} from "react";
 import {
   IonButton, IonCol,
   IonContent,
-  IonGrid, IonItem,
+  IonGrid, IonInput, IonItem,
   IonLabel,
   IonRow,
 } from "@ionic/react";
@@ -20,6 +20,20 @@ const DatepickerPopover: FC<{tenant: string, onDismiss: (startDate: Date, endDat
       onDismiss(startDate, endDate)
     }
   }
+
+  const DateInputComponent = forwardRef<HTMLIonInputElement, {}>(function CustomInput(p, ref) {
+    return (
+      <IonInput style={{"--padding-start": "16px"}}
+        {...p}
+        label={"Zeitraum"}
+        placeholder="Enter text"
+        fill="outline"
+        labelPlacement={"floating"}
+        ref={ref}
+      >
+      </IonInput>
+    );
+  });
 
   return (
     <IonContent className="ion-padding" color="eeglight">
@@ -41,6 +55,7 @@ const DatepickerPopover: FC<{tenant: string, onDismiss: (startDate: Date, endDat
           </IonRow>
           <IonRow>
             <IonCol>
+
               <DatePicker
                 selectsRange={true}
                 startDate={startDate}
@@ -48,7 +63,9 @@ const DatepickerPopover: FC<{tenant: string, onDismiss: (startDate: Date, endDat
                 onChange={(update) => {
                   setDateRange(update);
                 }}
-                isClearable={true}
+                // isClearable={true}
+                customInput={<DateInputComponent/>}
+                dateFormat="dd.MMM yyyy"
                 portalId="root-portal"
               />
             </IonCol>

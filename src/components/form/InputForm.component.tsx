@@ -1,6 +1,6 @@
 import React from "react";
 import {IonInput, IonItem, IonLabel} from "@ionic/react";
-import {Control, Controller, FieldError, FieldErrors} from "react-hook-form";
+import {Control, Controller, FieldError, FieldErrors, UseFormClearErrors} from "react-hook-form";
 import "./form-element.css";
 import {TextFieldTypes} from "@ionic/core";
 
@@ -12,8 +12,10 @@ import {TextFieldTypes} from "@ionic/core";
 
 interface InputFormProps {
   control: Control<any, any>,
+  clear?: UseFormClearErrors<any>
   name: string,
   label: string,
+  placeholder?: string,
   rules?: object,
   error?:  FieldError,
   type?: TextFieldTypes,
@@ -25,7 +27,7 @@ interface InputFormProps {
 }
 
 const InputForm: (React.FC<InputFormProps>) =
-  ({ control, name,rules, error,...rest}) => {
+  ({ control, clear, name,rules, error, placeholder,...rest}) => {
   return (
     <div className={"form-element"}>
       {/*<IonItem disabled={disabled} style={{"--min-height": "12px"}}>*/}
@@ -36,12 +38,20 @@ const InputForm: (React.FC<InputFormProps>) =
           name={name}
           control={control}
           rules={rules}
-          render={({field, fieldState}) => {
+          render={({field, fieldState, formState}) => {
             const { onChange, value, name,ref } = field;
             return (<IonInput
-                              onIonChange={(e) => onChange((rest.type === 'number' ? Number(e.detail.value!) : e.detail.value!))}
-                              onIonBlur={(e) => onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))}
-                              placeholder="Enter text"
+                              onIonChange={(e) => {
+                                if (fieldState.invalid) {
+                                  if (clear) clear(name)
+                                }
+                                onChange((rest.type === 'number' ? Number(e.detail.value!) : e.detail.value!))
+                              }}
+                              // onIonBlur={(e) => {
+                              //   console.log("Input OnBlure");
+                              //   onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))
+                              // }}
+                              placeholder={placeholder ? placeholder : "Enter Text"}
                               fill="outline"
                               labelPlacement={"floating"}
                               value={value}

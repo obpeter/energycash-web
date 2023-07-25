@@ -1,10 +1,11 @@
-import React, {FC} from "react";
+import React, {FC, useEffect, useState} from "react";
 import {IonChip, IonCol, IonGrid, IonIcon, IonLabel, IonList, IonListHeader, IonRow} from "@ionic/react";
 import {people} from "ionicons/icons";
 import InputForm from "./form/InputForm.component";
 import {useForm} from "react-hook-form";
 import {EegParticipant} from "../models/members.model";
 import {eegBusiness} from "../eegIcons";
+import ToggleButtonComponent from "./ToggleButton.component";
 
 interface MemberFormComponentProps {
   participant: EegParticipant
@@ -14,32 +15,55 @@ interface MemberFormComponentProps {
 
 const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId, onSubmit}) => {
 
-  const { handleSubmit, control, formState: {errors} } = useForm({
-    defaultValues: participant, values: participant, mode: "all"});
+  const [selectedBusinessType, setSelectedBusinessType] = useState(0)
+
+  const { handleSubmit, control, reset, formState: {errors} } = useForm({
+    defaultValues: participant, mode: "all"});
+
+  const onChangeBusinessType = (s: number) => {}
+
+  useEffect(() => {
+    if (participant) {
+      participant.businessRole === 'EEG_PRIVATE' ? setSelectedBusinessType(0) : setSelectedBusinessType(1)
+      reset(participant)
+    }
+  }, [participant])
 
   return (
     <>
       <IonGrid>
         <IonRow>
           <IonCol size="auto">
-            <IonChip>
-              <IonIcon icon={people}></IonIcon>
-              <IonLabel>Privat</IonLabel>
-            </IonChip>
-          </IonCol>
-          <IonCol size="auto">
-            <IonChip color="secondary">
-              <IonIcon icon={eegBusiness}></IonIcon>
-              <IonLabel>Firma</IonLabel>
-            </IonChip>
+            <ToggleButtonComponent
+              buttons={[{label: 'Privat', icon: people}, {label: 'Firma', icon: eegBusiness}]}
+              onChange={onChangeBusinessType}
+              value={selectedBusinessType}
+              changeable={false}
+            />
           </IonCol>
         </IonRow>
       </IonGrid>
       <form onBlur={handleSubmit(onSubmit)}>
         <IonList>
           <IonListHeader>Kontakt</IonListHeader>
-          <InputForm name={"firstname"} label="Vorname" control={control} type="text"/>
-          <InputForm name={"lastname"} label="Nachname" control={control} type="text"/>
+          <InputForm name={"participantNumber"} label="Mitglieds-Nr" control={control} type="text"/>
+          {selectedBusinessType === 0 ? (
+              <>
+                <div style={{display: "grid", gridTemplateColumns: "50% 50%"}}>
+                  <InputForm name={"titleBefore"} label="Titel (Vor)" control={control} type="text"/>
+                  <InputForm name={"titleAfter"} label="Titel (Nach)" control={control} type="text"/>
+                </div>
+                <InputForm name={"firstname"} label="Vorname" control={control}
+                           rules={{required: "Vorname fehlt"}} type="text" error={errors.firstname}/>
+                <InputForm name={"lastname"} label="Nachname" control={control} rules={{required: "Vorname fehlt"}}
+                           type="text" error={errors.lastname}/>
+              </>
+            ) :
+            (
+              <InputForm name={"firstname"} label="Firmenname" control={control}
+                         rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
+            )
+          }
           <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street}/>
           <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
           <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} type="text"/>

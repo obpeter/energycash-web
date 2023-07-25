@@ -11,6 +11,7 @@ import {selectedMeterSelector, selectedParticipantSelector, updateMeteringPoint}
 import {Metering} from "../models/meteringpoint.model";
 import MeterFormElement from "./core/MeterForm.element";
 import EegPaneTemplate from "./core/EegPane.template";
+import MeterAddressFormElement from "./core/MeterAddressForm.element";
 
 interface MeterFromComponentProps {
   meteringPoint: Metering
@@ -27,7 +28,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
 
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
-  const {handleSubmit, control, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
+  const {handleSubmit, control, watch, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
 
   // useEffect(() => {
   //   watch((data) => console.log(data));
@@ -50,7 +51,8 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   return (
     <form onBlur={handleSubmit((data) => onSubmit(data))}>
       <EegPaneTemplate>
-        <MeterFormElement control={control} rates={rates} errors={errors}/>
+        <MeterFormElement control={control} rates={rates} errors={errors} meterReadOnly={true} watch={watch}/>
+        <MeterAddressFormElement control={control} errors={errors} />
       </EegPaneTemplate>
     </form>
   )

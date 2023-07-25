@@ -1,4 +1,4 @@
-import {Eeg, EegTariff} from "../models/eeg.model";
+import {Eeg, EegNotification, EegTariff} from "../models/eeg.model";
 import {EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
@@ -33,6 +33,13 @@ class EegService {
     return {'Authorization': `Bearer ${token}`, "tenant": tenant}
   }
 
+  private handleErrors(response: Response) {
+    if (!response.ok) {
+      throw Error(response.statusText);
+    }
+    return response;
+  }
+
   async fetchEeg(token: string, tenant: string): Promise<Eeg> {
     return await fetch(`${API_API_SERVER}/query`, {
       method: 'POST',
@@ -41,7 +48,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(eegGraphqlQuery)
-    }).then(async res => {
+    }).then(this.handleErrors).then(async res => {
       if (res.status === 200) {
         const data = await res.json();
         return data.data.eeg;
@@ -49,7 +56,7 @@ class EegService {
     });
   }
 
-  async updateEeg(tenant: string, eeg: Record<string, any>): Promise<Record<string, any>> {
+  async updateEeg(tenant: string, eeg: Record<string, any>): Promise<Eeg> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg`, {
       method: 'POST',
@@ -58,22 +65,8 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(eeg)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
-
-  // async fetchEeg(token: string, tenant: string): Promise<Eeg> {
-  //   return await fetch('./api/eeg',{
-  //     method: 'GET',
-  //     headers: { ...this.getSecureHeaders(token, tenant),
-  //       'Content-Type': 'application/json'
-  //     }
-  //   }).then(res => res.json());
-  // }
-
-
-  // async fetchParicipants(tenant: string): Promise<EegParticipant[]> {
-  //   return await fetch('/assets/data/data.json').then(res => res.json());
-  // }
 
   async fetchParicipants(tenant: string, token?: string): Promise<EegParticipant[]> {
     if (!token) {
@@ -85,7 +78,7 @@ class EegService {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       }
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async createParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
@@ -97,7 +90,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(participant)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async updateParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
@@ -109,7 +102,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(participant)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async confirmParticipant(tenant: string, pid: string, data: FormData): Promise<EegParticipant> {
@@ -121,7 +114,7 @@ class EegService {
         'Accept': 'application/json'
       },
       body: data
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
 
   }
 
@@ -132,7 +125,7 @@ class EegService {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       }
-    }).then(async res => res.json());
+    }).then(this.handleErrors).then(async res => res.json());
   }
 
   async addRate(tenant: string, rate: EegTariff): Promise<EegTariff> {
@@ -144,10 +137,13 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(rate)
-    }).then(async res => res.json());
+    }).then(this.handleErrors).then(async res => res.json());
   }
 
-  async createMeteringPoint(tenant: string, participantId: string, meter: Metering): Promise<Metering> {
+  async createMeteringPoint(tenant: string, participantId: string, meter: Metering): Promise<{
+    participantId: string,
+    meter: Metering
+  }> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/create`, {
       method: 'PUT',
@@ -156,7 +152,9 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(meter)
-    }).then(res => res.json());
+    }).then(this.handleErrors)
+      .then((res) => res.json())
+      .then(m => {return {participantId: participantId, meter: m}});
   }
 
   async updateMeteringPoint(tenant: string, participantId: string, meter: Metering): Promise<Metering> {
@@ -169,7 +167,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(meter)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async fetchReport(tenant: string, year: number, segment: number, type: string, token?: string): Promise<EegEnergyReport> {
@@ -184,7 +182,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({type: type, year: year, segment: segment})
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
 
     //   return await Http.post({
     //       url: `${ENERGY_API_SERVER}/query`,
@@ -216,7 +214,7 @@ class EegService {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(reportDateGraphqlQuery(tenant))
-    }).then(res => res.json().then(data => data.data ? data.data.lastEnergyDate : ""));
+    }).then(this.handleErrors).then(res => res.json().then(data => data.data ? data.data.lastEnergyDate : ""));
     //   return await Http.post({
     //     url: `${ENERGY_API_SERVER}/query`,
     //     method: 'POST',
@@ -237,7 +235,7 @@ class EegService {
 
   async startEnergyBill(tenant: string, invoiceRequest: ClearingPreviewRequest): Promise<ClearingPreviewResponse> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/billing`, {
+    return await fetch(`${BILLING_API_SERVER}/cash/api/billing`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
@@ -245,28 +243,28 @@ class EegService {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(invoiceRequest)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async fetchInvoiceDocuments(tenant: string): Promise<InvoiceDocumentResponse[]> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/files/tenant/${tenant.toUpperCase()}`, {
+    return await fetch(`${BILLING_API_SERVER}/cash/api/billingDocumentFiles/tenant/${tenant.toUpperCase()}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json',
       },
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async downloadInvoiceDocument(tenant: string, filedataId: string): Promise<Blob> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/fileData/${filedataId}`, {
+    return await fetch(`${BILLING_API_SERVER}/cash/api/fileData/${filedataId}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
       },
-    }).then(res => res.blob());
+    }).then(this.handleErrors).then(res => res.blob());
   }
 
   async syncMeteringPointList(tenant: string): Promise<EegEnergyReport> {
@@ -277,7 +275,7 @@ class EegService {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       }
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async syncMeteringPoint(tenant: string, participantId: string, meter: string, direction: string, from: number, to: number): Promise<EegEnergyReport> {
@@ -291,7 +289,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async registerMeteringPoint(tenant: string, participantId: string, meter: string, direction: string): Promise<EegEnergyReport> {
@@ -304,7 +302,7 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
-    }).then(res => res.json());
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async startExcelExport(tenant: string, year: number, month: number): Promise<boolean> {
@@ -315,8 +313,9 @@ class EegService {
         ...this.getSecureHeaders(token, tenant),
         'Accept': 'application/json'
       },
-    }).then(res => true);
-
+    })
+      .then(this.handleErrors)
+      .then(res => true);
   }
 
   async createReport(tenant: string, payload: ExcelReportRequest) {
@@ -329,7 +328,9 @@ class EegService {
         },
         body: JSON.stringify(payload)
       }
-    ).then((response) => {
+    )
+      .then(this.handleErrors)
+      .then((response) => {
       //Create a Blob from the PDF Stream
       response.blob().then(file => {
         //Build a URL from the file
@@ -367,7 +368,7 @@ class EegService {
         // 'Content-Type': 'multipart/form-data'
       },
       body: await uploadEnergyGraphqlMutation(tenant, sheet, data)
-    }).then(res => true);
+    }).then(this.handleErrors).then(res => true);
   }
 
   async uploadMasterDataFile(tenant: string, sheet: string, data: File): Promise<boolean> {
@@ -383,7 +384,17 @@ class EegService {
         ...this.getSecureHeaders(token, tenant),
       },
       body: formData
-    }).then(res => true);
+    }).then(this.handleErrors).then(res => true);
+  }
+
+  async getNotifications(tenant: string, start: number): Promise<EegNotification[]> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/eeg/notifications/${start}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => res.json());
   }
 }
 

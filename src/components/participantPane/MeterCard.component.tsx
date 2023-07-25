@@ -58,7 +58,13 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
         return (<><span>{bill.toFixed(2)}</span><span style={{fontSize:"12px"}}> €</span></>);
       }
       // return (<><span>{(Math.round(report?.allocated! * 10) / 10)}</span><span style={{fontSize:"10px"}}> kWh</span></>);
-      return (<><span>{report ? report?.allocated!.toFixed(2) : 0}</span><span style={{fontSize:"10px"}}> kWh</span></>);
+
+      let value = report.allocated.toFixed(2);
+      if ('produced' in report) {
+        value = (report.produced - report.allocated).toFixed(2)
+      }
+      // return (<><span>{report ? report?.allocated!.toFixed(2) : 0}</span><span style={{fontSize:"10px"}}> kWh</span></>);
+      return (<><span>{value}</span><span style={{fontSize:"10px"}}> kWh</span></>);
     }
     return (<></>);
   }

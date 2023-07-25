@@ -31,9 +31,11 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
 
       const meterBillGroup = toRecord(memberBill.meteringPoints, "id")
 
-      const m = selectedParticipant.meters.filter(m=>meterBillGroup[m.meteringPoint]).reduce((group, meter) =>
-        ({...group, [meter.tariffId]:
-            {...group[meter.tariffId], [meter.meteringPoint]: meterBillGroup[meter.meteringPoint].amount}}), {} as RateModelGroup)
+      const m = selectedParticipant.meters.filter(m => meterBillGroup[m.meteringPoint]).reduce((group, meter) =>
+        ({
+          ...group, [meter.tariffId]:
+            {...group[meter.tariffId], [meter.meteringPoint]: meterBillGroup[meter.meteringPoint].amount}
+        }), {} as RateModelGroup)
 
       setRateGroups(m);
     }
@@ -68,7 +70,8 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
           console.log("Meter Group: ", meterGroup)
           if (meterGroup[m]) {
             return (
-              <MeterCardComponent key={i} participant={selectedParticipant} meter={meterGroup[m]} hideMeter={true} showCash={false}/>)
+              <MeterCardComponent key={i} participant={selectedParticipant} meter={meterGroup[m]} hideMeter={true}
+                                  showCash={false}/>)
           }
         })}
         <IonItem lines="none" fill={undefined} style={{"--background": "transparent"}}>
@@ -103,7 +106,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
 
   const createFooterSummary = () => {
     if (memberBill) {
-      const [credit, debit] = memberBill.meteringPoints.reduce(([c,d], m) =>
+      const [credit, debit] = memberBill.meteringPoints.reduce(([c, d], m) =>
           m.amount > 0 ? [c + m.amount, d] : [c, d + m.amount],
         [0, 0] as [credit: number, debit: number])
       return (
@@ -122,44 +125,47 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     )
   } else {
     return (
-      <div style={{
-        width: "50%",
-        margin: "16px",
-        padding: "16px",
-        boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2)"
-      }}>
-        <div>
-          {/*<IonToolbar>*/}
-          {/*  <IonItem lines="none">*/}
-          {/*    <IonLabel><strong>{selectedParticipant?.firstname} {selectedParticipant?.lastname}</strong></IonLabel>*/}
-          {/*    <IonButton slot="end" fill="clear" onClick={() => closeDetailPage(false)}>*/}
-          {/*      <IonIcon slot="icon-only" icon={closeOutline}/>*/}
-          {/*    </IonButton>*/}
-          {/*  </IonItem>*/}
-          {/*</IonToolbar>*/}
+      <div style={{position: "absolute", paddingTop: "16px", paddingLeft: "16px"}}>
+        <div style={{
+          width: "50%",
+          margin: "16px",
+          padding: "16px",
+          boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2)",
+          background: "var(--ion-color-eeglight-tint)"
+        }}>
+          <div>
+            {/*<IonToolbar>*/}
+            {/*  <IonItem lines="none">*/}
+            {/*    <IonLabel><strong>{selectedParticipant?.firstname} {selectedParticipant?.lastname}</strong></IonLabel>*/}
+            {/*    <IonButton slot="end" fill="clear" onClick={() => closeDetailPage(false)}>*/}
+            {/*      <IonIcon slot="icon-only" icon={closeOutline}/>*/}
+            {/*    </IonButton>*/}
+            {/*  </IonItem>*/}
+            {/*</IonToolbar>*/}
 
-          {rateGroups ? Object.entries(rateGroups).map((tariffId) => (createRateCard(tariffId))) : <></>}
+            {rateGroups ? Object.entries(rateGroups).map((tariffId) => (createRateCard(tariffId))) : <></>}
 
-        </div>
-        <div>
-          <IonGrid className={"rate-modal-footer"}>
-            <IonRow>
-              {createFooterSummary()}
-            </IonRow>
-            <IonRow style={{
-              flexDirection: "row-reverse",
-              borderTop: "1px solid var(--ion-border-color, #dcdcdc)",
-              marginTop: "10px"
-            }}>
-              <div style={{paddingRight: "10px", marginBottom: "10px", marginTop: "10px"}}>
-                {memberBill ? <>
-                  <IonItem lines="none" fill={"outline"} style={{"--min-height": "32px", fontSize: "14px"}}>
-                    <IonIcon style={{marginTop: "5px", marginBottom: "5px"}} icon={eegSumSign} slot="start"></IonIcon>
-                    <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, 0).toFixed(2)}</span> €
-                  </IonItem></> : <></>}
-              </div>
-            </IonRow>
-          </IonGrid>
+          </div>
+          <div>
+            <IonGrid className={"rate-modal-footer"}>
+              <IonRow>
+                {createFooterSummary()}
+              </IonRow>
+              <IonRow style={{
+                flexDirection: "row-reverse",
+                borderTop: "1px solid var(--ion-border-color, #dcdcdc)",
+                marginTop: "10px"
+              }}>
+                <div style={{paddingRight: "10px", marginBottom: "10px", marginTop: "10px"}}>
+                  {memberBill ? <>
+                    <IonItem lines="none" fill={"outline"} style={{"--min-height": "32px", fontSize: "14px"}}>
+                      <IonIcon style={{marginTop: "5px", marginBottom: "5px"}} icon={eegSumSign} slot="start"></IonIcon>
+                      <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, 0).toFixed(2)}</span> €
+                    </IonItem></> : <></>}
+                </div>
+              </IonRow>
+            </IonGrid>
+          </div>
         </div>
       </div>
     )

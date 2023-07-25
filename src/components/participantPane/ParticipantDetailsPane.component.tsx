@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useRef, useState} from "react";
+import React, {FC, MouseEventHandler, useEffect, useRef, useState} from "react";
 import {EegParticipant} from "../../models/members.model";
 import cn from "classnames";
 
@@ -7,7 +7,7 @@ import {
   AccordionGroupCustomEvent,
   IonAccordion,
   IonAccordionGroup,
-  IonBadge, IonButton, IonCard,
+  IonBadge, IonButton, IonButtons, IonCard,
   IonFab,
   IonFabButton,
   IonIcon,
@@ -23,7 +23,7 @@ import {
   documentTextOutline,
   logoEuro,
   person,
-  star,
+  star, starHalf,
   syncOutline,
   trashBin
 } from "ionicons/icons";
@@ -52,12 +52,17 @@ import {
   selectMetering,
   selectParticipant, updateParticipant
 } from "../../store/participant";
-import {formatMeteringPointString} from "../../util/Helper.util";
+import {createNewPeriod, formatMeteringPointString} from "../../util/Helper.util";
 import participants from "../../pages/Participants";
 import {selectedTenant} from "../../store/eeg";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import InvoiceDocumentComponent from "../InvoiceDocument.component";
+import PeriodSelectorElement from "../core/PeriodSelector.element";
+import {EegEnergyReport, MeterEnergySeries, SelectedPeriod} from "../../models/energy.model";
+import {eegService} from "../../service/eeg.service";
+import {MONTHNAME} from "../../models/eeg.model";
+import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm"
 // interface DynamicComponentProps {
@@ -87,10 +92,11 @@ interface DynamicComponentProps {
 }
 
 interface ParticipantDetailsPaneProps {
-  selectedParticipant: EegParticipant
+  periods: { begin: string, end: string };
+  activePeriod: SelectedPeriod | undefined;
 }
 
-const ParticipantDetailsPaneComponent: FC = () => {
+const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({periods, activePeriod}) => {
 
   // const {selectedParticipant} = props;
   const dispatcher = useAppDispatch();
@@ -101,12 +107,14 @@ const ParticipantDetailsPaneComponent: FC = () => {
   // const selectedMeter: Metering | undefined = {} as Metering
   const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
 
-  const energySeries = useAppSelector(energySeriesByMeter(selectedMeter?.meteringPoint!))
+  // const energySeries = useAppSelector(energySeriesByMeter(selectedMeter?.meteringPoint!))
 
   const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
+  const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod|undefined>(activePeriod)
+  const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries>({} as MeterEnergySeries)
+
   const [toaster] = useIonToast();
 
-  const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
 
   // const [dynamicComponent, setDynamicComponent] =
   //   useState<DynamicComponentProps>({componentKey: "memberForm", args: {participant: selectedParticipant, formId:"", onSubmit: (e:any) => console.log("update", e)}})
@@ -163,6 +171,11 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   }, [selectedMeterId])
 
+  useEffect(() => {
+    // setActiveEnergySeries(energySeries)
+    setSelectedPeriod(activePeriod)
+  }, [activePeriod])
+
   type detailsComponentKey = "COMPONENT_A" | "COMPONENT_B"
   const COMPONENTS: { [key: string]: React.FC<any> } = {
     COMPONENT_A: MemberFormComponent,
@@ -191,6 +204,15 @@ const ParticipantDetailsPaneComponent: FC = () => {
       setSelectedMeter(undefined)
     }
   }
+
+  // const calcSelectedEnergySeries = (report: EegEnergyReport) => {
+  //   const meta = selectedMeterId ? report.eeg.meta.find(m => m.name === selectedMeterId) : undefined
+  //   return report.eeg.intermediateReportResults.map(r =>
+  //     (meta && r.allocated.length > meta.sourceIdx) ?
+  //       { allocated: meta.dir === "CONSUMPTION" ? r.allocated[meta.sourceIdx] : r.distributed[meta.sourceIdx],
+  //         consumed: meta.dir === "CONSUMPTION" ? r.consumed[meta.sourceIdx] : r.produced[meta.sourceIdx] } as {allocated: number, consumed: number} :
+  //       { allocated: 0, consumed: 0 } as {allocated: number, consumed: number})
+  // }
 
   const onUpdateParticipant = (participant: EegParticipant) => {
     dispatcher(updateParticipant({tenant, participant}))
@@ -243,10 +265,38 @@ const ParticipantDetailsPaneComponent: FC = () => {
         return "Zustimmung des Mitglieds noch ausstehend"
       case 'APPROVED':
         return "Abschluss Meldung von Netzbetreiber noch ausstehend"
+      case 'REJECTED':
+        return "Zählpunkt wurde vom Netzbetreiber abgewiesen"
       default:
         return ""
     }
   }
+
+  // const onChangePeriod = (selectedPeriod: SelectedPeriod | undefined)  =>{
+  //   if (selectedPeriod) {
+  //     eegService.fetchReport(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type)
+  //       .then((r) => calcSelectedEnergySeries(r))
+  //       .then((r) => setActiveEnergySeries(r))
+  //       .then(() => setSelectedPeriod(selectedPeriod))
+  //   }
+  // }
+
+  // const changePeriod = (selectedPeriod: SelectedPeriod | undefined) => (event: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
+  //   setSelectedPeriod(selectedPeriod)
+  // }
+
+  const calcXAxisName = (i: number, period: SelectedPeriod) => {
+      switch (period && period.type) {
+        // case 'YH': return i > 0 && i<=6 ? `${MONTHNAME[(period.segment*6)-(6-i)].substring(0, 3)}` : `${i}`
+        // case 'YQ': return i > 0 && i<=3 ? `${MONTHNAME[(period.segment*3)-(3-i)].substring(0, 3)}` : `${i}`
+        case 'YH': return i > 0 && i<=12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
+        case 'YQ': return i > 0 && i<=12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
+        case 'YM': return `${i}`
+        case 'Y' : return i > 0 && i<=12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
+      }
+  }
+  // const isPeriodSelected = (periodType: string) => selectedPeriod?.type === periodType
+
   return (
     <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
       <div className={"details-header"}>
@@ -260,7 +310,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
         <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
           <div className={"details-box"}>
             {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (
-            <div>
+            <div style={{color: "black"}}>
               <AllowParticipantDialog trigger="open-participant-allow-dialog" participant={selectedParticipant} onDismiss={onWillDismiss}/>
               <IonCard color="warning-light">
                 <IonItem lines="none" color="warning-light">
@@ -349,17 +399,39 @@ const ParticipantDetailsPaneComponent: FC = () => {
                   <div className={"detail-subheader"}>z.B. Verträge</div>
                 </div>
               </IonItem>
-              {/*<IonItem lines="full" className={"eeg-item-box"} onClick={() => console.log("onSyncMeterpoint")}>*/}
-              {/*  <IonIcon icon={syncOutline} slot="start"></IonIcon>*/}
-              {/*  <div>*/}
-              {/*    <div className={"detail-header"}>Synchronisieren</div>*/}
-              {/*    <div className={"detail-subheader"}>mit Energieprovider</div>*/}
-              {/*  </div>*/}
-              {/*</IonItem>*/}
-              <div style={{marginLeft: "20px"}}><h4>Energiedaten</h4></div>
+              {isMeterActive() && activePeriod && selectedMeterId && <div style={{marginLeft: "20px"}}>
+                <h4>Energiedaten</h4>
+                <MeterChartNavbarComponent
+                  periods={periods}
+                  activePeriod={activePeriod}
+                  tenant={tenant}
+                  selectedMeterId={selectedMeterId}
+                  setEnergySeries={setActiveEnergySeries} />
+                {/*<div style={{display: "flex", alignItems: "center", justifyContent: "space-around"}}>*/}
+                {/*  <div>*/}
+                {/*    <IonButtons>*/}
+                {/*      {(["Y", "YH", "YQ", "YM"] as ('YH' | "YQ" | 'YM' | 'Y')[]).map((p, i) => (*/}
+                {/*        <IonButton*/}
+                {/*          key={i}*/}
+                {/*          onClick={() => onChangePeriod(createNewPeriod(selectedPeriod, p))}*/}
+                {/*          shape="round"*/}
+                {/*          size="small"*/}
+                {/*          className="stateButton"*/}
+                {/*          fill={isPeriodSelected(p) ? "solid" : undefined}*/}
+                {/*          color={isPeriodSelected(p) ? 'success' : undefined}>*/}
+                {/*          {p}*/}
+                {/*        </IonButton>*/}
+                {/*      ))}*/}
+                {/*    </IonButtons>*/}
+                {/*  </div>*/}
+                {/*  <div>*/}
+                {/*    <PeriodSelectorElement periods={periods} activePeriod={selectedPeriod} onUpdatePeriod={onChangePeriod} />*/}
+                {/*  </div>*/}
+                {/*</div>*/}
+              </div> }
               {/*<div style={{display: "flex", height: "300px", width: "100%"}}>*/}
-              {isMeterActive() && <div style={{height: "300px", width: "100%"}}>
-                <ResponsiveContainer width="90%" height={300}>
+              {isMeterActive() && activeEnergySeries && activeEnergySeries.series && activeEnergySeries.series.length > 0 && <div style={{height: "200px", width: "100%"}}>
+                <ResponsiveContainer width="90%" height={200}>
                   {/*<LineChart width={600} height={300} data={energySeries.map((e, i) => {*/}
                   {/*  return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}*/}
                   {/*})} margin={{top: 15, right: 15, bottom: 35, left: 0}}>*/}
@@ -374,8 +446,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
                   <BarChart
                     width={500}
                     height={300}
-                    data={energySeries.map((e, i) => {
-                      return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}
+                    data={activeEnergySeries.series.map((e, i) => {
+                      return {name: calcXAxisName(e.segmentIdx, activeEnergySeries.period), distributed: e.allocated, consumed: e.consumed}
                     })}
                     margin={{
                       top: 5,

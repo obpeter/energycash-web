@@ -42,7 +42,7 @@ const AllowParticipantDialog: FC<AllowParticipantDialogProps> = ({trigger, parti
   }
 
   return (
-    <IonModal id="doc-upload-modal" ref={modal} trigger={trigger} onWillDismiss={(ev) => onDismiss(participant, ev)}>
+    <IonModal id="doc-upload-modal" className="ion-padding" ref={modal} trigger={trigger} onWillDismiss={(ev) => onDismiss(participant, ev)}>
       <div className="wrapper">
         <h6>{participant.firstname} {participant.lastname} zulassen</h6>
         <p>Bitte lade die Anmeldedokumente von {participant.firstname} {participant.lastname} hoch</p>
@@ -55,15 +55,19 @@ const AllowParticipantDialog: FC<AllowParticipantDialogProps> = ({trigger, parti
           {files.map((v, i) => (
             <div className={"entry"} key={i}>
               <div>{v.name}</div>
-              <IonIcon icon={trash} />
+              <IonButton size={"small"} fill={"clear"} onClick={() => setFiles((prevState) => prevState.filter((f, ii) => i !== ii))}>
+                <IonIcon slot="icon-only" icon={trash} />
+              </IonButton>
             </div>
           ))}
         </div>
       </div>
-      <IonButtons slot={"end"}>
-        <IonButton onClick={() => modal.current?.dismiss()}>Abbrechen</IonButton>
-        <IonButton slot={"end"} onClick={() => confirm()}>Zulassen</IonButton>
+      <div style={{display: "flex", flexDirection:"row-reverse"}}>
+      <IonButtons color="eeg" slot={"end"} style={{color: "black"}}>
+        <IonButton fill="clear" onClick={() => modal.current?.dismiss()}>Abbrechen</IonButton>
+        <IonButton fill="clear" slot={"end"} onClick={() => confirm()}>Zulassen</IonButton>
       </IonButtons>
+      </div>
     </IonModal>
   )
 }

@@ -84,7 +84,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
 
   return (
     <div style={{
-      background: "var(--ion-item-background, #fff)",
+      background: "var(--ion-color-eeglight, #fff)",
       boxShadow: "0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)",
       borderRadius: "4px"
     }}>
@@ -107,7 +107,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
           </IonGrid>
         </div>
         <div style={{flexGrow: 1}}>
-          {addMeterPaneActive && meteringPoint && <RegisterMeterPaneComponent meteringPoint={meteringPoint} onAdd={appendMeter} onChancel={removeMeter}/>}
+          {addMeterPaneActive && meteringPoint && <RegisterMeterPaneComponent meteringPoint={meteringPoint} onAdd={appendMeter} onChancel={removeMeter} />}
         </div>
       </div>
     </div>

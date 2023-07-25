@@ -11,6 +11,7 @@ import ParticipantDetailsPaneComponent from "../components/participantPane/Parti
 import ParticipantInvoiceDetailsComponent from "../components/participantPane/ParticipantInvoiceDetails.component";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
 import AddMeterPaneComponent from "../components/participantPane/AddMeterPane.component";
+import {MemberViewContext} from "../store/hook/MemberViewProvider";
 
 const Participants: FC = () => {
   const dispatcher = useAppDispatch();
@@ -26,9 +27,12 @@ const Participants: FC = () => {
     showAddMeterPane,
   } = useContext(ParticipantContext);
 
+  const {
+    showAmount
+  } = useContext(MemberViewContext)
   function showParticipantDetails() {
     if (selectedParticipant) {
-      if (billingEnabled) {
+      if (showAmount) {
         return (
           <ParticipantInvoiceDetailsComponent />
         )
@@ -36,9 +40,9 @@ const Participants: FC = () => {
         return (
           <AddMeterPaneComponent />
         )
-      }else {
+      } else {
         return (
-          <ParticipantDetailsPaneComponent />
+          <ParticipantDetailsPaneComponent periods={periods} activePeriod={activePeriod}/>
         )
       }
     } else {
@@ -52,7 +56,7 @@ const Participants: FC = () => {
     <IonPage>
       <IonContent fullscreen color="eeg">
         <div style={{display:"flex", flexDirection:"row"}}>
-          <div>
+          <div style={{height: "100%", overflow: "hidden"}}>
             <ParticipantPaneComponent
               participants={participants}
               activePeriod={activePeriod}

@@ -6,9 +6,11 @@ export interface Eeg {
   legal: string;
   salesTax: string;
   taxNumber: string;
+  vatNumber: string;
   settlement: string;
   settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
   allocationMode: "DYNAMIC" | "STATIC"
+  area: "LOCAL" | "REGIONAL"
   communityId: string;
   address: Address;
   contact: Contact;
@@ -17,9 +19,28 @@ export interface Eeg {
   online: boolean;
 }
 
+export interface EegOwner {
+  username: string
+  password: string
+  confirmPassword: string
+  firstname: string
+  lastname: string
+  email: string
+}
+
+export interface EegPonton {
+  smtpHost: string
+  smtpPort: number
+  smtpUsername: string
+  smtpPassword: string
+  smtpConfirmPassword: string
+}
+
+export type EegRegister = Eeg & EegOwner & EegPonton
+
 export interface Address {
   street: string;
-  streetNumber: number;
+  streetNumber: string;
   zip: string;
   city: string;
   type: "BILLING" | "RESIDENCE"
@@ -132,4 +153,34 @@ export interface EdaProcess {
   name: string
   description: string
   type: 'CR_REQ_PT' | 'EC_REQ_ONL'
+}
+
+
+export class Message {
+  constructor(public properties: { [key: string]: any | any[]; }) {
+  }
+
+  private getValue = (prop: string): string => this.properties ? this.properties[prop] ? this.properties[prop] : "-" : "-"
+
+  public get type() {
+    return this.getValue("type")
+  }
+  public get meteringPoint() {
+    // console.log("get MeteringPoint", this.properties["meteringPoint"])
+    // console.log("get MeteringPoints", this.properties["meteringPoints"])
+    if (this.properties) {
+      return this.properties["meteringPoint"] ? this.properties["meteringPoint"] : this.properties["meteringPoints"] ? this.properties["meteringPoints"].join() : "-"
+    }
+    return "-"
+  }
+  public get responseCode() {
+    return this.getValue("responseCode")
+  }
+}
+
+export interface EegNotification {
+  id: number;
+  date: string;
+  type: 'ERROR' | 'MESSAGE' | 'NOTIFICATION';
+  message: Message;
 }

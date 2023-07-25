@@ -17,10 +17,10 @@ const SelectFormNative: React.FC<SelectFormNativeProps> = (
   return (
     <div className="form-element">
       <IonItem fill="outline">
-        {label && (
-          <IonLabel position="floating">{label}</IonLabel>
-        )}
-        <IonSelect interface="action-sheet" placeholder={placeholder} onIonChange={onChange} {...rest}>
+        {/*{label && (*/}
+        {/*  <IonLabel position="floating">{label}</IonLabel>*/}
+        {/*)}*/}
+        <IonSelect interface="action-sheet" placeholder={placeholder} onIonChange={onChange} label={label} {...rest}>
           {options.map(({key, value}) => (<IonSelectOption key={key} value={key}>{value}</IonSelectOption>))}
         </IonSelect>
       </IonItem>

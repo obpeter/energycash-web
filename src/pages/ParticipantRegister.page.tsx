@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, useEffect, useState} from "react";
 import {
   IonButton,
   IonButtons,
@@ -14,7 +14,7 @@ import {
 
 import "./ParticipantRegister.page.scss"
 import ParticipantRegisterCommonPaneComponent from "../components/ParticipantRegisterCommonPane.component";
-import {createParticipant, selectParticipant} from "../store/participant";
+import {createParticipant, participantsSelector, selectParticipant} from "../store/participant";
 import {EegParticipant} from "../models/members.model";
 import {useAppDispatch, useAppSelector} from "../store";
 import {selectedTenant} from "../store/eeg";
@@ -22,21 +22,32 @@ import ParticipantRegisterMeterPaneComponent from "../components/ParticipantRegi
 import {FormProvider, useFieldArray, useForm} from "react-hook-form";
 import {Metering} from "../models/meteringpoint.model";
 import {RouteComponentProps} from "react-router";
+import {options} from "ionicons/icons";
 
 const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
+
 
   const dispatch = useAppDispatch();
 
   const tenant = useAppSelector(selectedTenant)
+  const participants = useAppSelector(participantsSelector)
+  const [defaultParticipantNumber, setDefaultParticipantNumber] = useState(participants.length.toString().padStart(3, '0'))
+
+  // useEffect(() => {
+  //   setDefaultParticipantNumber(participants.length.toString().padStart(3, '0'))
+  // }, [participants])
+
+
   const selectedParticipant: EegParticipant = {
     id: '',
+    participantNumber: (participants.length + 1).toString().padStart(3, '0'),
     firstname: '',
     lastname: '',
     status: 'NEW',
-    titlePrefix: '',
-    titleSufix: '',
-    residentAddress: {street: '', type: 'RESIDENCE', city: '', streetNumber: 0, zip: ''},
-    billingAddress:  {street: '', type: 'BILLING', city: '', streetNumber: 0, zip: ''},
+    titleBefore: '',
+    titleAfter: '',
+    residentAddress: {street: '', type: 'RESIDENCE', city: '', streetNumber: '', zip: ''},
+    billingAddress:  {street: '', type: 'BILLING', city: '', streetNumber: '', zip: ''},
     contact: {email: "", phone: ""},
     accountInfo: {iban: '', owner: '', sepa: false},
     businessRole: 'EEG_PRIVATE',
@@ -46,8 +57,8 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
     tariffId: '',
     meters: []} as EegParticipant
 
-  const formMethods = useForm<EegParticipant>({defaultValues: selectedParticipant})
-  const {control, handleSubmit} = formMethods
+  const formMethods = useForm<EegParticipant>({defaultValues: selectedParticipant, mode: "onBlur", reValidateMode: 'onChange'})
+  const {reset, handleSubmit} = formMethods
   // const {append} = useFieldArray<EegParticipant>({control, name: 'meters'})
 
   const onRegisterParticipant = (participant: EegParticipant) => {
@@ -61,7 +72,13 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
   }
 
   const onSubmit = (data: EegParticipant) => {
+    data.billingAddress.type = "BILLING"
+    data.billingAddress.city = data.residentAddress.city
+    data.billingAddress.zip = data.residentAddress.zip
+    data.billingAddress.street = data.residentAddress.street
+    data.billingAddress.streetNumber = data.residentAddress.streetNumber
     onRegisterParticipant(data)
+    reset()
   }
 
   return (
@@ -74,9 +91,10 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
           <IonTitle>Registrieren</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent color="eeg">
+      <IonContent fullscreen color="eeg">
         <FormProvider {...formMethods}>
-          <form id="submit-register-participant" onSubmit={handleSubmit(onSubmit)}>
+          <form id="submit-register-participant" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <div>
             <div className={"register-participant-content"}>
               <div className="register-content-pane">
                 <h4>Allgemeines</h4>
@@ -88,6 +106,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
                 <h4>Zählpunkte</h4>
                 <ParticipantRegisterMeterPaneComponent participant={selectedParticipant} onAddMeter={onAddMeter}/>
               </div>
+            </div>
             </div>
           </form>
         </FormProvider>

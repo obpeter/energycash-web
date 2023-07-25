@@ -25,7 +25,7 @@ const RatesPage: FC = () => {
   const rates = useAppSelector(ratesSelector)
   const tenant = useAppSelector(selectedTenant)
 
-  const {currentRateType, setRateType} = useRateType()
+  const {setRateType} = useRateType()
 
   const [selectedRate, setSelectedRate] = useState<EegTariff|undefined>()
 
@@ -81,7 +81,7 @@ const RatesPage: FC = () => {
             </div>
           </div>
           <div style={{flexGrow:"1", background: "#EAE7D9"}}>
-            <RateDetailPaneComponent selectedRate={selectedRate} submitId="change-rate-submit-id" onSubmit={onSubmitRateChange} />
+            {selectedRate && <RateDetailPaneComponent selectedRateId={selectedRate.id} submitId="change-rate-submit-id" onSubmit={onSubmitRateChange} />}
           </div>
         </div>
       </IonContent>

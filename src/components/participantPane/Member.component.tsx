@@ -25,6 +25,7 @@ interface MemberProps {
   showAmount: boolean;
   onCheck: (e: CheckboxCustomEvent) => void;
   showDetailsPage: (participant: EegParticipant) => void;
+  onShowAddMeterPage: (p: EegParticipant) => (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => void
 }
 
 const MemberComponent: FC<MemberProps> = ( {participant,
@@ -34,7 +35,8 @@ const MemberComponent: FC<MemberProps> = ( {participant,
                                              hideMeter,
                                              showAmount,
                                              onCheck,
-                                             showDetailsPage}) => {
+                                             showDetailsPage,
+                                             onShowAddMeterPage}) => {
 
   const memberBill = useAppSelector(selectBillById(participant.id))
 
@@ -54,10 +56,10 @@ const MemberComponent: FC<MemberProps> = ( {participant,
 
   return (
     <div>
-    <IonGrid fixed={true} style={{paddingBottom: "0px", paddingTop: "0px"}}>
+    <IonGrid fixed={true} style={{paddingBottom: "0px", paddingTop: "0px", maxWidth:"380px"}}>
       { hideMember || (
-        <IonRow class="ion-align-items-center" style={{"--ion-background-color": "transparent", "--ion-item-background": "transparent"}}>
-          <MemberNameComponent participant={participant} isChecked={isChecked} onCheck={onCheck} showAmount={showAmount}/>
+        <IonRow class="ion-align-items-center" style={{"--ion-background-color": "transparent", "--ion-item-background": "transparent", flexWrap: "nowrap"}}>
+          <MemberNameComponent participant={participant} isChecked={isChecked} onCheck={onCheck} showAmount={showAmount} onAdd={onShowAddMeterPage}/>
         </IonRow>
       )}
       <IonRow>

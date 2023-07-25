@@ -18,6 +18,7 @@ import {EegParticipant} from "../../models/members.model";
 import {useAppDispatch, useAppSelector} from "../../store";
 import {ratesSelector} from "../../store/rate";
 import {selectedTenant} from "../../store/eeg";
+import MeterAddressFormElement from "../core/MeterAddressForm.element";
 
 
 const AddMeterPaneComponent: FC = () => {
@@ -27,17 +28,18 @@ const AddMeterPaneComponent: FC = () => {
   const tenant = useAppSelector(selectedTenant);
   const participant = useAppSelector(selectedParticipantSelector);
 
-  const meter = {status: "NEW", participantId: "", meteringPoint: ""} as Metering
+  const meter = {status: "NEW", participantId: "", meteringPoint: "", direction:"CONSUMPTION"} as Metering
 
-  const {handleSubmit, control, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: meter});
-
-  useEffect(() => {
-    reset(meter)
-  }, [participant])
+  const {handleSubmit, control, watch, setValue, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: meter});
 
   const {
     setShowAddMeterPane,
   } = useContext(ParticipantContext);
+
+  useEffect(() => {
+    reset(meter)
+    // setShowAddMeterPane(false);
+  }, [participant])
 
   const onChancel = () => {
     reset(meter)
@@ -51,14 +53,16 @@ const AddMeterPaneComponent: FC = () => {
 
       dispatcher(registerMeteringpoint({tenant, participantId, meter}))
       reset(meter);
+      setShowAddMeterPane(false);
     }
   }
   return (
     <EegWebContentPaneComponent>
       <CorePageTemplate>
-        <form onSubmit={handleSubmit((data) => onSubmit(data))}>
+        <form id="submit-register-meter" onSubmit={handleSubmit((data) => onSubmit(data))}>
           <EegPaneTemplate>
-            <MeterFormElement control={control} rates={rates} errors={errors}/>
+            <MeterFormElement control={control} rates={rates} errors={errors} setValue={setValue} participant={participant} watch={watch}/>
+            <MeterAddressFormElement control={control} errors={errors} setValue={setValue} participant={participant}/>
           </EegPaneTemplate>
         </form>
       </CorePageTemplate>

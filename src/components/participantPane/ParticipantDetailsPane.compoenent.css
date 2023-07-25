@@ -27,3 +27,8 @@
 .details-box .eeg-item-box.selected::part(native) {
     background: rgba(var(--ion-color-primary-rgb), 0.14);
 }
+
+IonButton.stateButton {
+    min-width: 32px;
+    man-height: 32px;
+}

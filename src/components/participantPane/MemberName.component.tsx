@@ -25,10 +25,11 @@ interface MemberNameComponentProps {
   tariff?: EegTariff | undefined;
   onCheck: (e: CheckboxCustomEvent) => void;
   onSelect?: (e: React.MouseEvent<HTMLIonCardElement, MouseEvent>) => void
+  onAdd: (p: EegParticipant) => (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => void
 }
 
 const MemberNameComponent: FC<MemberNameComponentProps> =
-  ({participant, isChecked, showAmount, tariff, onCheck, onSelect}) => {
+  ({participant, isChecked, showAmount, tariff, onCheck, onSelect, onAdd}) => {
 
   const bill = useAppSelector(selectBillByParticipant(participant.id))
   const {
@@ -43,23 +44,43 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
     return ""
   }
 
-  const onAdd = (e?: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
-    setShowAddMeterPane(true)
+  // const onAdd = (e?: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
+  //
+  //   setShowAddMeterPane(true)
+  //   e?.preventDefault()
+  //   e?.stopPropagation()
+  // }
+
+
+  const renderMemberName = ():string => {
+    let name = ""
+    if (participant.businessRole === 'EEG_PRIVATE') {
+      if (participant.titleBefore) {
+        name = participant.titleBefore + " "
+      }
+      name += participant.firstname + " " + participant.lastname
+      if (participant.titleAfter) {
+        name += ", " + participant.titleAfter
+      }
+    } else {
+      name = participant.firstname
+    }
+    return name
   }
 
   return (
     <>
-      <IonCol size="2">
+      <IonCol size="2" style={{flexWrap: "nowrap"}}>
         <IonItem lines="none" style={{background: "transparent", "--min-height": "24px"}}>
-          <IonCheckbox style={{"--size": "16px", margin: "0px"}} onIonChange={onCheck} checked={isChecked} disabled={true}></IonCheckbox>
+          <IonCheckbox style={{"--size": "16px", margin: "0px"}} onIonChange={onCheck} checked={isChecked} disabled={true} aria-label=""></IonCheckbox>
         </IonItem>
       </IonCol>
-      <IonCol>
-        <IonItem detail={!showAmount} lines="none" onClick={onSelect} style={{"--min-height": "24px"}}>
+      <IonCol size="10">
+        <IonItem detail={!showAmount} lines="none" onClick={onSelect} style={{"--min-height": "24px", "--padding-start": "0"}}>
           {isPending() ? (
             <IonLabel style={{margin: "0px", color: "#DC631E"}}>
               <div style={{display: "flex"}}>
-                <span>{participant.firstname} {participant.lastname}</span>
+                <span style={{fontSize: "14px"}}>{renderMemberName()}</span>
                 <span style={{marginLeft: "5px"}}><IonIcon size="small" icon={eegExclamation}></IonIcon></span>
               </div>
             </IonLabel>
@@ -67,11 +88,11 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
             <>
             <IonLabel style={{margin: "0px"}}>
               <div style={{display: "flex", justifyContent: "space-between"}}>
-                <span>{participant.firstname} {participant.lastname}</span>
+                <span style={{fontSize: "16px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{renderMemberName()}</span>
                 {showAmount && <span>{euroAmount()}</span>}
               </div>
             </IonLabel>
-            <IonButton slot="end" fill="clear" onClick={onAdd}>
+            <IonButton slot="end" fill="clear" onClick={onAdd(participant)}>
               <IonIcon slot="icon-only" icon={add}/>
             </IonButton>
             </>
