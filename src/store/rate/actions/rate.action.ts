@@ -1,4 +1,4 @@
-import {createAsyncThunk} from "@reduxjs/toolkit";
+import {createAction, createAsyncThunk} from "@reduxjs/toolkit";
 import {featureKey} from "../states/rate.state";
 import {eegService} from "../../../service/eeg.service";
 import {EegRate, EegTariff} from "../../../models/eeg.model";
@@ -29,3 +29,5 @@ export const updateRate = createAsyncThunk(
       return result;
   }
 )
+
+export const selectRate = createAction<EegTariff | undefined>(`${featureKey}/select/rate`);

@@ -1,6 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../store";
-import {ratesSelector, saveNewRate, updateRate} from "../store/rate";
+import {ratesSelector, saveNewRate, selectedRateSelector, selectRate, updateRate} from "../store/rate";
 import RateCardComponent from "../components/RateCard.component";
 import {
   IonButton, IonButtons,
@@ -22,22 +22,26 @@ import {useRateType} from "../store/hook/Rate.provider";
 const RatesPage: FC = () => {
 
   const dispatcher = useAppDispatch();
+  const selectedTariff = useAppSelector(selectedRateSelector)
   const rates = useAppSelector(ratesSelector)
   const tenant = useAppSelector(selectedTenant)
 
   const {setRateType} = useRateType()
 
-  const [selectedRate, setSelectedRate] = useState<EegTariff|undefined>()
+  // const [selectedRate, setSelectedRate] = useState<EegTariff|undefined>()
 
   useEffect(() => {
-    if (rates && rates.length > 0 && (!selectedRate || selectedRate.id.length === 0)) {
-      setSelectedRate(rates[0])
+    if (rates && rates.length > 0 && (!selectedTariff || selectedTariff.id.length === 0)) {
+      dispatcher(selectRate(rates[0]))
+    }
+    return () => {
+      dispatcher(selectRate(undefined))
     }
   }, [rates])
 
   const onSelect = (rate: EegTariff) => {
     setRateType(rate.type)
-    setSelectedRate(rate)
+    dispatcher(selectRate(rate))
   }
 
   const onNew = () => {
@@ -74,14 +78,14 @@ const RatesPage: FC = () => {
             </IonToolbar>
             <div className={"content"}>
             {rates.map((r, idx) => (
-              <div key={idx} className={cn("rates", {"selected": r.id === selectedRate?.id})}>
+              <div key={idx} className={cn("rates", {"selected": r.id === selectedTariff?.id})}>
                 <RateCardComponent rate={r} editable={true} onSelect={onSelect}/>
               </div>
             ))}
             </div>
           </div>
           <div style={{flexGrow:"1", background: "#EAE7D9"}}>
-            {selectedRate && <RateDetailPaneComponent selectedRateId={selectedRate.id} submitId="change-rate-submit-id" onSubmit={onSubmitRateChange} />}
+            {selectedTariff && <RateDetailPaneComponent submitId="change-rate-submit-id" onSubmit={onSubmitRateChange} />}
           </div>
         </div>
       </IonContent>

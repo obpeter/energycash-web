@@ -5,19 +5,18 @@ import {trashBin} from "ionicons/icons";
 import RateComponent from "./Rate.component";
 import {FieldValues} from "react-hook-form";
 import {useRateType} from "../store/hook/Rate.provider";
-import {useAppSelector} from "../store";
-import {selectRateById} from "../store/rate";
+import {useAppDispatch, useAppSelector} from "../store";
+import {selectedRateSelector, selectRate, selectRateById} from "../store/rate";
 
 interface RateDetailPaneComponentProps {
-  selectedRateId: string;
   onSubmit: (data: EegTariff) => void;
   submitId: string;
   mode?: 'NEW';
 }
 
-const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({selectedRateId, onSubmit, submitId, mode}) => {
-
-  const selectedTariff = useAppSelector(selectRateById(selectedRateId))
+const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, submitId, mode}) => {
+  const dispatcher = useAppDispatch();
+  const selectedTariff = useAppSelector(selectedRateSelector)
 
   const getMode = (): (undefined | 'NEW') => {
     return (selectedTariff && selectedTariff.id.length === 0) ? 'NEW' : undefined
@@ -41,7 +40,7 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({selectedRate
           <div className={"details-footer"}>
             <IonFooter>
               <IonToolbar className={"ion-padding-horizontal"}>
-                <IonButton fill="clear" slot="start">Zurück</IonButton>
+                <IonButton fill="clear" slot="start" onClick={() => dispatcher(selectRate(undefined))}>Zurück</IonButton>
                 <IonButton form={submitId} type="submit" slot="end">Änderungen speichern</IonButton>
               </IonToolbar>
             </IonFooter>

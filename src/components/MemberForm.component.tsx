@@ -76,10 +76,10 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
           <InputForm name={"accountInfo.iban"} label="IBAN" control={control} type="text"/>
           <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} type="text"/>
         </IonList>
-        <IonList>
-          <IonListHeader>Optional</IonListHeader>
-          <InputForm name={"optionals.website"} label="Webseite" control={control} type="text"/>
-        </IonList>
+        {/*<IonList>*/}
+        {/*  <IonListHeader>Optional</IonListHeader>*/}
+        {/*  <InputForm name={"optionals.website"} label="Webseite" control={control} type="text"/>*/}
+        {/*</IonList>*/}
       </form>
     </>
   )

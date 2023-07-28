@@ -65,32 +65,6 @@ import {MONTHNAME} from "../../models/eeg.model";
 import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm"
-// interface DynamicComponentProps {
-//   componentKey: DynamicComponentKey;
-//   args: any
-// }
-// const DynamicComponent: React.FC<DynamicComponentProps> = ({componentKey, args}) => {
-//   // const [Component, setComponent] = useState<any>();
-//   const COMPONENTS: {[key: string]: React.FC<any>} = {
-//     memberForm: MemberFormComponent,
-//     meterForm: MeterFormComponent,
-//   };
-//   const Component = COMPONENTS[componentKey];
-//   // useEffect(() => {
-//   //   if (componentKey) setComponent(COMPONENTS[componentKey])
-//   // }, [componentKey]);
-//
-//   console.log("Update Details", args);
-//
-//   return Component ? React.createElement(Component, args) : null;
-// };
-
-
-interface DynamicComponentProps {
-  selectedParticipant: EegParticipant;
-  componentKey: DynamicComponentKey
-}
-
 interface ParticipantDetailsPaneProps {
   periods: { begin: string, end: string };
   activePeriod: SelectedPeriod | undefined;
@@ -125,41 +99,6 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';
 
-  // useEffect(() => {
-  //   console.log("select Details", selectedParticipant);
-  //   switch (activeMenu) {
-  //     case 1:
-  //       setDynamicComponent((oldState) => {
-  //         return {componentKey: "memberForm", args: {participant: selectedParticipant, formId:"", onSubmit: (e:any) => console.log("update", e)}}
-  //       });
-  //       break;
-  //     case 2:
-  //       setDynamicComponent({componentKey: "meterForm", args: {meteringPoint: selectedMeter}});
-  //       break;
-  //   }
-  //
-  // }, [activeMenu, selectedParticipant])
-
-  // useEffect(() => {
-  //   if (selectedParticipant && selectedParticipant.meters && selectedParticipant.meters.length > 0) {
-  //     // setSelectedMeter(selectedParticipant.meters[0])
-  //
-  //     if (selectedMeter) {
-  //       let m = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeter.meteringPoint)
-  //       if (!m) {
-  //         m = selectedParticipant.meters[0]
-  //       }
-  //       setSelectedMeter(m)
-  //
-  //       if (accordionGroup && accordionGroup.current) {
-  //         accordionGroup.current.value = selectedMeter.meteringPoint
-  //       }
-  //     } else {
-  //       setSelectedMeter(selectedParticipant.meters[0])
-  //     }
-  //   }
-  // }, [selectedParticipant])
-
   useEffect(() => {
     if (selectedMeterId) {
       const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
@@ -175,44 +114,6 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
     // setActiveEnergySeries(energySeries)
     setSelectedPeriod(activePeriod)
   }, [activePeriod])
-
-  type detailsComponentKey = "COMPONENT_A" | "COMPONENT_B"
-  const COMPONENTS: { [key: string]: React.FC<any> } = {
-    COMPONENT_A: MemberFormComponent,
-    COMPONENT_B: MeterFormComponent,
-  };
-
-  // type detailsComponentTypes = "memberForm" | "meterForm"
-  // const detailsComponents = {
-  //   memberForm: MemberFormComponent,
-  //   meterForm: MeterFormComponent
-  // };
-
-  const detailC = (name: detailsComponentKey, props: any) => {
-    if (typeof COMPONENTS[name] !== "undefined") {
-      return React.createElement(COMPONENTS[name], props)
-    }
-  }
-
-  const switchMeter = (ev: AccordionGroupCustomEvent) => {
-    // setActiveMenu("meterForm")
-
-    if (selectedParticipant && selectedParticipant.meters) {
-      const m = selectedParticipant.meters.find(m => m.meteringPoint === ev.detail.value)
-      setSelectedMeter(m)
-    } else {
-      setSelectedMeter(undefined)
-    }
-  }
-
-  // const calcSelectedEnergySeries = (report: EegEnergyReport) => {
-  //   const meta = selectedMeterId ? report.eeg.meta.find(m => m.name === selectedMeterId) : undefined
-  //   return report.eeg.intermediateReportResults.map(r =>
-  //     (meta && r.allocated.length > meta.sourceIdx) ?
-  //       { allocated: meta.dir === "CONSUMPTION" ? r.allocated[meta.sourceIdx] : r.distributed[meta.sourceIdx],
-  //         consumed: meta.dir === "CONSUMPTION" ? r.consumed[meta.sourceIdx] : r.produced[meta.sourceIdx] } as {allocated: number, consumed: number} :
-  //       { allocated: 0, consumed: 0 } as {allocated: number, consumed: number})
-  // }
 
   const onUpdateParticipant = (participant: EegParticipant) => {
     dispatcher(updateParticipant({tenant, participant}))

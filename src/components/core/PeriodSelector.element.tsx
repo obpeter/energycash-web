@@ -1,22 +1,18 @@
 import React, {FC, useEffect, useState} from "react";
-import {IonCheckbox, IonItem, IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
-import {MONTHNAME} from "../models/eeg.model";
-import {EegParticipant} from "../models/members.model";
-import {SelectedPeriod} from "../models/energy.model";
-import {getPeriodSegment, yearMonth} from "../util/Helper.util";
-import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {CheckboxChangeEventDetail} from "@ionic/core";
+import {IonItem, IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
+import {SelectedPeriod} from "../../models/energy.model";
+import {MONTHNAME} from "../../models/eeg.model";
+import {getPeriodSegment, yearMonth} from "../../util/Helper.util";
 
-import "./PeriodSelector.component.css"
+import "./PeriodSelector.element.scss"
 
-interface PeriodSelectorProps {
+interface PeriodSelectorElementProps {
   periods: {begin: string, end: string};
   activePeriod: SelectedPeriod | undefined;
-  selectAll: (event: IonCheckboxCustomEvent<CheckboxChangeEventDetail>) => void;
   onUpdatePeriod: (selectedPeriod: SelectedPeriod) => void;
 }
 
-const PeriodSelectorComponent: FC<PeriodSelectorProps> = ({periods, activePeriod, selectAll, onUpdatePeriod}) => {
+const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activePeriod, onUpdatePeriod}) => {
 
   const [periodOptions, setPeroidOptions] = useState<SelectedPeriod[]>([]);
   const [usedPeriod, setUsedPeriod] = useState(0)
@@ -30,7 +26,7 @@ const PeriodSelectorComponent: FC<PeriodSelectorProps> = ({periods, activePeriod
     }
   }
 
-  const generatePeriodOptions = (period: string, endMonth: number, endYear: number, beginMonth: number, beginYear: number) => {
+  const generatePeriodOptions = (period: 'YH' | "YQ" | 'YM' | 'Y', endMonth: number, endYear: number, beginMonth: number, beginYear: number) => {
     const options: SelectedPeriod[] = [];
     for (let y = beginYear; y <= endYear; y++) {
       const em = y === endYear ? endMonth : 12
@@ -41,7 +37,6 @@ const PeriodSelectorComponent: FC<PeriodSelectorProps> = ({periods, activePeriod
       let m = (bm - 1 + (factor - (bm-1) % factor));
       const _em = em-1+(factor - (em-1) % factor);
       while (m <= _em) {
-        console.log("m=", m, "em=", em)
         options.push({type: period, segment: getPeriodSegment(period, m), year: y})
         m = (m  + (factor - (m) % factor))
       }
@@ -68,7 +63,7 @@ const PeriodSelectorComponent: FC<PeriodSelectorProps> = ({periods, activePeriod
     }
   }, [periods, activePeriod])
 
-  const onSelect = (e: SelectCustomEvent<number>) => {
+  const onChange = (e: SelectCustomEvent<number>) => {
     const idx = e.detail.value;
     if (idx && idx > 0) {
       onUpdatePeriod(periodOptions[idx - 1]);
@@ -77,21 +72,15 @@ const PeriodSelectorComponent: FC<PeriodSelectorProps> = ({periods, activePeriod
   }
 
   return (
-    <div className={"fixed-header flex-row"} style={{marginBottom: "16px"}}>
-      <IonItem lines="none">
-        <IonCheckbox style={{"--size": "16px", margin: "0px"}} onIonChange={selectAll}> </IonCheckbox>
-      </IonItem>
-      <IonItem lines="none" style={{flexGrow: "1"}}>
-        {/*<IonLabel></IonLabel>*/}
-        <IonSelect interface="popover" className="select-box" value={usedPeriod}
-                   onIonChange={onSelect}>
-          {periodOptions.map((o, idx) => (
-            <IonSelectOption key={idx} value={idx + 1}>{periodDisplayString(o)}</IonSelectOption>
-          ))}
-        </IonSelect>
-      </IonItem>
-    </div>
+    <IonItem lines="none" style={{flexGrow: "1"}}>
+      <IonSelect interface="popover" className="select-box" value={usedPeriod}
+                 onIonChange={onChange}>
+        {periodOptions.map((o, idx) => (
+          <IonSelectOption key={idx} value={idx + 1}>{periodDisplayString(o)}</IonSelectOption>
+        ))}
+      </IonSelect>
+    </IonItem>
   )
 }
 
-export default PeriodSelectorComponent;
+export default PeriodSelectorElement;
