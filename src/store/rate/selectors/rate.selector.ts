@@ -35,3 +35,8 @@ export const selectRateById = (id: string) =>
       return selectById(rateState, id) || undefined;
     }
   );
+
+export const selectedRateSelector = createSelector(
+  featureStateSelector,
+  state => state.selectedRate
+)

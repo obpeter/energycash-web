@@ -5,11 +5,11 @@ import {
   CheckboxCustomEvent,
   IonButton,
   IonButtons,
-  IonCol,
+  IonCol, IonGrid,
   IonIcon,
   IonItem,
   IonLabel,
-  IonRow,
+  IonRow, IonSearchbar,
   IonToolbar,
   SelectCustomEvent,
   useIonAlert, useIonLoading, useIonPopover, useIonToast
@@ -36,7 +36,7 @@ import {billingSelector, fetchEnergyBills} from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
 import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
-import {add, cloudUploadOutline, downloadOutline, flash, person} from "ionicons/icons";
+import {add, cloudUploadOutline, downloadOutline, flash, person, search, searchCircle} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {selectedParticipantSelector, selectMetering, selectParticipant} from "../../store/participant";
 import cn from "classnames";
@@ -69,7 +69,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const billingInfo = useAppSelector(billingSelector);
   const eeg = useAppSelector(eegSelector)
 
+  const [searchActive, setSearchActive] = useState(false);
   const [sortedParticipants, setSortedParticipants] = useState(participants);
+  const [result, setResult] = useState(participants)
 
   const [loading, dismissLoading] = useIonLoading();
 
@@ -141,6 +143,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     })
     // setCheckedParticipant(sorted.map(() => false))
     setSortedParticipants(sorted);
+    setResult(sorted);
   }, [participants])
 
   const infoToast = (message: string) => {
@@ -334,6 +337,14 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     }
   }
 
+  const handleInput = (ev: Event) => {
+    let query = '';
+    const target = ev.target as HTMLIonSearchbarElement;
+    if (target) query = target.value!.toLowerCase();
+
+    setResult(sortedParticipants.filter((d) => d.lastname.toLowerCase().indexOf(query) > -1 || d.firstname.toLowerCase().indexOf(query) > -1));
+  };
+
   const popoverRef = useRef<HTMLIonToolbarElement>(null)
   return (
     <div className={"participant-pane"}>
@@ -342,6 +353,16 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         <div className={"pane-content"}>
           <IonToolbar color="eeglight" style={{"--min-height": "56px"}} ref={popoverRef}>
             <IonButtons slot="end">
+              <IonButton
+                // id="open-datepicker-dialog"
+                color="primary"
+                shape="round"
+                fill={"solid"}
+                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
+                onClick={() => setSearchActive(!searchActive)}
+              >
+                <IonIcon slot="icon-only" icon={search}></IonIcon>
+              </IonButton>
               {eeg && !eeg.online && <IonButton
                 color="primary"
                 shape="round"
@@ -390,11 +411,19 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                 <IonIcon slot="icon-only" icon={add}></IonIcon>
               </IonButton>
             </IonButtons>
+
           </IonToolbar>
+          {searchActive &&
+              <IonToolbar>
+                <IonSearchbar
+                    style={{"--box-shadow": "undefined"}}
+                    debounce={500} onIonInput={(ev) => handleInput(ev)}>
+                </IonSearchbar>
+              </IonToolbar>}
           <ParticipantPeriodHeaderComponent periods={periods} activePeriod={activePeriod} selectAll={selectAll}
                                             onUpdatePeriod={onUpdatePeriodSelection}/>
 
-          {sortedParticipants.map((p, idx) => {
+          {result.map((p, idx) => {
             return (
               <div key={idx} onClick={onSelectParticipant(p)}
                    className={cn("participant", {"selected": p.id === selectedParticipant.id})}>

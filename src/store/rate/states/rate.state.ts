@@ -5,6 +5,7 @@ export const featureKey = 'rate';
 
 export interface RateState extends EntityState<EegTariff> {
   isFetching: boolean;
+  selectedRate: EegTariff | undefined;
 }
 export const adapter = createEntityAdapter<EegTariff>();
 
@@ -14,4 +15,5 @@ export const adapter = createEntityAdapter<EegTariff>();
 
 export const initialState: RateState = adapter.getInitialState({
   isFetching: false,
+  selectedRate: undefined,
 });
