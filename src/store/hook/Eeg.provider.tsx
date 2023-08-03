@@ -4,11 +4,14 @@ import {eegSelector, fetchEegModel, selectedTenant, selectTenant} from "../eeg";
 import {KeycloakContext, useKeycloak, useRoles, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
 import {fetchParticipantModel} from "../participant";
-import {fetchEnergyReport, setSelectedPeriod} from "../energy";
+import {fetchEnergyReport, selectedPeriodSelector, setSelectedPeriod} from "../energy";
 import {eegService} from "../../service/eeg.service";
 import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
 import {Eeg, EegTariff} from "../../models/eeg.model";
+import {createPeriodIdentifier} from "../../models/energy.model";
 import {EegParticipant} from "../../models/members.model";
+import {billingRunSelector, fetchBillingRun} from "../billingRun";
+import {fetchParticipantAmounts} from "../billing";
 
 
 export interface EegState {
@@ -38,7 +41,6 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   const roles = useRoles();
 
   const tenant = useAppSelector(selectedTenant)
-
   const eeg = useAppSelector(eegSelector);
 
   useEffect(() => {
@@ -79,10 +81,16 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
               break
           }
           dispatch(fetchEnergyReport({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period}))
+          dispatch(fetchBillingRun({
+            tenant: tenant,
+            clearingPeriodType : period,
+            clearingPeriodIdentifier : createPeriodIdentifier(period, parseInt(year, 10), segment)
+          }))
         }
       })
     }
   },[eeg])
+
 
   const init = async () => {
     let initTenant = tenant

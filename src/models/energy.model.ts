@@ -47,6 +47,10 @@ export interface SelectedPeriod {
   segment: number
 }
 
+export const createPeriodIdentifier = (type : string, year : number, segment : number): string => {
+  return "Abr_"+type+"-"+year+"-"+segment;
+}
+
 export interface EnergySeries {
   segmentIdx: number,
   allocated: number,

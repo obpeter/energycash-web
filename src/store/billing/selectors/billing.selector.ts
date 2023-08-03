@@ -13,6 +13,10 @@ export const billingSelector = createSelector(
   selectAll
 );
 
+export const selectBillFetchingSelector = createSelector(
+    featureStateSelector, billingState => billingState.isFetching
+);
+
 export const selectBillById = (id: string) =>
   createSelector(
     featureStateSelector,
