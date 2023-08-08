@@ -1,10 +1,10 @@
 import React, {FC, useEffect, useState} from "react";
 import {IonButton, IonButtons} from "@ionic/react";
 import {createNewPeriod} from "../util/Helper.util";
-import PeriodSelectorElement from "./core/PeriodSelector.element";
 import {EegEnergyReport, EnergySeries, MeterEnergySeries, ReportType, SelectedPeriod} from "../models/energy.model";
 import {eegService} from "../service/eeg.service";
 import {Exception} from "sass";
+import PeriodSelectorElement from "./core/PeriodSelector.element";
 
 interface MeterChartNavbarComponentProps {
   tenant: string
@@ -63,6 +63,9 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({tenant, 
       updateSeries(selectedMeterId, selectedPeriod)
     }
   }
+
+  const onSelectAll = ()  => {
+  };
 
   return (
     <div style={{display: "flex", alignItems: "center", justifyContent: "space-around"}}>

@@ -102,3 +102,12 @@ export function findPartial<O extends object, OT extends keyof object>(obj: O, k
   })
   return result
 }
+
+// Kuerzt lange Timestampangaben. Z.B.: 2023-07-31T19:55:04.234769 -> 2023-07-31, 19:55
+export function reformatDateTimeStamp(dateTimeStampString : string) : string {
+  if (dateTimeStampString && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d*$/.test(dateTimeStampString)) {
+    return dateTimeStampString.substring(0,10)+", "+dateTimeStampString.substring(11,16)
+  } else {
+    return "";
+  }
+}
