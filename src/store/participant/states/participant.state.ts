@@ -1,12 +1,11 @@
 import {createEntityAdapter, EntityState} from "@reduxjs/toolkit";
 import {EegParticipant} from "../../../models/members.model";
-import {Metering} from "../../../models/meteringpoint.model";
 
 export const featureKey = 'participant';
 
 export interface ParticipantState extends EntityState<EegParticipant> {
   isFetching: boolean;
-  selectedParticipant: EegParticipant;
+  selectedParticipant: EegParticipant | undefined;
   selectedMeter: string | undefined;
   // newParticipant: EegParticipant;
 }

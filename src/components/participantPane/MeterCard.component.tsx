@@ -1,6 +1,6 @@
 import React, {FC} from "react";
 import {IonCard, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from "@ionic/react";
-import {eegPlug, eegSolar} from "../../eegIcons";
+import {eegExclamation, eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
 import {Metering} from "../../models/meteringpoint.model";
 import cn from "classnames"
@@ -19,9 +19,14 @@ interface MeterCardComponentProps {
   hideMeter: boolean;
   onSelect?: (e: React.MouseEvent<HTMLIonCardElement, MouseEvent>, participantId: string, meter: Metering) => void;
   showCash?: boolean;
+  isSelected?: boolean;
 }
 
-const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hideMeter, onSelect, showCash}) => {
+interface CARDSTYLE {
+  [key: string]: any
+};
+
+const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hideMeter, onSelect, showCash, isSelected}) => {
 
   const currentDate = new Date();
   const year = currentDate.getFullYear();
@@ -52,6 +57,10 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const isGenerator = () => meter.direction === 'GENERATION';
   const isMeterPending = () => isPending() || meter.status === 'NEW' || meter.status === 'PENDING';
 
+  const isMeterInactive = () => meter.status === "REVOKED" || meter.status === "REJECTED"
+
+  const isMeterActive = () => meter.status === "ACTIVE"
+
   const meterValue = () => {
     if (report && report.allocated) {
       if (showCash && tariff) {
@@ -69,17 +78,30 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
     return (<></>);
   }
 
+  const renderMeterName = (m: Metering) => {
+    if (m.equipmentName && m.equipmentName.length > 0) {
+      return m.equipmentName;
+    }
+    return formatMeteringPointString(m.meteringPoint)
+  }
+
+  let cardStyle: CARDSTYLE = {marginTop: "0px", fontSize: "16px"}
+  if (isSelected) {
+    cardStyle = {...cardStyle, backgroundColor:"#e5ffdd"}
+  }
+
   // /*history.push(`/participant/${participant.id}/meter/${meter.meteringPoint}`*/
   return (
-    <IonCard style={{marginTop: "0px", fontSize: "16px"}} onClick={(e) => onSelect && onSelect(e, participant.id, meter)}>
+    <IonCard style={cardStyle} onClick={(e) => onSelect && onSelect(e, participant.id, meter)}>
       <IonGrid fixed={true} style={{paddingTop: "12px"}}>
-        <IonRow style={isMeterPending() ? {color: "#DC631E"} : {color: "#1E4640"}}>
+        <IonRow style={isMeterActive() ? {color: "#1E4640"} : isMeterPending() ? {color: "#DC631E"} : {color: "#dc1e1e"}}>
           <IonCol size={"1"}>
-            <IonIcon icon={isGenerator() ? eegSolar : eegPlug} size="small"></IonIcon>
+            <IonIcon icon={isMeterInactive() ? eegExclamation : isGenerator() ? eegSolar : eegPlug} size="small"></IonIcon>
           </IonCol>
           <IonCol size={isMeterPending() ? "11" : "7"}>
             {/*<IonLabel style={{textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{participant.participant.meters[0].meteringPoint}</IonLabel>*/}
-            <div style={{fontSize: "15px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer"}}>{formatMeteringPointString(meter.meteringPoint)}</div>
+            {/*<div style={{fontSize: "15px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer"}}>{renderMeterName(meter)}</div>*/}
+            <div style={{fontSize: "15px", overflow: "hidden", cursor: "pointer"}}>{renderMeterName(meter)}</div>
           </IonCol>
           {isMeterPending() || (
             <IonCol size={"4"}>

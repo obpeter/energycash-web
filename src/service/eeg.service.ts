@@ -1,5 +1,5 @@
 import {Eeg, EegNotification, EegTariff} from "../models/eeg.model";
-import {EegParticipant} from "../models/members.model";
+import {ContractInfo, EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {
@@ -12,8 +12,9 @@ import {
 import {EegEnergyReport} from "../models/energy.model";
 import {
   eegGraphqlQuery,
-  energyGraphqlQuery,
+  loadContractFilesQuery,
   reportDateGraphqlQuery,
+  uploadContractFilesMutation,
   uploadEnergyGraphqlMutation
 } from "./graphql-query";
 import {ExcelReportRequest} from "../models/reports.model";
@@ -21,6 +22,7 @@ import {ExcelReportRequest} from "../models/reports.model";
 const ENERGY_API_SERVER = process.env.REACT_APP_ENERGY_SERVER_URL;
 const BILLING_API_SERVER = process.env.REACT_APP_BILLING_SERVER_URL;
 const API_API_SERVER = process.env.REACT_APP_API_SERVER_URL;
+const FILESTORE_API_SERVER = process.env.REACT_APP_FILESTORE_SERVER_URL;
 
 class EegService {
 
@@ -338,6 +340,45 @@ class EegService {
     }).then(this.handleErrors).then(res => res.blob());
   }
 
+  // Filestore Services
+  async loadContractDocumentInfos(tenant: string): Promise<ContractInfo[]> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        'Content-Type': "application/json"
+      },
+      body: JSON.stringify(loadContractFilesQuery(tenant))
+    }).then(this.handleErrors).then(res => res.json()).then(res => res.data.files);
+  }
+
+  async uploadContractDocuments(tenant: string, participantId: string, files: File[]) {
+    const token = await this.authClient.getToken();
+    return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      },
+      // body: JSON.stringify(uploadContractFilesMutation(tenant, files, participantId))
+      body: await uploadContractFilesMutation(tenant, files, participantId)
+    }).then(this.handleErrors).then(res => res.json());
+
+  }
+
+  async downloadDocument(tenant: string, fileId: string): Promise<Blob> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${FILESTORE_API_SERVER}/filestore/${fileId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => res.blob());
+  }
+  // END FILESTORE SERVICES ////////////////////////////////////////////
+
   async exportBillingArchive(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
     if (!token) {
       token = await this.authClient.getToken();
@@ -386,10 +427,10 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async syncMeteringPoint(tenant: string, participantId: string, meter: string, direction: string, from: number, to: number): Promise<EegEnergyReport> {
+  async syncMeteringPoint(tenant: string, participantId: string, meters: {meter: string, direction: string}[], from: number, to: number): Promise<any> {
     const token = await this.authClient.getToken();
 
-    const body = {meteringPoint: meter, direction: direction, from: from, to: to}
+    const body = {meteringPoints: meters, from: from, to: to}
     return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/syncenergy`, {
       method: 'POST',
       headers: {
@@ -425,7 +466,6 @@ class EegService {
       .then(this.handleErrors)
       .then(res => true);
   }
-
 
   async createReport(tenant: string, payload: ExcelReportRequest) {
     const token = await this.authClient.getToken();

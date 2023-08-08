@@ -32,7 +32,7 @@ export const participantsSelector = createSelector(
 export const participantSelector = createSelector(
   featureStateSelector,
   (participantState: ParticipantState): EegParticipant | undefined => {
-    return selectById(participantState, (participantState.selectedParticipant.id || "")) || undefined;
+    return selectById(participantState, (participantState.selectedParticipant?.id || "")) || undefined;
   }
 )
 
@@ -71,6 +71,7 @@ export const selectedMeterIdSelector = createSelector(
 
 export const selectedMeterSelector = createSelector(
   featureStateSelector,
-  state => state.selectedParticipant.meters.find(m => m.meteringPoint === state.selectedMeter)
+  state => state.selectedParticipant ? state.selectedParticipant.meters?.find(m => m.meteringPoint === state.selectedMeter) : undefined
 
 )
+

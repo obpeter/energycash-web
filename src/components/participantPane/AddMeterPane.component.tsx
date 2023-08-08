@@ -1,6 +1,5 @@
 import React, {FC, useContext, useEffect} from "react";
 import CorePageTemplate from "../core/CorePage.template";
-import MeterFormComponent from "../MeterForm.component";
 import {Metering} from "../../models/meteringpoint.model";
 import EegWebContentPaneComponent from "../EegWebContentPane.component";
 import {IonButton, IonFooter, IonToolbar} from "@ionic/react";
@@ -8,13 +7,7 @@ import {ParticipantContext} from "../../store/hook/ParticipantProvider";
 import EegPaneTemplate from "../core/EegPane.template";
 import MeterFormElement from "../core/MeterForm.element";
 import {useForm} from "react-hook-form";
-import {
-  participantsSelector,
-  registerMeteringpoint,
-  selectedParticipantSelector,
-  updateMeteringPoint
-} from "../../store/participant";
-import {EegParticipant} from "../../models/members.model";
+import {registerMeteringpoint, selectedParticipantSelector} from "../../store/participant";
 import {useAppDispatch, useAppSelector} from "../../store";
 import {ratesSelector} from "../../store/rate";
 import {selectedTenant} from "../../store/eeg";
@@ -47,7 +40,7 @@ const AddMeterPaneComponent: FC = () => {
   }
 
   const onSubmit = (meter: Metering) => {
-    if (isDirty) {
+    if (isDirty && participant) {
       let participantId = participant.id;
       meter.participantId = participantId
 

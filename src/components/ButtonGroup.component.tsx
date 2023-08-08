@@ -2,7 +2,6 @@ import React, {FC, useState} from "react";
 import {IonButton, IonButtons} from "@ionic/react";
 
 import "./ButtonGroup.component.css";
-import {flash, person} from "ionicons/icons";
 
 const ButtonGroup: FC<{buttons: {icon: JSX.Element}[], onChange: (idx: number) => void}> = ({buttons, onChange}) => {
 

@@ -1,22 +1,16 @@
-import React, {FC, useContext, useEffect, useState} from "react";
+import React, {FC, Suspense, useContext} from "react";
 import {IonContent, IonPage, SelectCustomEvent} from "@ionic/react";
 import ParticipantPaneComponent from "../components/participantPane/ParticipantPane.component";
 
 import "./Participants.css"
-import {useAppDispatch, useAppSelector} from "../store";
+import {useAppSelector} from "../store";
 import {participantsSelector, selectedParticipantSelector} from "../store/participant";
 import {periodsSelector, selectedPeriodSelector} from "../store/energy";
-import {selectedTenant} from "../store/eeg";
-import ParticipantDetailsPaneComponent from "../components/participantPane/ParticipantDetailsPane.component";
-import ParticipantInvoiceDetailsComponent from "../components/participantPane/ParticipantInvoiceDetails.component";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
-import AddMeterPaneComponent from "../components/participantPane/AddMeterPane.component";
 import {MemberViewContext} from "../store/hook/MemberViewProvider";
 
 const Participants: FC = () => {
-  const dispatcher = useAppDispatch();
   const periods = useAppSelector(periodsSelector);
-  const tenant = useAppSelector(selectedTenant);
   const activePeriod = useAppSelector(selectedPeriodSelector);
   const participants = useAppSelector(participantsSelector);
 
@@ -30,19 +24,32 @@ const Participants: FC = () => {
   const {
     showAmount
   } = useContext(MemberViewContext)
+
   function showParticipantDetails() {
     if (selectedParticipant) {
       if (showAmount) {
+        const ParticipantInvoiceDetailsComponent =
+          React.lazy(() => import("../components/participantPane/ParticipantInvoiceDetails.component"))
         return (
-          <ParticipantInvoiceDetailsComponent />
+          <Suspense fallback = { <div> Invoicing loading ... </div> }>
+            <ParticipantInvoiceDetailsComponent />
+          </Suspense>
         )
       } else if (showAddMeterPane) {
+        const AddMeterPaneComponent =
+          React.lazy(() => import("../components/participantPane/AddMeterPane.component"))
         return (
-          <AddMeterPaneComponent />
+          <Suspense fallback = { <div></div> }>
+            <AddMeterPaneComponent />
+          </Suspense>
         )
       } else {
+        const ParticipantDetailsPaneComponent =
+          React.lazy(() => import("../components/participantPane/ParticipantDetailsPane.component"))
         return (
-          <ParticipantDetailsPaneComponent periods={periods} activePeriod={activePeriod}/>
+          <Suspense fallback = { <div></div> }>
+            <ParticipantDetailsPaneComponent periods={periods} activePeriod={activePeriod}/>
+          </Suspense>
         )
       }
     } else {

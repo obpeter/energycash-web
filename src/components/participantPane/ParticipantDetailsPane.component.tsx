@@ -1,30 +1,22 @@
-import React, {FC, MouseEventHandler, useEffect, useRef, useState} from "react";
+import React, {FC, useEffect, useState} from "react";
 import {EegParticipant} from "../../models/members.model";
 import cn from "classnames";
 
 import "./ParticipantDetailsPane.compoenent.css"
 import {
-  AccordionGroupCustomEvent,
-  IonAccordion,
-  IonAccordionGroup,
-  IonBadge, IonButton, IonButtons, IonCard,
-  IonFab,
-  IonFabButton,
+  IonButton, IonCard,
   IonIcon,
   IonItem,
-  IonLabel, IonThumbnail,
+  IonLabel,
   IonTitle,
   IonToggle,
   IonToolbar, useIonToast
 } from "@ionic/react";
 import {
-  add,
   caretForwardOutline,
   documentTextOutline,
   logoEuro,
   person,
-  star, starHalf,
-  syncOutline,
   trashBin
 } from "ionicons/icons";
 import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
@@ -33,15 +25,12 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis
 } from "recharts";
 import {useAppDispatch, useAppSelector} from "../../store";
-import {energySeriesByMeter} from "../../store/energy";
 import {Metering} from "../../models/meteringpoint.model";
 import MemberFormComponent from "../MemberForm.component";
 import MeterFormComponent from "../MeterForm.component";
@@ -49,22 +38,20 @@ import {
   confirmParticipant,
   selectedMeterIdSelector,
   selectedParticipantSelector,
-  selectMetering,
-  selectParticipant, updateParticipant
+  updateParticipant
 } from "../../store/participant";
-import {createNewPeriod, formatMeteringPointString} from "../../util/Helper.util";
-import participants from "../../pages/Participants";
+import {formatMeteringPointString} from "../../util/Helper.util";
 import {selectedTenant} from "../../store/eeg";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
-import InvoiceDocumentComponent from "../InvoiceDocument.component";
-import PeriodSelectorElement from "../core/PeriodSelector.element";
-import {EegEnergyReport, MeterEnergySeries, SelectedPeriod} from "../../models/energy.model";
+import InvoiceDocumentComponent from "./InvoiceDocument.component";
+import {MeterEnergySeries, SelectedPeriod} from "../../models/energy.model";
 import {eegService} from "../../service/eeg.service";
 import {MONTHNAME} from "../../models/eeg.model";
 import MeterChartNavbarComponent from "../MeterChartNavbar.component";
+import ContractDocumentComponent from "./ContractDocument.component";
 
-type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm"
+type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 interface ParticipantDetailsPaneProps {
   periods: { begin: string, end: string };
   activePeriod: SelectedPeriod | undefined;
@@ -72,26 +59,18 @@ interface ParticipantDetailsPaneProps {
 
 const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({periods, activePeriod}) => {
 
-  // const {selectedParticipant} = props;
   const dispatcher = useAppDispatch();
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const tenant = useAppSelector(selectedTenant)
 
-  // const selectedMeter: Metering | undefined = {} as Metering
   const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
-
-  // const energySeries = useAppSelector(energySeriesByMeter(selectedMeter?.meteringPoint!))
 
   const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
   const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod|undefined>(activePeriod)
   const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries>({} as MeterEnergySeries)
 
   const [toaster] = useIonToast();
-
-
-  // const [dynamicComponent, setDynamicComponent] =
-  //   useState<DynamicComponentProps>({componentKey: "memberForm", args: {participant: selectedParticipant, formId:"", onSubmit: (e:any) => console.log("update", e)}})
 
   const isMeterNew = () => selectedMeter?.status === 'NEW';
   const isMeterActive = () => selectedMeter?.status === "ACTIVE"
@@ -101,9 +80,8 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
 
   useEffect(() => {
     if (selectedMeterId) {
-      const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
+      const meter = selectedParticipant?.meters.find(m => m.meteringPoint === selectedMeterId)
       if (meter) {
-        console.log("Set updated Meter: ", meter)
         setSelectedMeter(meter)
       }
     }
@@ -123,18 +101,14 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
 
     switch (componentKey) {
       case "memberForm":
-        return <MemberFormComponent participant={selectedParticipant} formId={""}
-                                    onSubmit={onUpdateParticipant}/>
+        return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} formId={""}
+                                    onSubmit={onUpdateParticipant}/> : <></>
       case "meterForm":
-        if (selectedMeter) {
-          return <MeterFormComponent meteringPoint={selectedMeter}/>
-        } else {
-          return <></>
-        }
+          return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>
       case "invoiceForm":
-        return <InvoiceDocumentComponent tenant={tenant} participant={selectedParticipant}/>
+        return selectedParticipant ? <InvoiceDocumentComponent tenant={tenant} participant={selectedParticipant}/> : <></>
       case "documentForm":
-        return <></>
+        return selectedParticipant ? <ContractDocumentComponent tenant={tenant} participant={selectedParticipant}/> : <></>
       default:
         return <></>
     }
@@ -150,7 +124,10 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
 
   function onWillDismiss(participant: EegParticipant, ev: CustomEvent<OverlayEventDetail<FormData>>) {
     if (ev.detail.role === 'confirm' && ev.detail.data) {
-      dispatcher(confirmParticipant({tenant, participantId: participant.id, data: ev.detail.data}))
+      const data:FormData = ev.detail.data
+      eegService.uploadContractDocuments(tenant, participant.id, data.getAll("docfiles")
+        .map(e => e as File))
+        .then(() => dispatcher(confirmParticipant({tenant, participantId: participant.id, data: data})))
       presentToast(`${participant.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${participant.contact.email} gesendet.`)
     }
 
@@ -168,28 +145,15 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
         return "Abschluss Meldung von Netzbetreiber noch ausstehend"
       case 'REJECTED':
         return "Zählpunkt wurde vom Netzbetreiber abgewiesen"
+      case 'REVOKED':
+        return "Zählpunkt wurde vom Netzbetreiber aufgehoben"
       default:
         return ""
     }
   }
 
-  // const onChangePeriod = (selectedPeriod: SelectedPeriod | undefined)  =>{
-  //   if (selectedPeriod) {
-  //     eegService.fetchReport(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type)
-  //       .then((r) => calcSelectedEnergySeries(r))
-  //       .then((r) => setActiveEnergySeries(r))
-  //       .then(() => setSelectedPeriod(selectedPeriod))
-  //   }
-  // }
-
-  // const changePeriod = (selectedPeriod: SelectedPeriod | undefined) => (event: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
-  //   setSelectedPeriod(selectedPeriod)
-  // }
-
   const calcXAxisName = (i: number, period: SelectedPeriod) => {
       switch (period && period.type) {
-        // case 'YH': return i > 0 && i<=6 ? `${MONTHNAME[(period.segment*6)-(6-i)].substring(0, 3)}` : `${i}`
-        // case 'YQ': return i > 0 && i<=3 ? `${MONTHNAME[(period.segment*3)-(3-i)].substring(0, 3)}` : `${i}`
         case 'YH': return i > 0 && i<=12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
         case 'YQ': return i > 0 && i<=12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
         case 'YM': return `${i}`
@@ -197,6 +161,10 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
       }
   }
   // const isPeriodSelected = (periodType: string) => selectedPeriod?.type === periodType
+
+  if (!selectedParticipant) {
+    return <></>
+  }
 
   return (
     <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
@@ -234,6 +202,16 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
               </IonItem>
             </div>
             <div>
+              <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}
+                       onClick={() => setActiveMenu("documentForm")}>
+                <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
+                <div>
+                  <div className={"detail-header"}>Dokumente</div>
+                  <div className={"detail-subheader"}>z.B. Verträge</div>
+                </div>
+              </IonItem>
+            </div>
+            <div>
               <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "invoiceForm"})}
                        onClick={() => setActiveMenu("invoiceForm")}>
                 <IonIcon icon={logoEuro} slot="start"></IonIcon>
@@ -252,15 +230,15 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                 <IonToggle slot="end" checked={selectedParticipant?.role !== 'EEG_USER'} disabled={true}></IonToggle>
               </IonItem>
             </div>
-            <div>
-              <IonItem lines="full" className={"eeg-item-box"}>
-                <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
-                <div>
-                  <div className={"detail-header"}>Mitglied aktiv</div>
-                </div>
-                <IonToggle slot="end" checked={selectedParticipant?.status === 'ACTIVE'} disabled={true}></IonToggle>
-              </IonItem>
-            </div>
+            {/*<div>*/}
+            {/*  <IonItem lines="full" className={"eeg-item-box"}>*/}
+            {/*    <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>*/}
+            {/*    <div>*/}
+            {/*      <div className={"detail-header"}>Mitglied aktiv</div>*/}
+            {/*    </div>*/}
+            {/*    <IonToggle slot="end" checked={selectedParticipant?.status === 'ACTIVE'} disabled={true}></IonToggle>*/}
+            {/*  </IonItem>*/}
+            {/*</div>*/}
           </div>
           <div className={"details-box"}>
             { selectedMeter ? (
@@ -277,14 +255,6 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                   </IonCard>
               }
 
-              <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterNew()}>
-                <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
-                <div>
-                  <div
-                    className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
-                </div>
-                <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"} disabled={true}></IonToggle>
-              </IonItem>
               <IonItem button lines="full"
                        className={cn("eeg-item-box", {"selected": activeMenu === "meterForm"})}
                        onClick={() => setActiveMenu("meterForm")}>
@@ -293,13 +263,22 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                   <div className={"detail-header"}>Details und Adresse</div>
                 </div>
               </IonItem>
-              <IonItem lines="full" className={"eeg-item-box"}>
-                <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
+              <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterNew()}>
+                <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
                 <div>
-                  <div className={"detail-header"}>Dokumente</div>
-                  <div className={"detail-subheader"}>z.B. Verträge</div>
+                  <div
+                    className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
                 </div>
+                <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"} disabled={true}></IonToggle>
               </IonItem>
+              {/*<IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}*/}
+              {/*         onClick={() => setActiveMenu("documentForm")}>*/}
+              {/*  <IonIcon icon={documentTextOutline} slot="start"></IonIcon>*/}
+              {/*  <div>*/}
+              {/*    <div className={"detail-header"}>Dokumente</div>*/}
+              {/*    <div className={"detail-subheader"}>z.B. Verträge</div>*/}
+              {/*  </div>*/}
+              {/*</IonItem>*/}
               {isMeterActive() && activePeriod && selectedMeterId && <div style={{marginLeft: "20px"}}>
                 <h4>Energiedaten</h4>
                 <MeterChartNavbarComponent

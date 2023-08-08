@@ -1,10 +1,10 @@
 import React, {FC, useEffect, useState} from "react";
-import {IonCol, IonGrid, IonList, IonListHeader, IonRow} from "@ionic/react";
+import {IonCol, IonGrid, IonList, IonRow} from "@ionic/react";
 import SelectForm from "../form/SelectForm.component";
 import InputForm from "../form/InputForm.component";
 import CheckboxComponent from "../form/Checkbox.component";
 import {Metering} from "../../models/meteringpoint.model";
-import {Address, EegTariff} from "../../models/eeg.model";
+import {EegTariff} from "../../models/eeg.model";
 import {Control, FieldErrors, UseFormSetValue, UseFormWatch} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";

@@ -43,6 +43,10 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
               <p>Vorauszahlung</p>
               <p>{(Number(rate.participantFee)) + " €"}</p>
             </div>
+            {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                <p>Umsatzsteuer</p>
+                <p>{(rate.vatInPercent && rate.vatInPercent.length > 0 ? rate.vatInPercent : "0") + " %"}</p>
+            </div>}
             {rate.discount && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Rabatt</p>
               <p>{rate.discount + " %"}</p>
@@ -56,6 +60,10 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
               <p>Cent pro kWh</p>
               <p>{rate.centPerKWh+ " Cent"}</p>
             </div>
+            {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                <p>Umsatzsteuer</p>
+                <p>{(rate.vatInPercent && rate.vatInPercent.length > 0 ? rate.vatInPercent : "0") + " %"}</p>
+            </div>}
             {rate.freeKWH && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Inklusive kWh</p>
               <p>{rate.freeKWH + " kWh"}</p>
@@ -73,6 +81,10 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
               <p>Cent pro kWh</p>
               <p>{(Number(rate.centPerKWh)) + " Cent"}</p>
             </div>
+            {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                <p>Umsatzsteuer</p>
+                <p>{(rate.vatInPercent && rate.vatInPercent.length > 0 ? rate.vatInPercent : "0") + " %"}</p>
+            </div>}
             {rate.discount && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Rabatt</p>
               <p>{rate.discount + " %"}</p>

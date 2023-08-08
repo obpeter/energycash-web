@@ -14,7 +14,7 @@ export const reducer = createReducer(initialState, builder =>
   builder
     .addCase(fetchParticipantModel.fulfilled, (state, action) => {
       const {participants} = action.payload
-      return adapter.setAll(state, participants)
+      return adapter.setAll({...state, selectedParticipant: undefined, selectedMeter: undefined, isFetching: false}, participants)
     })
     .addCase(newParticipant, (state, action) => {
       return {...state, isFetching: false,
@@ -30,12 +30,10 @@ export const reducer = createReducer(initialState, builder =>
       return {...state, selectedParticipant: {} as EegParticipant};
     })
     .addCase(addMeteringPoint, (state, action) => {
-
-      // return {...state, selectedParticipant: {...state.selectedParticipant, meters: [...state.selectedParticipant?.meters/* || {} as Metering, action.payload*/]}};
-
-      return {...state, selectedParticipant: {...state.selectedParticipant, meters: [...(state.selectedParticipant?.meters || []), action.payload]}};
-      // return {...state};
-      // return s
+      return {...state,
+        selectedParticipant: state.selectedParticipant ?
+          {...state.selectedParticipant, meters: [...(state.selectedParticipant?.meters || []), action.payload]} :
+          undefined};
     })
     .addCase(createParticipant.fulfilled, (state, action) => {
       return adapter.addOne({...state, selectedParticipant: action.payload, isFetching: false}, action.payload);
@@ -56,10 +54,12 @@ export const reducer = createReducer(initialState, builder =>
     })
     .addCase(updateMeteringPoint.fulfilled, (state, action) => {
       const {meter, participantId} = action.payload;
-
-      const modParticipant = state.selectedParticipant;
-      const changedParticipant = {...modParticipant, meters: [...modParticipant.meters.filter(m => m.meteringPoint !== meter.meteringPoint), ...[meter]] }
-      return adapter.updateOne({...state, selectedMeter: meter.meteringPoint}, {id: modParticipant.id, changes: changedParticipant})
+        return adapter.updateOne({...state, selectedMeter: meter.meteringPoint},
+          {id: participantId, changes:
+              {...state.entities[participantId],
+                meters: state.entities[participantId] ?
+                  state.entities[participantId]!.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter : m) : undefined}
+          })
     })
     .addCase(confirmParticipant.fulfilled, (state, action) => {
       console.log("Confirm Participant Reducer", action.payload)

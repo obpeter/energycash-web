@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from "react";
-import {IonChip, IonCol, IonGrid, IonIcon, IonLabel, IonList, IonListHeader, IonRow} from "@ionic/react";
+import {IonCol, IonGrid, IonList, IonListHeader, IonRow} from "@ionic/react";
 import {people} from "ionicons/icons";
 import InputForm from "./form/InputForm.component";
 import {useForm} from "react-hook-form";
@@ -17,10 +17,13 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 
-  const { handleSubmit, control, reset, formState: {errors} } = useForm({
+  const { handleSubmit, setValue, control, reset, formState: {errors} } = useForm({
     defaultValues: participant, mode: "all"});
 
-  const onChangeBusinessType = (s: number) => {}
+  const onChangeBusinessType = (s: number) => {
+    setSelectedBusinessType(s)
+    setValue("businessRole", s === 0 ? "EEG_PRIVATE" : "EEG_BUSINESS")
+  }
 
   useEffect(() => {
     if (participant) {
@@ -38,7 +41,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
               buttons={[{label: 'Privat', icon: people}, {label: 'Firma', icon: eegBusiness}]}
               onChange={onChangeBusinessType}
               value={selectedBusinessType}
-              changeable={false}
+              changeable={true}
             />
           </IonCol>
         </IonRow>

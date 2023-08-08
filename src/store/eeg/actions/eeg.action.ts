@@ -1,7 +1,6 @@
 import {createAction, createAsyncThunk} from "@reduxjs/toolkit";
 import {featureKey} from "../states/eeg.state";
 import {eegService} from "../../../service/eeg.service";
-import { Eeg } from "../../../models/eeg.model";
 
 export const fetchEegModel = createAsyncThunk(
   `${featureKey}/fetchEeg`,

@@ -21,14 +21,14 @@ const reducer = combineReducers({
   [billingRun.featureKey]: billingRun.reducer,
 });
 
-/**
- * MIddleware
- */
-const middleware = getDefaultMiddleware({
-  thunk: true,
-  immutableCheck: true,
-  serializableCheck: true
-});
+// /**
+//  * MIddleware
+//  */
+// const middleware = getDefaultMiddleware({
+//   thunk: true,
+//   immutableCheck: true,
+//   serializableCheck: true
+// });
 
 /**
  * Store
