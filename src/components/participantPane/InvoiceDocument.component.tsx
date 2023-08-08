@@ -12,16 +12,16 @@ const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}
 
   useEffect(() => {
     if (tenant && participant) {
-      eegService.fetchInvoiceDocuments(tenant)
+      eegService.fetchBillingDocumentFiles(tenant)
         .then(docs => docs.filter(d => d.participantId === participant.id))
         .then(docs => setInvoiceDocs(docs))
     }
   }, [tenant, participant])
 
 
-  async function createReport(fileDataId: string) {
+  async function downloadBillingDocument(fileDataId: string) {
     try {
-      eegService.downloadInvoiceDocument(tenant, fileDataId).then(b => {
+      eegService.downloadBillingDocument(tenant, fileDataId).then(b => {
         const fileURL = URL.createObjectURL(b);
         // //Open the URL on new Window
         window.open(fileURL, '_blank');
@@ -35,7 +35,7 @@ const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}
       <IonList>
         <IonListHeader><h2>Rechnungen</h2></IonListHeader>
         {invoiceDocs.map((d, i) => (
-          <IonItem button key={d.billingDocumentId} lines="none" onClick={() => createReport(d.fileDataId)}>
+          <IonItem button key={d.billingDocumentId} lines="none" onClick={() => downloadBillingDocument(d.fileDataId)}>
             <IonLabel> {d.name} </IonLabel>
             <IonIcon icon={eegPdfDoc} slot="start"></IonIcon>
           </IonItem>

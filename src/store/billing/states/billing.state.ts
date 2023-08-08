@@ -1,5 +1,4 @@
 import {createEntityAdapter, EntityState} from "@reduxjs/toolkit";
-import {EegTariff} from "../../../models/eeg.model";
 import {ParticipantBillType} from "../../../models/meteringpoint.model";
 
 export const featureKey = 'billing';

@@ -3,10 +3,11 @@ import {ContractInfo, EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {
-  ClearingPreviewRequest,
-  ClearingPreviewResponse,
-  InvoiceDocumentResponse,
-  Metering
+  ClearingPreviewRequest, ClearingPreviewResponse, InvoiceDocumentResponse,
+  Metering,
+  MeteringEnergyGroupType,
+  ParticipantBillType,
+  BillingRun
 } from "../models/meteringpoint.model";
 import {EegEnergyReport} from "../models/energy.model";
 import {
@@ -41,6 +42,36 @@ class EegService {
     }
     return response;
   }
+
+  async handleDownload (response : Response, defaultFilename : string) : Promise<boolean> {
+    response.blob().then(file => {
+      //Build a URL from the file
+      const fileURL = URL.createObjectURL(file);
+
+      let filename = response.headers.get('Filename')
+      if (!filename) {
+        const disposition = response.headers.get('Content-Disposition');
+        const dispositionParts = disposition ? disposition.split(';') : null;
+        filename = dispositionParts ? dispositionParts[1].split('=')[1]: null;
+        filename = filename ? filename.replaceAll('"', '') : null;
+      }
+      if (!filename)
+        filename = defaultFilename
+
+      const link = document.createElement('a');
+      link.href = fileURL
+      link.setAttribute('download', filename)
+
+      // 3. Append to html page
+      document.body.appendChild(link);
+      // 4. Force download
+      link.click();
+      // 5. Clean up and remove the link
+      link.parentNode?.removeChild(link);
+    });
+    return true;
+  }
+
 
   async fetchEeg(token: string, tenant: string): Promise<Eeg> {
     return await fetch(`${API_API_SERVER}/query`, {
@@ -235,9 +266,37 @@ class EegService {
     //   })
   }
 
-  async startEnergyBill(tenant: string, invoiceRequest: ClearingPreviewRequest): Promise<ClearingPreviewResponse> {
+  async fetchBillingRun(tenant: string, clearingPeriodType: string, clearingPeriodIdentifier: string, token?: string): Promise<BillingRun[]> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch( `${BILLING_API_SERVER}/api/billingRuns/${tenant}/${clearingPeriodType}/${clearingPeriodIdentifier}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      }
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async fetchBillingRunById(tenant: string, billingRundId : string, token?: string): Promise<BillingRun> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch( `${BILLING_API_SERVER}/api/billingRuns/${billingRundId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      }
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async fetchBilling(tenant: string, invoiceRequest: ClearingPreviewRequest): Promise<ClearingPreviewResponse> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/api/billing`, {
+    return await fetch(`${BILLING_API_SERVER}/api/billing`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
@@ -248,9 +307,21 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async fetchInvoiceDocuments(tenant: string): Promise<InvoiceDocumentResponse[]> {
+  async fetchParticipantAmounts(tenant : string, billingRunId : string) : Promise<ParticipantBillType[]> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/api/billingDocumentFiles/tenant/${tenant.toUpperCase()}`, {
+    return await fetch(`${BILLING_API_SERVER}/api/billingRuns/${billingRunId}/participantAmounts`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      },
+    }).then(this.handleErrors).then(res => res.json())
+  }
+
+  async fetchBillingDocumentFiles(tenant: string): Promise<InvoiceDocumentResponse[]> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${BILLING_API_SERVER}/api/billingDocumentFiles/tenant/${tenant.toUpperCase()}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
@@ -259,9 +330,9 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async downloadInvoiceDocument(tenant: string, filedataId: string): Promise<Blob> {
+  async downloadBillingDocument(tenant: string, filedataId: string): Promise<Blob> {
     const token = await this.authClient.getToken();
-    return await fetch(`${BILLING_API_SERVER}/cash/api/fileData/${filedataId}`, {
+    return await fetch(`${BILLING_API_SERVER}/api/fileData/${filedataId}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
@@ -307,6 +378,43 @@ class EegService {
     }).then(this.handleErrors).then(res => res.blob());
   }
   // END FILESTORE SERVICES ////////////////////////////////////////////
+
+  async exportBillingArchive(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch(`${BILLING_API_SERVER}/api/billingRuns/${billingRunId}/billingDocuments/archive`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => this.handleDownload(res, billingRunId+".zip"));
+  }
+
+  async exportBillingExcel(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch(`${BILLING_API_SERVER}/api/billingRuns/${billingRunId}/billingDocuments/xlsx`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => this.handleDownload(res, billingRunId+".xlsx"));
+  }
+
+  async billingRunSendmail(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch(`${BILLING_API_SERVER}/api/billingRuns/${billingRunId}/billingDocuments/sendmail`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => true);
+  }
+
 
   async syncMeteringPointList(tenant: string): Promise<EegEnergyReport> {
     const token = await this.authClient.getToken();
@@ -371,32 +479,7 @@ class EegService {
       }
     )
       .then(this.handleErrors)
-      .then((response) => {
-      //Create a Blob from the PDF Stream
-      response.blob().then(file => {
-        //Build a URL from the file
-        const fileURL = URL.createObjectURL(file);
-        // //Open the URL on new Window
-        // window.open(fileURL, '');
-
-        const link = document.createElement('a');
-        let filename = response.headers.get('Filename')
-        if (!filename)
-          filename = "energy-export"
-
-        link.href = fileURL
-        link.setAttribute('download', filename)
-
-        // 3. Append to html page
-        document.body.appendChild(link);
-        // 4. Force download
-        link.click();
-        // 5. Clean up and remove the link
-        link.parentNode?.removeChild(link);
-        }
-      );
-      return true;
-    });
+      .then( response => this.handleDownload(response, "energy-export"));
   }
 
   async uploadEnergyFile(tenant: string, sheet: string, data: File): Promise<boolean> {

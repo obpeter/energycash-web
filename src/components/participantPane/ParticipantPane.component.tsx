@@ -2,27 +2,28 @@ import React, {FC, MouseEventHandler, startTransition, useContext, useEffect, us
 
 import {EegParticipant} from "../../models/members.model";
 import {
-  CheckboxCustomEvent,
+  CheckboxCustomEvent, IonAlert,
   IonButton,
   IonButtons,
   IonCol, IonGrid,
   IonIcon,
   IonItem,
   IonLabel,
-  IonRow, IonSearchbar,
+  IonRow, IonSearchbar, IonSpinner,
   IonToolbar,
   SelectCustomEvent,
   useIonAlert, useIonLoading, useIonPopover, useIonToast
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {SelectedPeriod} from "../../models/energy.model";
+import {createPeriodIdentifier, SelectedPeriod} from "../../models/energy.model";
 import ParticipantPeriodHeaderComponent from "./ParticipantPeriodHeader.component";
 import MemberComponent from "./Member.component";
 import {
   ClearingPreviewRequest,
   Metering,
   MeteringEnergyGroupType,
+  ParticipantBillType
 } from "../../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
 import {ParticipantContext} from "../../store/hook/ParticipantProvider";
@@ -31,11 +32,25 @@ import {MemberViewContext} from "../../store/hook/MemberViewProvider";
 import "./ParticipantPane.component.scss"
 import SlideButtonComponent from "../SlideButton.component";
 import {useAppDispatch, useAppSelector} from "../../store";
-import {billingSelector, fetchEnergyBills} from "../../store/billing";
+import {
+  billingSelector,
+  fetchEnergyBills,
+  fetchParticipantAmounts, resetParticipantAmounts,
+  selectBillFetchingSelector
+} from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {fetchEnergyReport, meteringEnergyGroup} from "../../store/energy";
+import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
-import {add, cloudUploadOutline, downloadOutline, flash, person, search} from "ionicons/icons";
+import {
+  add, archiveOutline,
+  cloudUploadOutline, documentTextOutline,
+  downloadOutline,
+  flash,
+  mailOutline,
+  person,
+  search,
+  searchCircle
+} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {
   selectedMeterIdSelector,
@@ -44,13 +59,20 @@ import {
   selectParticipant
 } from "../../store/participant";
 import cn from "classnames";
-import {isParticipantActivated} from "../../util/Helper.util";
+import {isParticipantActivated, reformatDateTimeStamp} from "../../util/Helper.util";
 import DatepickerComponent from "../dialogs/datepicker.component";
 import DatepickerPopover from "../dialogs/datepicker.popover";
 import {ExcelReportRequest, InvestigatorCP} from "../../models/reports.model";
 import {eegService} from "../../service/eeg.service";
 import UploadPopup from "../dialogs/upload.popup";
 import {useRefresh} from "../../store/hook/Eeg.provider";
+import {
+  billingRunErrorSelector,
+  billingRunIsFetchingSelector,
+  billingRunSelector, billingRunSendmail,
+  billingRunStatusSelector,
+  fetchBillingRun, fetchBillingRunById
+} from "../../store/billingRun";
 
 interface ParticipantPaneProps {
   participants: EegParticipant[];
@@ -72,7 +94,13 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const billingInfo = useAppSelector(billingSelector);
-  const eeg = useAppSelector(eegSelector)
+  const eeg = useAppSelector(eegSelector);
+
+  const billingRun = useAppSelector(billingRunSelector);
+  const billingRunStatus = useAppSelector(billingRunStatusSelector);
+  const billingRunIsFetching = useAppSelector(billingRunIsFetchingSelector);
+  const selectBillIsFetching = useAppSelector(selectBillFetchingSelector);
+  const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
 
   const [searchActive, setSearchActive] = useState(false);
   const [sortedParticipants, setSortedParticipants] = useState(participants);
@@ -105,6 +133,16 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const [presentAlert] = useIonAlert();
 
+
+  useEffect( () => {
+    if (showAmount && billingRun && billingRun.id) {
+      dispatcher(fetchParticipantAmounts({tenant: tenant, billingRunId: billingRun.id }))
+    }
+    if (showAmount && !billingRun) {
+      dispatcher(resetParticipantAmounts());
+    }
+  }, [billingRun, showAmount])
+
   useEffect(() => {
     if (checkedParticipant) {
       const nextBillingEnabled =
@@ -116,6 +154,12 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         toggleShowAmount(false)
     }
   }, [checkedParticipant])
+
+  useEffect( () => {
+    if (billingRunErrorMessage) {
+      errorToast(billingRunErrorMessage);
+    }
+  }, [billingRunErrorMessage]);
 
   useEffect(() => {
     const sorted = participants.sort((a, b) => {
@@ -155,9 +199,19 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     toaster({
       message: message,
       duration: 3500,
-      position: 'bottom'
+      position: 'bottom',
     });
   };
+
+  const errorToast = (message: string) => {
+    toaster({
+      message: message,
+      duration: 3500,
+      position: 'bottom',
+      color: "danger"
+    });
+  };
+
 
   const buildAllocationMapFromSelected = ():MeteringEnergyGroupType[] => {
     const participantMap =
@@ -201,16 +255,15 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         ],
         onDidDismiss: (e: CustomEvent) => {
           if (e.detail.role === 'confirm') {
-
-            const invoiceRequest =
-              {allocations: buildAllocationMapFromSelected(),
-                tenantId: tenant,
-                preview: true,
-                clearingPeriodIdentifier: "Preview",
-                clearingPeriodType: "YM"} as ClearingPreviewRequest
-            dispatcher(
-              fetchEnergyBills({tenant, invoiceRequest}))
-              .then(() => toggleShowAmount(true));
+            if (activePeriod) {
+              dispatcher(fetchBillingRun({
+                tenant: tenant,
+                clearingPeriodType: activePeriod.type,
+                clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type,
+                    activePeriod.year, activePeriod.segment)
+              }))
+            }
+            toggleShowAmount(true);
           } else {
             toggleShowAmount(false);
           }
@@ -229,6 +282,13 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
       segment: selectedPeriod.segment,
       type: selectedPeriod.type,
     }))
+    dispatcher(fetchBillingRun({
+      tenant: tenant,
+      clearingPeriodType : selectedPeriod.type,
+      clearingPeriodIdentifier : createPeriodIdentifier(selectedPeriod.type,
+          selectedPeriod.year, selectedPeriod.segment)
+    }))
+
     // setUsedPeriod(idx)
   }
 
@@ -330,15 +390,51 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     }
   }
 
-  const onSubmitBills = () => {
+  const onDoBilling = (preview : boolean) => {
     if (activePeriod) {
       const invoiceRequest = {
         allocations: buildAllocationMapFromSelected(),
         tenantId: tenant,
-        preview: false,
-        clearingPeriodIdentifier: "Rechnung_"+activePeriod.type+"-"+activePeriod.segment,
+        preview: preview,
+        clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type, activePeriod.year, activePeriod.segment),
         clearingPeriodType: activePeriod.type} as ClearingPreviewRequest;
-      eegService.startEnergyBill(tenant, invoiceRequest);
+      dispatcher(
+        fetchEnergyBills({tenant, invoiceRequest}))
+        .then(() => {
+            dispatcher(fetchBillingRun({
+              tenant: tenant,
+              clearingPeriodType: activePeriod.type,
+              clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type,
+                activePeriod.year, activePeriod.segment)
+            }))
+          }
+        );
+    }
+  }
+
+  async function sendBilling (billingRunId : string) {
+    if (billingRunId) {
+      dispatcher(
+        billingRunSendmail( {tenant, billingRunId}))
+        .then(() => {
+          dispatcher(fetchBillingRunById({tenant, billingRunId }));
+        })
+    }
+  }
+
+  async function exportBillingExcel(billingRunId: string) {
+    try {
+      await eegService.exportBillingExcel(tenant, billingRunId);
+    } catch (e) {
+      console.log(e as string)
+    }
+  }
+
+  async function exportBillingArchive(billingRunId: string) {
+    try {
+      await eegService.exportBillingArchive(tenant, billingRunId);
+    } catch (e) {
+      console.log(e as string)
     }
   }
 
@@ -347,11 +443,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     const target = ev.target as HTMLIonSearchbarElement;
     if (target) query = target.value!.toLowerCase();
 
-    setResult(sortedParticipants.filter((d) =>
-      d.lastname.toLowerCase().indexOf(query) > -1 ||
-      d.firstname.toLowerCase().indexOf(query) > -1 ||
-      d.meters.filter(m => m.meteringPoint.toLowerCase().indexOf(query) > -1).length > 0
-    ));
+    setResult(sortedParticipants.filter((d) => d.lastname.toLowerCase().indexOf(query) > -1 || d.firstname.toLowerCase().indexOf(query) > -1));
   };
 
   const popoverRef = useRef<HTMLIonToolbarElement>(null)
@@ -478,7 +570,59 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
               </IonRow>
               <IonRow>
                 <IonCol size="12">
-                  <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onSubmitBills()}>{`RECHNUNG VERSENDEN (${billingInfo.length})`}</IonButton>
+                  { billingRunIsFetching || selectBillIsFetching &&
+                      <IonSpinner name="dots"></IonSpinner>
+                  }
+                  { !billingRunIsFetching && !billingRun &&
+                      <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onDoBilling(true)}>{`VORSCHAU ERSTELLEN`}</IonButton>
+                  }
+                  { !billingRunIsFetching && billingRunStatus === 'NEW' &&
+                      <>
+                        { "Vorschau (" + reformatDateTimeStamp(billingRun.runStatusDateTime) + ")"}
+                        <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onDoBilling(true)}>{`VORSCHAU AKTUALISIEREN`}</IonButton>
+                        <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onDoBilling(false)}>{`ABRECHNUNG DURCHFÜHREN (${billingInfo.length})`}</IonButton>
+                      </>
+                  }
+                  { !billingRunIsFetching && billingRunStatus === 'DONE' &&
+                    <>
+                      <div>
+                        { (billingRun.mailStatus === "SENT") ? "Versendet ("+reformatDateTimeStamp(billingRun.mailStatusDateTime)+")"
+                            : "Abgerechnet (" + reformatDateTimeStamp(billingRun.runStatusDateTime) + ")" }
+                      </div>
+                      <div>
+                        <IonButton id="confirm-send">
+                          <IonIcon slot="end" icon={mailOutline}></IonIcon>
+                          {'SENDEN'}
+                        </IonButton>
+                        <IonAlert
+                            header="SENDEN"
+                            subHeader="Mit Klick auf OK versenden Sie alle Abrechnungsdokumente per E-Mail."
+                            trigger="confirm-send"
+                            buttons={[
+                              {
+                                text: 'Abbrechen',
+                                role: 'cancel'
+                              },
+                              {
+                                text: 'OK',
+                                role: 'confirm',
+                                handler: () => {
+                                  sendBilling(billingRun.id);
+                                },
+                              },
+                            ]}
+                        ></IonAlert>
+                        <IonButton onClick={() => exportBillingArchive(billingRun.id)}>
+                          <IonIcon slot="end" icon={archiveOutline}></IonIcon>
+                          {'DOWNLOAD'}
+                        </IonButton>
+                        <IonButton onClick={() => exportBillingExcel(billingRun.id)}>
+                          <IonIcon slot="end" icon={documentTextOutline}></IonIcon>
+                          {'EXCEL'}
+                        </IonButton>
+                      </div>
+                    </>
+                  }
                 </IonCol>
               </IonRow>
             </div>

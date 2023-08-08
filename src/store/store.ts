@@ -5,6 +5,7 @@ import * as participant from './participant';
 import * as rate from './rate';
 import * as energy from './energy';
 import * as billing from './billing';
+import * as billingRun from './billingRun';
 
 import {combineReducers, configureStore, getDefaultMiddleware} from "@reduxjs/toolkit";
 
@@ -17,6 +18,7 @@ const reducer = combineReducers({
   [rate.featureKey]: rate.reducer,
   [energy.featureKey]: energy.reducer,
   [billing.featureKey]: billing.reducer,
+  [billingRun.featureKey]: billingRun.reducer,
 });
 
 // /**

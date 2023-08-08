@@ -7,7 +7,11 @@ import {fetchParticipantModel} from "../participant";
 import {fetchEnergyReport} from "../energy";
 import {eegService} from "../../service/eeg.service";
 import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
-import {Eeg} from "../../models/eeg.model";
+import {Eeg, EegTariff} from "../../models/eeg.model";
+import {createPeriodIdentifier} from "../../models/energy.model";
+import {EegParticipant} from "../../models/members.model";
+import {billingRunSelector, fetchBillingRun} from "../billingRun";
+import {fetchParticipantAmounts} from "../billing";
 
 
 export interface EegState {
@@ -78,10 +82,16 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
               break
           }
           dispatch(fetchEnergyReport({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period}))
+          dispatch(fetchBillingRun({
+            tenant: tenant,
+            clearingPeriodType : period,
+            clearingPeriodIdentifier : createPeriodIdentifier(period, parseInt(year, 10), segment)
+          }))
         }
       })
     }
   },[eeg])
+
 
   const init = async () => {
     let initTenant = tenant

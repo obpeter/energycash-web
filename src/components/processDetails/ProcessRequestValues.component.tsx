@@ -65,10 +65,10 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
       console.log("filtered Meters: ", meter);
       if (meter) {
         console.log("process Meters: ", meter);
-        eegService.syncMeteringPoint(
-          eeg.rcNumber.toUpperCase(), data.participantId,
-          meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
-          startDate.getTime(), endDate.getTime())
+          eegService.syncMeteringPoint(
+            eeg.rcNumber.toUpperCase(), data.participantId,
+            meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
+            startDate.getTime(), endDate.getTime())
             .finally(() => {
               reset()
               setDateRange([null, null])
