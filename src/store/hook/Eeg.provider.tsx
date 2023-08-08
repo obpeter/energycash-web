@@ -1,14 +1,13 @@
 import React, {createContext, FC, ReactNode, useContext, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../index";
 import {eegSelector, fetchEegModel, selectedTenant, selectTenant} from "../eeg";
-import {KeycloakContext, useKeycloak, useRoles, useTenants} from "./AuthProvider";
+import {useKeycloak, useRoles, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
 import {fetchParticipantModel} from "../participant";
-import {fetchEnergyReport, setSelectedPeriod} from "../energy";
+import {fetchEnergyReport} from "../energy";
 import {eegService} from "../../service/eeg.service";
 import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
-import {Eeg, EegTariff} from "../../models/eeg.model";
-import {EegParticipant} from "../../models/members.model";
+import {Eeg} from "../../models/eeg.model";
 
 
 export interface EegState {

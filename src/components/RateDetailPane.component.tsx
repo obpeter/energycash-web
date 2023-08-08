@@ -3,8 +3,6 @@ import {EegTariff} from "../models/eeg.model";
 import {IonButton, IonContent, IonFooter, IonIcon, IonItem, IonLabel, IonToolbar} from "@ionic/react";
 import {trashBin} from "ionicons/icons";
 import RateComponent from "./Rate.component";
-import {FieldValues} from "react-hook-form";
-import {useRateType} from "../store/hook/Rate.provider";
 import {useAppDispatch, useAppSelector} from "../store";
 import {selectedRateSelector, selectRate, selectRateById} from "../store/rate";
 

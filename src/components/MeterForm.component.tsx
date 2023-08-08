@@ -1,8 +1,4 @@
-import React, {FC, SyntheticEvent, useEffect, useState} from "react";
-import SelectForm from "./form/SelectForm.component";
-import InputForm from "./form/InputForm.component";
-import CheckboxComponent from "./form/Checkbox.component";
-import {IonList, IonListHeader} from "@ionic/react";
+import React, {FC, useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../store";
 import {ratesSelector} from "../store/rate";
@@ -28,28 +24,31 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
 
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
-  const {handleSubmit, control, watch, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
+  const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
 
-  // useEffect(() => {
-  //   watch((data) => console.log(data));
-  // }, [watch]);
+  useEffect(() => {
+    reset(metering)
+  }, [metering])
 
-  const getRatesOption = () => {
-    return rates.map((r) => {
-      return {key: r.id, value: r.name}
-    })
-  }
   const onSubmit = (meter: Metering) => {
-
-    if (isDirty) {
-      let participantId = participant.id;
-      dispatcher(updateMeteringPoint({tenant, participantId, meter}))
-      reset(meter);
+    console.log("MeterForm - Handle onSubmit: ", meter, isDirty, participant, dirtyFields)
+    if (Object.keys(dirtyFields).length > 0) {
+      let participantId = participant?.id;
+      if (participantId) {
+        dispatcher(updateMeteringPoint({tenant, participantId, meter}))
+        reset(meter);
+      }
     }
   }
 
+  const blurHandler = (e?: React.BaseSyntheticEvent) => {
+    console.log("MeterForm - Handle on Blur: ", e)
+    handleSubmit((data) => onSubmit(data), (invalid) => console.log("MeterForm - Form us Invalid", invalid))(e)
+  }
+
   return (
-    <form onBlur={handleSubmit((data) => onSubmit(data))}>
+    // <form onBlur={handleSubmit((data) => onSubmit(data))}>
+    <form onBlur={blurHandler}>
       <EegPaneTemplate>
         <MeterFormElement control={control} rates={rates} errors={errors} meterReadOnly={true} watch={watch}/>
         <MeterAddressFormElement control={control} errors={errors} />

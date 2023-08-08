@@ -4,7 +4,6 @@ import {createNewPeriod} from "../util/Helper.util";
 import PeriodSelectorElement from "./core/PeriodSelector.element";
 import {EegEnergyReport, EnergySeries, MeterEnergySeries, ReportType, SelectedPeriod} from "../models/energy.model";
 import {eegService} from "../service/eeg.service";
-import {Exception} from "sass";
 
 interface MeterChartNavbarComponentProps {
   tenant: string

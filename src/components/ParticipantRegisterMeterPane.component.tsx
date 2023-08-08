@@ -1,29 +1,11 @@
 import React, {FC, useEffect, useState} from "react";
-import {
-  IonCard,
-  IonCardContent,
-  IonCol,
-  IonGrid,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList, IonListHeader,
-  IonRow,
-  IonText
-} from "@ionic/react";
-import {add, star} from "ionicons/icons";
+import {IonCard, IonCardContent, IonCol, IonGrid, IonIcon, IonItem, IonLabel, IonRow, IonText} from "@ionic/react";
+import {add} from "ionicons/icons";
 import {EegParticipant} from "../models/members.model";
 import MeterCardComponent from "./participantPane/MeterCard.component";
-import ToggleButtonComponent from "./ToggleButton.component";
-import {eegPlug} from "../eegIcons";
-import SelectFormNative from "./form/SelectFormNative.component";
-import SelectForm from "./form/SelectForm.component";
-import InputForm from "./form/InputForm.component";
-import CheckboxComponent from "./form/Checkbox.component";
-import {Control, useFieldArray, useForm, useFormContext, useWatch} from "react-hook-form";
+import {useFieldArray, useFormContext} from "react-hook-form";
 import RegisterMeterPaneComponent from "./RegisterMeterPane.component";
 import {Metering} from "../models/meteringpoint.model";
-import {Address} from "../models/eeg.model";
 
 interface ParticipantRegisterMeterPaneComponentProps {
   participant: EegParticipant;
@@ -35,7 +17,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
   const [addMeterPaneActive, setAddMeterPaneActive] = useState(false)
   const [meteringPoint, setMeteringPoint] = useState<Metering | undefined>()
 
-  const { control, setValue, getValues, watch, formState: { errors }} = useFormContext<EegParticipant>();
+  const { control, watch} = useFormContext<EegParticipant>();
   const {fields, append, update, remove} = useFieldArray<EegParticipant>({control, name: 'meters'})
 
   useEffect(() => {

@@ -44,14 +44,6 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
     return ""
   }
 
-  // const onAdd = (e?: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
-  //
-  //   setShowAddMeterPane(true)
-  //   e?.preventDefault()
-  //   e?.stopPropagation()
-  // }
-
-
   const renderMemberName = ():string => {
     let name = ""
     if (participant.businessRole === 'EEG_PRIVATE') {

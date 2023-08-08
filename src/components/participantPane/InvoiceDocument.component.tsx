@@ -1,9 +1,9 @@
 import React, {FC, useEffect, useState} from "react";
 import {IonIcon, IonItem, IonLabel, IonList, IonListHeader} from "@ionic/react";
-import {eegService} from "../service/eeg.service";
-import {InvoiceDocumentResponse} from "../models/meteringpoint.model";
-import {EegParticipant} from "../models/members.model";
-import {eegPdfDoc} from "../eegIcons";
+import {eegService} from "../../service/eeg.service";
+import {InvoiceDocumentResponse} from "../../models/meteringpoint.model";
+import {EegParticipant} from "../../models/members.model";
+import {eegPdfDoc} from "../../eegIcons";
 
 
 const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}> = ({tenant, participant}) => {

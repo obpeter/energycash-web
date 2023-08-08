@@ -19,7 +19,8 @@ interface SelectFormProps {
   readonly?: boolean,
   onIonBlur?: (event: IonSelectCustomEvent<void>) => void,
   onIonDismiss?: (event: IonSelectCustomEvent<void>) => void,
-  onIonChange?: (event: IonSelectCustomEvent<SelectChangeEventDetail>) => void
+  onIonChange?: (event: IonSelectCustomEvent<SelectChangeEventDetail>) => void,
+  multiple?: boolean
 }
 
 const SelectForm: React.FC<SelectFormProps> = (
@@ -37,16 +38,14 @@ const SelectForm: React.FC<SelectFormProps> = (
           control={control}
           rules={rules}
           render={({field}) => {
-            const {onChange} = field;
+            const {onChange, value} = field;
             return (<IonSelect
               fill="outline"
               labelPlacement={"floating"}
-              // label={label}
-              // disabled={disabled}
+              value={value}
               interface={selectInterface}
-              // placeholder={placeholder}
-              onIonChange={onChange} {...field} {...rest}>
-              {options.map(({key, value}, i) => (<IonSelectOption key={i} value={key} disabled={disabled}>{value}</IonSelectOption>))}
+              onIonChange={onChange}  {...rest}>
+              {options.map((o, i) => (<IonSelectOption key={o.key} value={o.key} disabled={disabled}>{o.value}</IonSelectOption>))}
             </IonSelect>)
           }
         }

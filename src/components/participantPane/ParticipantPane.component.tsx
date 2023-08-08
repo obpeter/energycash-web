@@ -23,7 +23,6 @@ import {
   ClearingPreviewRequest,
   Metering,
   MeteringEnergyGroupType,
-  ParticipantBillType
 } from "../../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
 import {ParticipantContext} from "../../store/hook/ParticipantProvider";
@@ -34,11 +33,16 @@ import SlideButtonComponent from "../SlideButton.component";
 import {useAppDispatch, useAppSelector} from "../../store";
 import {billingSelector, fetchEnergyBills} from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
+import {fetchEnergyReport, meteringEnergyGroup} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
-import {add, cloudUploadOutline, downloadOutline, flash, person, search, searchCircle} from "ionicons/icons";
+import {add, cloudUploadOutline, downloadOutline, flash, person, search} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../../eegIcons";
-import {selectedParticipantSelector, selectMetering, selectParticipant} from "../../store/participant";
+import {
+  selectedMeterIdSelector,
+  selectedParticipantSelector,
+  selectMetering,
+  selectParticipant
+} from "../../store/participant";
 import cn from "classnames";
 import {isParticipantActivated} from "../../util/Helper.util";
 import DatepickerComponent from "../dialogs/datepicker.component";
@@ -66,6 +70,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const tenant = useAppSelector(selectedTenant);
   const energyMeterGroup = useAppSelector(meteringEnergyGroup);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
+  const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const billingInfo = useAppSelector(billingSelector);
   const eeg = useAppSelector(eegSelector)
 
@@ -342,7 +347,11 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     const target = ev.target as HTMLIonSearchbarElement;
     if (target) query = target.value!.toLowerCase();
 
-    setResult(sortedParticipants.filter((d) => d.lastname.toLowerCase().indexOf(query) > -1 || d.firstname.toLowerCase().indexOf(query) > -1));
+    setResult(sortedParticipants.filter((d) =>
+      d.lastname.toLowerCase().indexOf(query) > -1 ||
+      d.firstname.toLowerCase().indexOf(query) > -1 ||
+      d.meters.filter(m => m.meteringPoint.toLowerCase().indexOf(query) > -1).length > 0
+    ));
   };
 
   const popoverRef = useRef<HTMLIonToolbarElement>(null)
@@ -426,7 +435,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
           {result.map((p, idx) => {
             return (
               <div key={idx} onClick={onSelectParticipant(p)}
-                   className={cn("participant", {"selected": p.id === selectedParticipant.id})}>
+                   className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
                 <MemberComponent
                   participant={p}
                   onCheck={onCheckParticipant(p)}
@@ -444,7 +453,13 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                       return false;
                     return true;
                   }).map((m, i) => (
-                    <MeterCardComponent key={i} participant={p} meter={m} hideMeter={false} showCash={showAmount} onSelect={onSelectMeter}/>
+                    <MeterCardComponent key={i}
+                                        participant={p}
+                                        meter={m}
+                                        hideMeter={false}
+                                        showCash={showAmount}
+                                        onSelect={onSelectMeter}
+                                        isSelected={m.meteringPoint === selectedMeterId}/>
                   ))}
                 </MemberComponent>
               </div>

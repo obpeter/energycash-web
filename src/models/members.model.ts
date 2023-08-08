@@ -20,3 +20,12 @@ export interface EegParticipant {
   businessRole: 'EEG_PRIVATE' | 'EEG_BUSINESS'
   tariffId: string
 }
+
+export interface ContractInfo {
+  id: string;
+  userId: string;
+  name: string;
+  fileCategory: string;
+  fileDownloadUri: string;
+  createdAt: string;
+}

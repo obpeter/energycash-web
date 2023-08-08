@@ -14,7 +14,7 @@ export interface Metering {
   streetNumber: string;
   city: string;
   zip: string,
-  status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED"
+  status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED" | "REVOKED"
 };
 
 export interface ClearingPreviewRequest {

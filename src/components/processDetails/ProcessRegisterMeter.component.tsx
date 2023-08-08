@@ -1,8 +1,7 @@
 import React, {FC, forwardRef, useEffect, useState} from "react";
-import {IonButton, IonContent, IonInput, IonItem} from "@ionic/react";
+import {IonButton, IonInput, IonItem} from "@ionic/react";
 import InputForm from "../form/InputForm.component";
 import SelectForm from "../form/SelectForm.component";
-import DatePicker from "react-datepicker";
 import {useForm} from "react-hook-form";
 import {Metering} from "../../models/meteringpoint.model";
 import {Eeg} from "../../models/eeg.model";
@@ -28,7 +27,9 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
     meteringPoint: undefined,
   }
 
-  const {handleSubmit, control, watch, setValue} = useForm<ProcessValues>({defaultValues: processValues})
+  const {handleSubmit, reset,
+    control, watch,
+    setValue, formState} = useForm<ProcessValues>({defaultValues: processValues})
   const [useableMeters, setUsableMeters] = useState<Metering[]>(meters)
   const [meteringPoint, participantId] = watch(['meteringPoint', 'participantId'])
 
@@ -60,6 +61,10 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
       if (meter) {
         console.log(data, meter.meteringPoint, meter.direction)
         eegService.registerMeteringPoint(eeg.rcNumber.toUpperCase(), data.participantId, meter.meteringPoint, meter.direction)
+          .finally(() => {
+            reset()
+          })
+
       }
     }
   }
@@ -84,12 +89,12 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
         <InputForm name="communityId" label="Gemeinschafts-Id" control={control} readonly={true}/>
         <SelectForm control={control} name={"participantId"} options={participants.map((p) => {
           return {key: p.id, value: p.firstname + " " + p.lastname}
-        })} label={"Mitglied"} selectInterface={"popover"}/>
+        })} label={"Mitglied"} selectInterface={"popover"} rules={{required: true}}/>
         <SelectForm control={control} name={"meteringPoint"} options={useableMeters.map((p) => {
           return {key: p.meteringPoint, value: p.meteringPoint + " (" + p.equipmentName + ")"}
-        })} label={"Zählpunkt"} selectInterface={"popover"}/>
+        })} label={"Zählpunkt"} selectInterface={"popover"}  rules={{required: true}}/>
         <IonItem lines="none" style={{zIndex: "0"}}>
-          <IonButton slot="end" onClick={handleSubmit(onRequest)}>
+          <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={!formState.isValid}>
             Anfordern
           </IonButton>
         </IonItem>

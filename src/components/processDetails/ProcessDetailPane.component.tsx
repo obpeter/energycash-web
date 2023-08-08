@@ -1,17 +1,9 @@
-import React, {FC, forwardRef, useEffect, useState} from "react";
-import {IonButton, IonContent, IonFooter, IonIcon, IonInput, IonItem, IonLabel, IonToolbar} from "@ionic/react";
-import {eye, trashBin} from "ionicons/icons";
-import RateComponent from "../Rate.component";
+import React, {FC} from "react";
 import {EdaProcess, Eeg} from "../../models/eeg.model";
 
 import './ProcessDetailPane.component.scss'
-import InputForm from "../form/InputForm.component";
-import {Control, useForm} from "react-hook-form";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
-import SelectForm from "../form/SelectForm.component";
-import DatePicker from "react-datepicker";
-import {eegService} from "../../service/eeg.service";
 import {useAppSelector} from "../../store";
 import {selectedTenant} from "../../store/eeg";
 import ProcessRequestValuesComponent from "./ProcessRequestValues.component";

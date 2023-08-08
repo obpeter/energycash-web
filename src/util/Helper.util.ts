@@ -1,5 +1,5 @@
 import {EegParticipant} from "../models/members.model";
-import {EegEnergyReport, ReportType, SelectedPeriod} from "../models/energy.model";
+import {ReportType, SelectedPeriod} from "../models/energy.model";
 
 
 export const formatedName = (participant: EegParticipant) => {
