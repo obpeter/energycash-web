@@ -12,6 +12,7 @@ import {createPeriodIdentifier} from "../../models/energy.model";
 import {EegParticipant} from "../../models/members.model";
 import {billingRunSelector, fetchBillingRun} from "../billingRun";
 import {fetchParticipantAmounts} from "../billing";
+import {fetchBillingConfig} from "../billingConfig/actions";
 
 
 export interface EegState {

@@ -1,4 +1,4 @@
-import {Eeg, EegNotification, EegTariff} from "../models/eeg.model";
+import {BillingConfig, Eeg, EegNotification, EegTariff} from "../models/eeg.model";
 import {EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
@@ -374,6 +374,116 @@ class EegService {
     }).then(this.handleErrors).then(res => true);
   }
 
+  async fetchBillingConfigByTenantId(tenant: string, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch( `${BILLING_API_SERVER}/api/billingConfigs/tenant/${tenant}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      }
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async fetchBillingConfigById(billingConfigId: string, tenant : string, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch( `${BILLING_API_SERVER}/api/billingConfigs/${billingConfigId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      }
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async createBillingConfig(tenant: string, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    const result = fetch( `${BILLING_API_SERVER}/api/billingConfigs`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({tenantId : tenant, invoiceNumberStart : 0,
+                          creditNoteNumberStart: 0, documentNumberSequenceLength: 5} as BillingConfig)
+    }).then(this.handleErrors).then(res => res.json())
+
+    return await result.then(
+        data => {
+          return this.fetchBillingConfigById(data, tenant, token);
+        }
+    )
+  }
+
+  async updateBillingConfig(tenant: string, billingConfig: BillingConfig, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+
+    const result = await fetch( `${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}`, {
+      method: 'PUT',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(billingConfig)
+    }).then(this.handleErrors).then(res => {});
+
+    return this.fetchBillingConfigById(billingConfig.id, tenant, token);
+
+  }
+
+  async uploadImageBillingConfig(tenant: string, billingConfig : BillingConfig, imageType: "logo" | "footer", file: File): Promise<BillingConfig> {
+    const token = await this.authClient.getToken();
+    const body = new FormData();
+    body.append('file', file)
+
+    const result = await fetch(`${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}/${imageType}Image`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      },
+      body: body
+    }).then(this.handleErrors).then(res => {});
+
+    return this.fetchBillingConfigById(billingConfig.id, tenant, token);
+  }
+
+  async deleteImageBillingConfig(tenant: string, billingConfig : BillingConfig, imageType: "logo" | "footer"): Promise<BillingConfig> {
+    const token = await this.authClient.getToken();
+
+    const result = await fetch(`${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}/${imageType}Image`, {
+      method: 'DELETE',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      }
+    }).then(this.handleErrors).then(res => {});
+
+    return this.fetchBillingConfigById(billingConfig.id, tenant, token);
+  }
+
+  async getImageBillingConfig(tenant: string, billingConfig : BillingConfig, imageType: "logo" | "footer"): Promise<Blob> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}/${imageType}Image`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      }
+    }).then(this.handleErrors).then(response => response.blob());
+  }
 
   async syncMeteringPointList(tenant: string): Promise<EegEnergyReport> {
     const token = await this.authClient.getToken();

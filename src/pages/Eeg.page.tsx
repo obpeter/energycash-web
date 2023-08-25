@@ -1,5 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
 import {
+  IonButton,
   IonCard,
   IonContent,
   IonItem,
@@ -19,6 +20,7 @@ import {eegService} from "../service/eeg.service";
 import {IonSelectCustomEvent} from "@ionic/core/dist/types/components";
 import {useAccessGroups} from "../store/hook/Eeg.provider";
 import {findPartial} from "../util/Helper.util";
+import EegBillingConfigCardComponent from "../components/EegBillingConfigCard.component";
 
 const EegPage: FC = () => {
 
@@ -87,7 +89,7 @@ const EegPage: FC = () => {
   return (
     <IonPage>
       <IonContent fullscreen>
-        <div style={{flexGrow: "1", background: "#EAE7D9", height: "100vh"}}>
+        <div style={{flexGrow: "1", background: "#EAE7D9"}}>
           <div style={{display: "flex", flexDirection: "row"}}>
 
             <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
@@ -215,6 +217,9 @@ const EegPage: FC = () => {
                   </IonCard>
                 </div>
               </form>
+
+              <EegBillingConfigCardComponent/>
+
             </div>
           </div>
         </div>
