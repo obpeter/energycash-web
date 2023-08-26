@@ -44,8 +44,8 @@ const EegBillingConfigCardComponent: FC = () => {
 
     const {handleSubmit, control, formState: {isDirty, dirtyFields}} =
         useForm({
-            defaultValues: billingConfig,
-            values: billingConfig,
+            defaultValues: billingConfig!,
+            values: billingConfig!,
             mode: "all",
         })
     
@@ -62,6 +62,7 @@ const EegBillingConfigCardComponent: FC = () => {
     });
 
     const onSubmit = (billingConfigData: BillingConfig) => {
+        if (!billingConfigData) return;
         if (Object.keys(dirtyFields).length > 0) {
             dispatcher(updateBillingConfig({tenant, billingConfig : billingConfigData}))
                 .then(() => succesToast("Änderung gespeichert"));
@@ -117,7 +118,7 @@ const EegBillingConfigCardComponent: FC = () => {
         if (data) {
             const [file, imageType] = data
             if (imageType && file && file.length === 1) {
-                dispatcher(uploadImageBillingConfig({tenant, billingConfig, imageType, file: file[0]}))
+                dispatcher(uploadImageBillingConfig({tenant, billingConfig:billingConfig!, imageType, file: file[0]}))
             }
         }
     }
@@ -142,7 +143,7 @@ const EegBillingConfigCardComponent: FC = () => {
 
                     {
                         billingConfig &&
-                        <form  onBlur={handleSubmit(onSubmit)}>
+                        <form onBlur={handleSubmit(onSubmit)}>
                             <InputForm name={"beforeItemsTextInvoice"}
                                                 label="Rechnungen: Text vor Positionen"
                                                 control={control}

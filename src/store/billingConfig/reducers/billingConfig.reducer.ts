@@ -18,7 +18,7 @@ export const reducer = createReducer(initialState, builder =>
             return { ...state, billingConfig: billingConfig, isFetching: false, errorMessage : null }
         })
         .addCase(fetchBillingConfig.rejected, state => {
-            return { ...state, isFetching: false, errorMessage : 'Fehler beim Laden der Abrechnungseinstellungen' };
+            return { ...state, billingConfig : null, isFetching: false, errorMessage : 'Fehler beim Laden der Abrechnungseinstellungen' };
         })
         .addCase(createBillingConfig.pending, state => {
             return { ...state, isFetching: true, errorMessage : null };

@@ -374,7 +374,7 @@ class EegService {
     }).then(this.handleErrors).then(res => true);
   }
 
-  async fetchBillingConfigByTenantId(tenant: string, token?: string): Promise<BillingConfig> {
+  async fetchBillingConfigByTenantId(tenant: string, token?: string): Promise<BillingConfig>  {
     if (!token) {
       token = await this.authClient.getToken();
     }

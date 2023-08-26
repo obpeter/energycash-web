@@ -7,7 +7,7 @@ export const featureKey = 'billingConfig';
 
 export interface BillingConfigState {
   isFetching: boolean;
-  billingConfig: BillingConfig;
+  billingConfig: BillingConfig | null;
   errorMessage : string | null;
 }
 export const initialState: BillingConfigState = {

@@ -6,7 +6,7 @@ const featureStateSelector = (state: { [featureKey]: BillingConfigState }) => st
 
 
 export const billingConfigSelector = createSelector(
-    featureStateSelector, (billingConfigState) : BillingConfig => {
+    featureStateSelector, (billingConfigState) : BillingConfig | null => {
         return billingConfigState.billingConfig;
     }
 );
