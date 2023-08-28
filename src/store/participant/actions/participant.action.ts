@@ -80,6 +80,14 @@ export const updateMeteringPoint = createAsyncThunk(
     return {meter: meter, participantId: participantId}
   }
 )
+export const removeMeteringPoint = createAsyncThunk(
+  `${featureKey}/meter/remove`,
+  async (args: {tenant: string, participantId: string, meter: Metering}) => {
+    const {tenant, participantId, meter} = args
+    await eegService.removeMeteringPoint(tenant, participantId, meter);
+    return {meter: meter, participantId: participantId}
+  }
+)
 
 export const confirmParticipant = createAsyncThunk(
   `${featureKey}/participant/confirm`,

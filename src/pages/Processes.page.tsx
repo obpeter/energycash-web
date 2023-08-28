@@ -35,6 +35,11 @@ const ProcessesPage: FC = () => {
       description: "Dieser Prozess dient zur Aktivierung einers Zählpunktes. ",
       type: "EC_REQ_ONL"
     },
+    // {
+    //   name: "Prozess History",
+    //   description: "Übersicht der Prozesskommunikation mit den Marktpartner",
+    //   type: "HISTORY"
+    // },
   ]
 
   const [selectedProcess, setSelectedProcess] = useState<EdaProcess | undefined>()

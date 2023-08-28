@@ -191,9 +191,26 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
       return 0
     })
     // setCheckedParticipant(sorted.map(() => false))
+    const filteredAndSorted = filterMeters(sorted)
     setSortedParticipants(sorted);
-    setResult(sorted);
+    setResult(filteredAndSorted);
   }, [participants])
+
+  useEffect(() => {
+    const filteredAndSorted = filterMeters(sortedParticipants)
+    setResult(filteredAndSorted);
+  }, [hideConsumers, hideProducers]);
+
+  const filterMeters = (p: EegParticipant[]) => {
+    return p.map(ip => { return {...ip,
+      meters: ip.meters.filter(m => {
+        if (m.direction === 'GENERATION' && hideProducers)
+          return false;
+        if (m.direction === 'CONSUMPTION' && hideConsumers)
+          return false;
+        return true;
+      })} as EegParticipant})
+  }
 
   const infoToast = (message: string) => {
     toaster({
@@ -294,14 +311,17 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const onSelectParticipant = (p: EegParticipant) => (e: React.MouseEvent<Element, MouseEvent>) => {
     dispatcher(selectParticipant(p.id))
-    dispatcher(selectMetering(p.meters[0].meteringPoint));
+    if (p.meters.length > 0) {
+      dispatcher(selectMetering(p.meters[0].meteringPoint));
+    }
     setShowAddMeterPane(false)
   }
 
   const onShowAddMeterPage = (p: EegParticipant) => (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
     dispatcher(selectParticipant(p.id))
-    dispatcher(selectMetering(p.meters[0].meteringPoint));
-
+    if (p.meters.length > 0) {
+      dispatcher(selectMetering(p.meters[0].meteringPoint));
+    }
     setShowAddMeterPane(true)
     e?.preventDefault()
     e?.stopPropagation()
@@ -525,9 +545,36 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                                             onUpdatePeriod={onUpdatePeriodSelection}/>
 
           {result.map((p, idx) => {
+            if (p.meters.length > 0) {
+            return (
+            <div key={idx} onClick={onSelectParticipant(p)}
+                 className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
+              <MemberComponent
+                participant={p}
+                onCheck={onCheckParticipant(p)}
+                isChecked={checkedParticipant && (checkedParticipant[p.id] || false)}
+                hideMeter={hideMeter}
+                hideMember={hideMember}
+                showAmount={showAmount}
+                showDetailsPage={showDetailsPage}
+                onShowAddMeterPage={onShowAddMeterPage}
+              >
+                {hideMeter || p.meters.map((m, i) => (
+                  <MeterCardComponent key={"meter"+i}
+                                      participant={p}
+                                      meter={m}
+                                      hideMeter={false}
+                                      showCash={showAmount}
+                                      onSelect={onSelectMeter}
+                                      isSelected={m.meteringPoint === selectedMeterId}/>
+                ))}
+              </MemberComponent>
+            </div>
+            )
+          } else {
             return (
               <div key={idx} onClick={onSelectParticipant(p)}
-                   className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
+                                    className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
                 <MemberComponent
                   participant={p}
                   onCheck={onCheckParticipant(p)}
@@ -537,25 +584,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                   showAmount={showAmount}
                   showDetailsPage={showDetailsPage}
                   onShowAddMeterPage={onShowAddMeterPage}
-                >
-                  {hideMeter || p.meters.filter((m) => {
-                    if (m.direction === 'GENERATION' && hideProducers)
-                      return false;
-                    if (m.direction === 'CONSUMPTION' && hideConsumers)
-                      return false;
-                    return true;
-                  }).map((m, i) => (
-                    <MeterCardComponent key={i}
-                                        participant={p}
-                                        meter={m}
-                                        hideMeter={false}
-                                        showCash={showAmount}
-                                        onSelect={onSelectMeter}
-                                        isSelected={m.meteringPoint === selectedMeterId}/>
-                  ))}
-                </MemberComponent>
+                />
               </div>
-            )
+            )}
           })}
         </div>
         <div className={"pane-footer"}>

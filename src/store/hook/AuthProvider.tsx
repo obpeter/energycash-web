@@ -99,7 +99,7 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
         roles: authClient.accessGroups,
       });
 
-      console.log("UpdateState: ", this.state, "tenants", authClient);
+      // console.log("UpdateState: ", this.state, "tenants", authClient);
     }
 
     render() {

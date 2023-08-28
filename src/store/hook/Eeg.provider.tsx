@@ -44,6 +44,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const eeg = useAppSelector(eegSelector);
 
+
   useEffect(() => {
     // console.log("APP STATE CHANGED: ", state)
     if (tenant) init()

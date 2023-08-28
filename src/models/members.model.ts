@@ -4,21 +4,22 @@ import {Metering} from "./meteringpoint.model";
 export interface EegParticipant {
   id: string;
   participantNumber:string,
+  tariffId: string
+  participantSince: Date
+  titleBefore: string;
+  titleAfter: string;
   firstname: string;
   lastname: string;
+  taxNumber: string;
   residentAddress: Address;
   billingAddress: Address;
   contact: Contact;
-  titleBefore: string;
-  titleAfter: string;
-  taxNumber: string;
   accountInfo: AccountInfo;
   optionals: Optionals;
   meters: Metering[];
   status: 'NEW' | 'PENDING' | 'ACTIVE' | 'DISUSED'
   role: 'EEG_ADMIN' | 'EEG_USER'
   businessRole: 'EEG_PRIVATE' | 'EEG_BUSINESS'
-  tariffId: string
 }
 
 export interface ContractInfo {

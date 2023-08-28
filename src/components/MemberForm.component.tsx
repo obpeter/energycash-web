@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useEffect, useState, ClipboardEvent} from "react";
 import {IonCol, IonGrid, IonList, IonListHeader, IonRow} from "@ionic/react";
 import {people} from "ionicons/icons";
 import InputForm from "./form/InputForm.component";
@@ -17,7 +17,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 
-  const { handleSubmit, setValue, control, reset, formState: {errors} } = useForm({
+  const { handleSubmit, setValue, control,clearErrors,  reset, formState: {errors} } = useForm({
     defaultValues: participant, mode: "all"});
 
   const onChangeBusinessType = (s: number) => {
@@ -31,6 +31,14 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
       reset(participant)
     }
   }, [participant])
+
+  const handlePhonePaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
+    e.persist()
+    e.clipboardData.items[0].getAsString(text=>{
+      setValue("contact.phone", text.replace(/\+/gi, "00").replace(/\s/gi,""))
+    })
+    e.stopPropagation()
+  }
 
   return (
     <>
@@ -67,22 +75,18 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
                          rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
             )
           }
-          <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street}/>
+          <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
           <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
           <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} type="text"/>
           <InputForm name={"residentAddress.city"} label="Ort" control={control} type="text"/>
-          <InputForm name={"contact.phone"} label="Telefon" control={control} rules={{pattern: {value: /^[0-9]*$/, message: ""}}} type="text" error={errors.contact?.phone}/>
-          <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email}/>
+          <InputForm name={"contact.phone"} label="Telefon" control={control} onPaste={handlePhonePaste} type="text"/>
+          <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email} clear={clearErrors}/>
         </IonList>
         <IonList>
           <IonListHeader>Bankdaten</IonListHeader>
           <InputForm name={"accountInfo.iban"} label="IBAN" control={control} type="text"/>
           <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} type="text"/>
         </IonList>
-        {/*<IonList>*/}
-        {/*  <IonListHeader>Optional</IonListHeader>*/}
-        {/*  <InputForm name={"optionals.website"} label="Webseite" control={control} type="text"/>*/}
-        {/*</IonList>*/}
       </form>
     </>
   )

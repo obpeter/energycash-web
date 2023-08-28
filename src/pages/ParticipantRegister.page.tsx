@@ -41,6 +41,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
   const selectedParticipant: EegParticipant = {
     id: '',
     participantNumber: (participants.length + 1).toString().padStart(3, '0'),
+    participantSince: new Date(),
     firstname: '',
     lastname: '',
     status: 'NEW',

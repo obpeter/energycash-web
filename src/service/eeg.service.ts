@@ -1,4 +1,4 @@
-import {Eeg, EegNotification, EegTariff} from "../models/eeg.model";
+import {EdaHistories, Eeg, EegNotification, EegTariff} from "../models/eeg.model";
 import {ContractInfo, EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
@@ -200,6 +200,17 @@ class EegService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(meter)
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async removeMeteringPoint(tenant: string, participantId: string, meter: Metering): Promise<Metering> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/remove/${meter.meteringPoint}`, {
+      method: 'DELETE',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
     }).then(this.handleErrors).then(res => res.json());
   }
 
@@ -514,6 +525,15 @@ class EegService {
   async getNotifications(tenant: string, start: number): Promise<EegNotification[]> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg/notifications/${start}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => res.json());
+  }
+  async getHistories(tenant: string): Promise<EdaHistories> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/process/history`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),

@@ -8,6 +8,7 @@ import {useAppSelector} from "../../store";
 import {selectedTenant} from "../../store/eeg";
 import ProcessRequestValuesComponent from "./ProcessRequestValues.component";
 import ProcessRegisterMeterComponent from "./ProcessRegisterMeter.component";
+import ProcessHistoryComponent from "./ProcessHistory.component";
 
 
 interface ProcessDetailPaneComponentProps {
@@ -33,6 +34,8 @@ const ProcessDetailPaneComponent: FC<ProcessDetailPaneComponentProps> = ({
           return <ProcessRegisterMeterComponent eeg={eeg} meters={meters} participants={participants} />
         case 'CR_REQ_PT':
           return <ProcessRequestValuesComponent eeg={eeg} meters={meters} participants={participants} />
+        case 'HISTORY':
+          return <ProcessHistoryComponent eeg={eeg} />
       }
     }
     return <></>

@@ -12,6 +12,7 @@ import {ConsumerReport, ProducerReport} from "../../models/energy.model";
 import {selectRateById} from "../../store/rate";
 import {selectBillByMeter} from "../../store/billing";
 import {formatMeteringPointString} from "../../util/Helper.util";
+import unset from "react-hook-form/dist/utils/unset";
 
 interface MeterCardComponentProps {
   participant:EegParticipant;
@@ -85,7 +86,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
     return formatMeteringPointString(m.meteringPoint)
   }
 
-  let cardStyle: CARDSTYLE = {marginTop: "0px", fontSize: "16px"}
+  let cardStyle: CARDSTYLE = {marginTop: "0px", fontSize: "16px", marginInline: "0"}
   if (isSelected) {
     cardStyle = {...cardStyle, backgroundColor:"#e5ffdd"}
   }

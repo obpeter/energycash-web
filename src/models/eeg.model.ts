@@ -152,7 +152,7 @@ export enum MONTHNAMESHORT {
 export interface EdaProcess {
   name: string
   description: string
-  type: 'CR_REQ_PT' | 'EC_REQ_ONL'
+  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY'
 }
 
 
@@ -183,4 +183,16 @@ export interface EegNotification {
   date: string;
   type: 'ERROR' | 'MESSAGE' | 'NOTIFICATION';
   message: Message;
+}
+
+export type EdaHistories = Record<string, Record<string, Array<any>>>
+
+export interface EdaHistory {
+  date: Date
+  protocol: string
+  processType: string
+  message: Record<string, any>
+  meteringPoint?: string
+  meteringFrom?: Date
+  meteringTo?: Date
 }

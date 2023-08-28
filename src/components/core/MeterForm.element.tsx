@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {ClipboardEvent, FC, useEffect, useState} from "react";
 import {IonCol, IonGrid, IonList, IonRow} from "@ionic/react";
 import SelectForm from "../form/SelectForm.component";
 import InputForm from "../form/InputForm.component";
@@ -52,6 +52,15 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
     }
   }
 
+  const handleMeterPaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
+
+    e.persist()
+    e.clipboardData.items[0].getAsString(text=>{
+      setValue && setValue("meteringPoint", text.replace(/[-_]/gi, "").replace(/\s/gi,""))
+    })
+    e.stopPropagation()
+  }
+
   return (
     <>
       <IonGrid>
@@ -75,6 +84,7 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
                      maxLength: {value: 33, message: "MAX-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern" },
                      pattern: {value: /^AT[0-9A-Z]*$/, message: "Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern od. Großbuchstaben"}}}
                    error={errors?.meteringPoint}
+                   onPaste={handleMeterPaste}
         />
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>

@@ -4,7 +4,7 @@ import cn from "classnames";
 
 import "./ParticipantDetailsPane.compoenent.css"
 import {
-  IonButton, IonCard,
+  IonButton, IonButtons, IonCard,
   IonIcon,
   IonItem,
   IonLabel,
@@ -35,7 +35,7 @@ import {Metering} from "../../models/meteringpoint.model";
 import MemberFormComponent from "../MemberForm.component";
 import MeterFormComponent from "../MeterForm.component";
 import {
-  confirmParticipant,
+  confirmParticipant, removeMeteringPoint,
   selectedMeterIdSelector,
   selectedParticipantSelector,
   updateParticipant
@@ -50,6 +50,7 @@ import {eegService} from "../../service/eeg.service";
 import {MONTHNAME} from "../../models/eeg.model";
 import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 import ContractDocumentComponent from "./ContractDocument.component";
+import participants from "../../pages/Participants";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 interface ParticipantDetailsPaneProps {
@@ -84,6 +85,8 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
       if (meter) {
         setSelectedMeter(meter)
       }
+    } else {
+      setSelectedMeter(undefined)
     }
 
   }, [selectedMeterId])
@@ -94,7 +97,7 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
   }, [activePeriod])
 
   const onUpdateParticipant = (participant: EegParticipant) => {
-    dispatcher(updateParticipant({tenant, participant}))
+    dispatcher(updateParticipant({tenant, participant})).then(() => console.log("Participant Updated"))
   }
 
   const dynamicComponent = (componentKey: DynamicComponentKey) => {
@@ -147,6 +150,8 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
         return "Zählpunkt wurde vom Netzbetreiber abgewiesen"
       case 'REVOKED':
         return "Zählpunkt wurde vom Netzbetreiber aufgehoben"
+      case 'INVALID':
+        return "Zählpunkt wurde vom Netzbetreiber nicht angenommen"
       default:
         return ""
     }
@@ -164,6 +169,13 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
 
   if (!selectedParticipant) {
     return <></>
+  }
+
+  const onRemoveMeteringPoint = () => {
+    if (selectedMeter && selectedParticipant) {
+      dispatcher(removeMeteringPoint(
+        {tenant: tenant, participantId: selectedParticipant.id, meter: selectedMeter}))
+    }
   }
 
   return (
@@ -230,15 +242,6 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                 <IonToggle slot="end" checked={selectedParticipant?.role !== 'EEG_USER'} disabled={true}></IonToggle>
               </IonItem>
             </div>
-            {/*<div>*/}
-            {/*  <IonItem lines="full" className={"eeg-item-box"}>*/}
-            {/*    <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>*/}
-            {/*    <div>*/}
-            {/*      <div className={"detail-header"}>Mitglied aktiv</div>*/}
-            {/*    </div>*/}
-            {/*    <IonToggle slot="end" checked={selectedParticipant?.status === 'ACTIVE'} disabled={true}></IonToggle>*/}
-            {/*  </IonItem>*/}
-            {/*</div>*/}
           </div>
           <div className={"details-box"}>
             { selectedMeter ? (
@@ -252,6 +255,12 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                           <IonIcon icon={eegSandClass} slot="start"/>
                           <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
                       </IonItem>
+                    {selectedMeter.status === "INVALID" &&
+                      <IonItem>
+                        <IonButton color="warning" slot="end" size="small" fill = "outline"
+                                   onClick={() => onRemoveMeteringPoint()}>Löschen</IonButton>
+                      </IonItem>
+                    }
                   </IonCard>
               }
 
@@ -271,14 +280,6 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                 </div>
                 <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"} disabled={true}></IonToggle>
               </IonItem>
-              {/*<IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}*/}
-              {/*         onClick={() => setActiveMenu("documentForm")}>*/}
-              {/*  <IonIcon icon={documentTextOutline} slot="start"></IonIcon>*/}
-              {/*  <div>*/}
-              {/*    <div className={"detail-header"}>Dokumente</div>*/}
-              {/*    <div className={"detail-subheader"}>z.B. Verträge</div>*/}
-              {/*  </div>*/}
-              {/*</IonItem>*/}
               {isMeterActive() && activePeriod && selectedMeterId && <div style={{marginLeft: "20px"}}>
                 <h4>Energiedaten</h4>
                 <MeterChartNavbarComponent
@@ -287,42 +288,9 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
                   tenant={tenant}
                   selectedMeterId={selectedMeterId}
                   setEnergySeries={setActiveEnergySeries} />
-                {/*<div style={{display: "flex", alignItems: "center", justifyContent: "space-around"}}>*/}
-                {/*  <div>*/}
-                {/*    <IonButtons>*/}
-                {/*      {(["Y", "YH", "YQ", "YM"] as ('YH' | "YQ" | 'YM' | 'Y')[]).map((p, i) => (*/}
-                {/*        <IonButton*/}
-                {/*          key={i}*/}
-                {/*          onClick={() => onChangePeriod(createNewPeriod(selectedPeriod, p))}*/}
-                {/*          shape="round"*/}
-                {/*          size="small"*/}
-                {/*          className="stateButton"*/}
-                {/*          fill={isPeriodSelected(p) ? "solid" : undefined}*/}
-                {/*          color={isPeriodSelected(p) ? 'success' : undefined}>*/}
-                {/*          {p}*/}
-                {/*        </IonButton>*/}
-                {/*      ))}*/}
-                {/*    </IonButtons>*/}
-                {/*  </div>*/}
-                {/*  <div>*/}
-                {/*    <PeriodSelectorElement periods={periods} activePeriod={selectedPeriod} onUpdatePeriod={onChangePeriod} />*/}
-                {/*  </div>*/}
-                {/*</div>*/}
               </div> }
-              {/*<div style={{display: "flex", height: "300px", width: "100%"}}>*/}
               {isMeterActive() && activeEnergySeries && activeEnergySeries.series && activeEnergySeries.series.length > 0 && <div style={{height: "200px", width: "100%"}}>
                 <ResponsiveContainer width="90%" height={200}>
-                  {/*<LineChart width={600} height={300} data={energySeries.map((e, i) => {*/}
-                  {/*  return {name: "" + (i + 1), distributed: e.allocated, consumed: e.consumed}*/}
-                  {/*})} margin={{top: 15, right: 15, bottom: 35, left: 0}}>*/}
-                  {/*  <YAxis fontSize={10} unit={" kW"}/>*/}
-                  {/*  <CartesianGrid strokeDasharray="3 3"/>*/}
-                  {/*  <XAxis dataKey="name" angle={315} tickMargin={5} fontSize={10}/>*/}
-                  {/*  <Tooltip/>*/}
-                  {/*  <Legend align={'center'} verticalAlign={'bottom'} height={40} fontSize={"4px"}/>*/}
-                  {/*  <Line name="EEG" type="monotone" dataKey="distributed" stroke="#20c997" strokeWidth={1} fontSize={6} activeDot={false} dot={false}/>*/}
-                  {/*  <Line name="Netz" type="monotone" dataKey="consumed" stroke="#000000" strokeWidth={1} fontSize={6} activeDot={false} dot={false}/>*/}
-                  {/*</LineChart>*/}
                   <BarChart
                     width={500}
                     height={300}
