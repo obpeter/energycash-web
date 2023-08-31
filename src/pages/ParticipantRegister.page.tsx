@@ -54,6 +54,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
     role: 'EEG_USER',
     optionals: {website: ''},
     taxNumber: '',
+    vatNumber: '',
     tariffId: '',
     meters: []} as EegParticipant
 

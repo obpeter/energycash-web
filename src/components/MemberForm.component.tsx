@@ -70,6 +70,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
           <InputForm name={"residentAddress.city"} label="Ort" control={control} type="text"/>
           <InputForm name={"contact.phone"} label="Telefon" control={control} rules={{pattern: {value: /^[0-9]*$/, message: ""}}} type="text" error={errors.contact?.phone}/>
           <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email}/>
+          <InputForm name={"vatNumber"} label="UID" control={control} type="text"/>
         </IonList>
         <IonList>
           <IonListHeader>Bankdaten</IonListHeader>

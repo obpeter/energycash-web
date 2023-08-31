@@ -12,6 +12,7 @@ export interface EegParticipant {
   titleBefore: string;
   titleAfter: string;
   taxNumber: string;
+  vatNumber : string;
   accountInfo: AccountInfo;
   optionals: Optionals;
   meters: Metering[];
