@@ -64,9 +64,9 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
                 <p>Umsatzsteuer</p>
                 <p>{(rate.vatInPercent && rate.vatInPercent.length > 0 ? rate.vatInPercent : "0") + " %"}</p>
             </div>}
-            {rate.freeKWH && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+            {rate.freeKWh && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Inklusive kWh</p>
-              <p>{rate.freeKWH + " kWh"}</p>
+              <p>{rate.freeKWh + " kWh"}</p>
             </div>}
             {rate.discount && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Rabatt</p>

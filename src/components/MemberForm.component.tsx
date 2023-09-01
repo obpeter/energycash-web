@@ -6,14 +6,17 @@ import {useForm} from "react-hook-form";
 import {EegParticipant} from "../models/members.model";
 import {eegBusiness} from "../eegIcons";
 import ToggleButtonComponent from "./ToggleButton.component";
+import SelectForm from "./form/SelectForm.component";
+import {EegTariff} from "../models/eeg.model";
 
 interface MemberFormComponentProps {
   participant: EegParticipant
+  rates: EegTariff[]
   formId: string
   onSubmit: (data: EegParticipant) => void
 }
 
-const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId, onSubmit}) => {
+const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, formId, onSubmit}) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 
@@ -38,6 +41,12 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
       setValue("contact.phone", text.replace(/\+/gi, "00").replace(/\s/gi,""))
     })
     e.stopPropagation()
+  }
+
+  const getRatesOption = () => {
+    return rates.filter(r => r.type === "EEG").map((r) => {
+      return {key: r.id, value: r.name}
+    })
   }
 
   return (
@@ -75,6 +84,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
                          rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
             )
           }
+          <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()}/>
           <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
           <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
           <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} type="text"/>

@@ -12,6 +12,7 @@ import {createPeriodIdentifier} from "../../models/energy.model";
 import {EegParticipant} from "../../models/members.model";
 import {billingRunSelector, fetchBillingRun} from "../billingRun";
 import {fetchParticipantAmounts} from "../billing";
+import {fetchBillingConfig} from "../billingConfig/actions";
 
 
 export interface EegState {
@@ -44,6 +45,12 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const eeg = useAppSelector(eegSelector);
 
+  useEffect( () => {
+    if (tenant) {
+      init()
+    }
+    console.log("Update EEG Data")
+  }, [])
 
   useEffect(() => {
     // console.log("APP STATE CHANGED: ", state)

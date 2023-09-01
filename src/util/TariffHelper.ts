@@ -3,8 +3,8 @@ import {EegTariff} from "../models/eeg.model";
 const vzpInEuro = (allocated: number, tariff: EegTariff) => {
   let billableEnergy = allocated;
   let amount = 0;
-  if (tariff.freeKWH) {
-    billableEnergy = Math.max(billableEnergy - Number(tariff.freeKWH), 0)
+  if (tariff.freeKWh) {
+    billableEnergy = Math.max(billableEnergy - Number(tariff.freeKWh), 0)
   }
 
   if (tariff.centPerKWh) {
@@ -24,8 +24,8 @@ const vzpInEuro = (allocated: number, tariff: EegTariff) => {
 const ezpInEuro = (allocated: number, tariff: EegTariff) => {
   let billableEnergy = allocated;
   let amount = 0;
-  if (tariff.freeKWH) {
-    billableEnergy = Math.max(billableEnergy - Number(tariff.freeKWH), 0)
+  if (tariff.freeKWh) {
+    billableEnergy = Math.max(billableEnergy - Number(tariff.freeKWh), 0)
   }
 
   if (tariff.centPerKWh) {

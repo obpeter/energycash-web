@@ -61,6 +61,29 @@ export interface Optionals {
   website: string;
 }
 
+export interface BillingConfig {
+  id : string;
+  tenantId : string;
+  headerImageFileDataId : string;
+  footerImageFileDataId : string;
+  beforeItemsTextInvoice : string;
+  beforeItemsTextCreditNote : string;
+  beforeItemsTextInfo : string;
+  afterItemsTextInvoice : string;
+  afterItemsTextCreditNote : string;
+  afterItemsTextInfo : string;
+  termsTextInvoice : string;
+  termsTextCreditNote : string;
+  termsTextInfo : string;
+  footerText : string;
+  documentNumberSequenceLength : number;
+  customTemplateFileDataId : string;
+  invoiceNumberPrefix : string;
+  invoiceNumberStart : number;
+  creditNoteNumberPrefix : string;
+  creditNoteNumberStart : number;
+}
+
 export interface EegRateItem {
   name: RateTypeEnum;
   value: string;
@@ -115,7 +138,7 @@ export interface EegTariff {
   baseFee?: string
   businessNr?: string
   centPerKWh?: string
-  freeKWH?: string
+  freeKWh?: string
   discount?: string
 }
 

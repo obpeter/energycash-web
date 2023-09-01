@@ -51,6 +51,7 @@ import {MONTHNAME} from "../../models/eeg.model";
 import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 import ContractDocumentComponent from "./ContractDocument.component";
 import participants from "../../pages/Participants";
+import {ratesSelector} from "../../store/rate";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 interface ParticipantDetailsPaneProps {
@@ -64,6 +65,7 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const tenant = useAppSelector(selectedTenant)
+  const rates = useAppSelector(ratesSelector);
 
   const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
 
@@ -104,7 +106,7 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
 
     switch (componentKey) {
       case "memberForm":
-        return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} formId={""}
+        return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} rates={rates} formId={""}
                                     onSubmit={onUpdateParticipant}/> : <></>
       case "meterForm":
           return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>

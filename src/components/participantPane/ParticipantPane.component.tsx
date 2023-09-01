@@ -361,7 +361,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         })
         .catch(() => {
           dismissReport(undefined)
-          dismissLoading()})
+          dismissLoading()
+          errorToast("Export konnte nicht generiert werden.")
+        })
     }
   });
 
@@ -470,7 +472,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   return (
     <div className={"participant-pane"}>
       <div className={"pane-body"}>
-        <DatepickerComponent range={dismiss} trigger="open-datepicker-dialog" />
+        {/*<DatepickerComponent range={dismiss} trigger="open-datepicker-dialog" />*/}
         <div className={"pane-content"}>
           <IonToolbar color="eeglight" style={{"--min-height": "56px"}} ref={popoverRef}>
             <IonButtons slot="end">

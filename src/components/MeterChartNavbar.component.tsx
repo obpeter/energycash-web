@@ -29,13 +29,27 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({tenant, 
   const calcSelectedEnergySeries = (reportType: ReportType, meterId: string, report: EegEnergyReport): EnergySeries[] => {
     const meta = report.eeg.meta.find(m => m.name === meterId)
     return report.eeg.intermediateReportResults.map(r => {
-      if (meta && r.allocated.length > meta.sourceIdx) {
+      if (meta) {
         const [period, year, segment, idx] = r.id.split('/')
-        return {
-          segmentIdx: Number(idx),
-          allocated: meta.dir === "CONSUMPTION" ? r.allocated[meta.sourceIdx] : r.produced[meta.sourceIdx] - r.distributed[meta.sourceIdx],
-          consumed: meta.dir === "CONSUMPTION" ? r.consumed[meta.sourceIdx] - r.allocated[meta.sourceIdx] : r.produced[meta.sourceIdx]
-        } as EnergySeries
+        switch (meta.dir) {
+          case "CONSUMPTION":
+            if ((r.allocated.length > meta.sourceIdx) && (r.consumed.length > meta.sourceIdx)) {
+              return {
+                segmentIdx: Number(idx),
+                allocated: r.allocated[meta.sourceIdx],
+                consumed: r.consumed[meta.sourceIdx] - r.allocated[meta.sourceIdx]
+              } as EnergySeries
+            }
+            break;
+          case "GENERATION":
+            if ((r.produced.length > meta.sourceIdx) && (r.distributed.length > meta.sourceIdx)) {
+              return {
+                segmentIdx: Number(idx),
+                allocated: r.produced[meta.sourceIdx] - r.distributed[meta.sourceIdx],
+                consumed: r.produced[meta.sourceIdx]
+              } as EnergySeries
+            }
+        }
       }
       return  { segmentIdx: 0, allocated: 0, consumed: 0 } as EnergySeries
     })

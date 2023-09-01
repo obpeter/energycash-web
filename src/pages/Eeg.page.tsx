@@ -1,5 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
 import {
+  IonButton,
   IonCard,
   IonContent,
   IonItem,
@@ -19,6 +20,7 @@ import {eegService} from "../service/eeg.service";
 import {IonSelectCustomEvent} from "@ionic/core/dist/types/components";
 import {useAccessGroups} from "../store/hook/Eeg.provider";
 import {findPartial} from "../util/Helper.util";
+import EegBillingConfigCardComponent from "../components/EegBillingConfigCard.component";
 
 const EegPage: FC = () => {
 
@@ -79,15 +81,15 @@ const EegPage: FC = () => {
     }
   }
 
-  const onChangeValue = (e: IonSelectCustomEvent<SelectChangeEventDetail>) => {
-    dispatcher(updateEegModel({tenant, eeg: {[e.target.name]: e.detail.value}}))
+  const onChangeValue = (property: string) => (e: IonSelectCustomEvent<SelectChangeEventDetail>) => {
+    dispatcher(updateEegModel({tenant, eeg: {[property]: e.detail.value}}))
     // eegService.updateEeg(tenant, {[e.target.name]: e.detail.value})
   }
 
   return (
     <IonPage>
       <IonContent fullscreen>
-        <div style={{flexGrow: "1", background: "#EAE7D9", height: "100vh"}}>
+        <div style={{flexGrow: "1", background: "#EAE7D9"}}>
           <div style={{display: "flex", flexDirection: "row"}}>
 
             <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
@@ -114,7 +116,7 @@ const EegPage: FC = () => {
                     {key: "QUARTER", value: "Vierteljährlich"},
                     {key: "BIANNUAL", value: "Halbjährlich"},
                     {key: "ANNUAL", value: "Jährlich"},
-                  ]} onIonChange={onChangeValue}></SelectForm>
+                  ]} onIonChange={onChangeValue("settlementInterval")} disabled={true}></SelectForm>
                   <IonItem lines="none">
                     {/*<IonLabel slot="start">SEPA aktiv</IonLabel>*/}
                     <Controller
@@ -215,6 +217,9 @@ const EegPage: FC = () => {
                   </IonCard>
                 </div>
               </form>
+
+              <EegBillingConfigCardComponent/>
+
             </div>
           </div>
         </div>

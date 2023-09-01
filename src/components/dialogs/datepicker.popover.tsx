@@ -9,6 +9,7 @@ import {
 import DatePicker from "react-datepicker";
 
 import "./upload.popover.scss"
+import "react-datepicker/dist/react-datepicker.css";
 
 const DatepickerPopover: FC<{tenant: string, onDismiss: (startDate: Date, endDate: Date) => void}> = ({tenant, onDismiss}) => {
 

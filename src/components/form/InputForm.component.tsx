@@ -52,6 +52,7 @@ const InputForm: (React.FC<InputFormProps>) =
                               labelPlacement={"floating"}
                               value={value}
                               name={name}
+                              // onChange={onChange}
                               ref={ref}
                               // errorText={rest.error?.message}
                               {...rest}></IonInput>)

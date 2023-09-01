@@ -102,8 +102,8 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
             <div>
               <InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" inputmode={"numeric"} error={errors.centPerKWh}/>
-              <InputFormComponent label="Inklusive kWh" control={control} name={"freeKWH"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.freeKWH}/>
+              <InputFormComponent label="Inklusive kWh" control={control} name={"freeKWh"}
+                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.freeKWh}/>
               <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
               {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh',*/}
