@@ -156,6 +156,9 @@ const EegPage: FC = () => {
                       {key: "verein", value: "Verein"},
                       {key: "genossenschaft", value: "Genossenschaft"},
                       {key: "gesellschaft", value: "Gesellschaft"}]} placeholder="Rechtsform" disabled={!isAdmin()}/>
+                    <InputFormComponent name={"businessNr"} label="Firmennummer" control={control} rules={{}}
+                                        type="text"
+                                        readonly={!isAdmin()}/>
                     <InputFormComponent name={"vatNumber"} label="Umsatzsteuer ID" control={control} rules={{}}
                                         type="text"
                                         readonly={!isAdmin()}/>

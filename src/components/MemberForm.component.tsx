@@ -31,6 +31,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
   useEffect(() => {
     if (participant) {
       participant.businessRole === 'EEG_PRIVATE' ? setSelectedBusinessType(0) : setSelectedBusinessType(1)
+      console.log("RESET PARTICIPANT")
       reset(participant)
     }
   }, [participant])
@@ -85,12 +86,13 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
             )
           }
           <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()}/>
-          <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
-          <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
-          <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} type="text"/>
-          <InputForm name={"residentAddress.city"} label="Ort" control={control} type="text"/>
+          <InputForm name={"billingAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
+          <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
+          <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control} type="text"/>
+          <InputForm name={"billingAddress.city"} label="Ort" control={control} type="text"/>
           <InputForm name={"contact.phone"} label="Telefon" control={control} onPaste={handlePhonePaste} type="text"/>
           <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email} clear={clearErrors}/>
+          <InputForm name={"vatNumber"} label="UID" control={control} type="text"/>
         </IonList>
         <IonList>
           <IonListHeader>Bankdaten</IonListHeader>

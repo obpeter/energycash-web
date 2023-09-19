@@ -60,7 +60,6 @@ import {
 } from "../../store/participant";
 import cn from "classnames";
 import {isParticipantActivated, reformatDateTimeStamp} from "../../util/Helper.util";
-import DatepickerComponent from "../dialogs/datepicker.component";
 import DatepickerPopover from "../dialogs/datepicker.popover";
 import {ExcelReportRequest, InvestigatorCP} from "../../models/reports.model";
 import {eegService} from "../../service/eeg.service";
@@ -104,7 +103,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const [searchActive, setSearchActive] = useState(false);
   const [sortedParticipants, setSortedParticipants] = useState(participants);
-  const [result, setResult] = useState(participants)
+  const [result, setResult] = useState<EegParticipant[]>([])
 
   const [loading, dismissLoading] = useIonLoading();
 
@@ -336,7 +335,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const billingSum = () => {
     if (billingInfo) {
-      const sum = billingInfo.reduce((i, s) => i + s.amount + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
+      const sum = billingInfo.reduce((i, s) => i + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
       return Math.round(sum * 100) / 100;
     }
     return 0

@@ -1,5 +1,3 @@
-import {options} from "ionicons/icons";
-
 export interface Eeg {
   name: string;
   rcNumber: string;
@@ -7,6 +5,7 @@ export interface Eeg {
   salesTax: string;
   taxNumber: string;
   vatNumber: string;
+  businessNr: string;
   settlement: string;
   settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
   allocationMode: "DYNAMIC" | "STATIC"
@@ -210,12 +209,3 @@ export interface EegNotification {
 
 export type EdaHistories = Record<string, Record<string, Array<any>>>
 
-export interface EdaHistory {
-  date: Date
-  protocol: string
-  processType: string
-  message: Record<string, any>
-  meteringPoint?: string
-  meteringFrom?: Date
-  meteringTo?: Date
-}

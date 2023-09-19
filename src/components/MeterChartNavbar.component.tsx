@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
 import {IonButton, IonButtons} from "@ionic/react";
 import {createNewPeriod} from "../util/Helper.util";
 import {EegEnergyReport, EnergySeries, MeterEnergySeries, ReportType, SelectedPeriod} from "../models/energy.model";
@@ -71,12 +71,12 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({tenant, 
       .then((r) => setEnergySeries({period: selectedPeriod, series:r}))
   }
 
-  const onChangePeriod = (selectedPeriod: SelectedPeriod | undefined)  =>{
+  const onChangePeriod = useCallback((selectedPeriod: SelectedPeriod | undefined)  =>{
     if (selectedPeriod) {
       setSelectedPeriod(selectedPeriod)
       updateSeries(selectedMeterId, selectedPeriod)
     }
-  }
+  }, [selectedPeriod])
 
   const onSelectAll = ()  => {
   };

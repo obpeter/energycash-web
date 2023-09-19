@@ -35,7 +35,7 @@ const InputForm: (React.FC<InputFormProps>) =
           control={control}
           rules={rules}
           render={({field, fieldState, formState}) => {
-            const { onChange, value, name,ref } = field;
+            const { onChange, value, name, ref } = field;
             return (<IonInput
                               onIonChange={(e) => {
                                 if (fieldState.invalid) {
@@ -47,6 +47,7 @@ const InputForm: (React.FC<InputFormProps>) =
                               //   console.log("Input OnBlure");
                               //   onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))
                               // }}
+                              onChange={onChange}
                               placeholder={placeholder ? placeholder : "Enter Text"}
                               fill="outline"
                               labelPlacement={"floating"}

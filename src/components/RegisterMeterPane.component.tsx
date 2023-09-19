@@ -29,7 +29,7 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({
                                                                          }) => {
 
   const rates = useAppSelector(ratesSelector);
-  const {handleSubmit, setValue, control, watch, formState: {errors}} = useForm({defaultValues: meteringPoint});
+  const {handleSubmit, setValue, control, watch, formState: {errors}, clearErrors} = useForm({defaultValues: meteringPoint});
 
   const {getValues} = useFormContext<EegParticipant>();
   const participant = getValues()
@@ -45,10 +45,10 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({
     <div style={{display: "grid", gridTemplateColumns: "50% 50%", justifyContent: "space-between"}}>
       <div style={{flexGrow: "1", height: "100%"}}>
         <MeterFormElement control={control} rates={rates} errors={errors} setValue={setValue}
-                          participant={participant} watch={watch}/>
+                          participant={participant} watch={watch} clear={clearErrors}/>
       </div>
       <div style={{flexGrow: "1", height: "100%"}}>
-        <MeterAddressFormElement control={control} errors={errors} setValue={setValue} participant={participant}/>
+        <MeterAddressFormElement control={control} errors={errors} setValue={setValue} participant={participant} showStatus={true} clear={clearErrors}/>
       </div>
       <div style={{gridColumnStart: "1", gridColumnEnd: "2", display: "grid"}}>
         <IonFooter>

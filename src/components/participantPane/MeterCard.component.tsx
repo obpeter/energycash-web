@@ -55,7 +55,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
     return 0
   }
   const isPending = () => participant.status === 'PENDING';
-  const isGenerator = () => meter.direction === 'GENERATION';
+  const isGenerator = (m: Metering) => m.direction === 'GENERATION';
   const isMeterPending = () => isPending() || meter.status === 'NEW' || meter.status === 'PENDING';
 
   const isMeterInactive = () => meter.status === "REVOKED" || meter.status === "REJECTED"
@@ -97,7 +97,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
       <IonGrid fixed={true} style={{paddingTop: "12px"}}>
         <IonRow style={isMeterActive() ? {color: "#1E4640"} : isMeterPending() ? {color: "#DC631E"} : {color: "#dc1e1e"}}>
           <IonCol size={"1"}>
-            <IonIcon icon={isMeterInactive() ? eegExclamation : isGenerator() ? eegSolar : eegPlug} size="small"></IonIcon>
+            <IonIcon icon={isMeterInactive() ? eegExclamation : isGenerator(meter) ? eegSolar : eegPlug} size="small"></IonIcon>
           </IonCol>
           <IonCol size={isMeterPending() ? "11" : "7"}>
             {/*<IonLabel style={{textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{participant.participant.meters[0].meteringPoint}</IonLabel>*/}
@@ -108,9 +108,9 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
             <IonCol size={"4"}>
               <div style={{display: "flex", flexFlow:"row-reverse"}}>
                 { showCash ? (
-                  <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator()}, {"consumer-text": isGenerator()})}>{meterValue()}</IonLabel>
+                  <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator(meter)}, {"consumer-text": isGenerator(meter)})}>{meterValue()}</IonLabel>
                 ) : (
-                  <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator()}, {"consumer-text": isGenerator()})}>{meterValue()}</IonLabel>
+                  <IonLabel className={cn("ion-text-end", {"producer-text": !isGenerator(meter)}, {"consumer-text": isGenerator(meter)})}>{meterValue()}</IonLabel>
                 )}
               </div>
             </IonCol>
@@ -120,7 +120,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
       {isMeterPending() || hideMeter || (
         <div style={{height: "6px", width: "100%", background: "rgba(0, 0, 0, 0.04)"}}>
           <div style={{position: "absolute", height: "6px", right: "0", width: "" + barRatio(report) + "%"}}
-               className={cn({"producer":isGenerator()}, {"consumer":!isGenerator()})}></div>
+               className={cn({"producer":isGenerator(meter)}, {"consumer":!isGenerator(meter)})}></div>
         </div>
       )}
     </IonCard>

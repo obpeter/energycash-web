@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, MouseEventHandler, useEffect, useState} from "react";
 import {
   IonButton, IonButtons,
   IonCard, IonCol, IonGrid,
@@ -7,7 +7,7 @@ import {
   IonLabel,
   IonList,
   IonListHeader, IonRow,
-  IonToolbar,
+  IonToolbar, useIonAlert,
   useIonModal
 } from "@ionic/react";
 import {eegPdfDoc, eegStar} from "../../eegIcons";
@@ -18,6 +18,10 @@ import UploadContractFilesDialog from "../dialogs/UploadContractFiles.dialog";
 
 import "./ContractDocument.component.scss"
 import {trash, trashBin} from "ionicons/icons";
+import {fileService} from "../../service/file.service";
+import {fetchBillingRun} from "../../store/billingRun";
+import {createPeriodIdentifier} from "../../models/energy.model";
+import {IonButtonCustomEvent} from "@ionic/core/dist/types/components";
 
 
 interface ContractDocumentComponentProps {
@@ -26,15 +30,16 @@ interface ContractDocumentComponentProps {
 }
 const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, participant}) => {
   const [contractDocs, setContractDocs] = useState<ContractInfo[]>([])
+  const [presentAlert] = useIonAlert();
 
   useEffect(() => {
     if (tenant && participant) {
-      eegService.loadContractDocumentInfos(tenant)
+      fileService.loadContractDocumentInfos(tenant, participant.id)
         .then(docs => {
           console.log(docs)
           return docs
         })
-        .then(docs => docs.filter(d => d.userId === participant.id && d.fileCategory === "contract"))
+        // .then(docs => docs.filter(d => d.userId === participant.id && d.fileCategory === "contract"))
         .then(docs => setContractDocs(docs))
     }
 
@@ -76,7 +81,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
       onWillDismiss: (ev: CustomEvent<OverlayEventDetail>) => {
         if (ev.detail.role === 'confirm' && ev.detail.data) {
           const data:FormData = ev.detail.data
-          eegService.uploadContractDocuments(tenant, participant.id, data.getAll("docfiles")
+          fileService.uploadContractDocuments(tenant, participant.id, data.getAll("docfiles")
             .map(e => e as File))
             .then((r) => {
               const fileInfo = {id: r.data.addFile.id,
@@ -93,6 +98,30 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
     });
   }
 
+  const deleteContract = (c: ContractInfo) => (event: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
+    event.stopPropagation()
+    presentAlert({
+      subHeader: "Vertragsdaten",
+      message: `Die Datei ${c.name} wird unwiderruflich vom Server gelöscht!`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+        },
+      ],
+      onDidDismiss: (e: CustomEvent) => {
+        if (e.detail.role === 'confirm') {
+          fileService.deleteContractDocuments(tenant, c.id).then(() => {
+            setContractDocs((d) => d.filter(e => e.id !== c.id))
+          })
+        }
+      },
+    })
+  }
   const parseFileName = (create: string, name: string) => {
     const date = new Date(create).toLocaleString('de-at',{month:'short', year:'numeric'})
     return (
@@ -139,7 +168,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
               <IonLabel>{parseFileName(d.createdAt, d.name)}</IonLabel>
               <IonIcon icon={eegPdfDoc} slot="start"></IonIcon>
               <IonButtons slot="end">
-                <IonButton size={"small"} fill={"clear"}>
+                <IonButton size={"small"} fill={"clear"} onClick={deleteContract(d)}>
                   <IonIcon slot="icon-only" size={"small"} icon={trash}></IonIcon>
                 </IonButton>
               </IonButtons>

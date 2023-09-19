@@ -24,7 +24,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
 
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
-  const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
+  const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset, clearErrors} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
 
   useEffect(() => {
     reset(metering)
@@ -50,8 +50,8 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
     // <form onBlur={handleSubmit((data) => onSubmit(data))}>
     <form onBlur={blurHandler}>
       <EegPaneTemplate>
-        <MeterFormElement control={control} rates={rates} errors={errors} meterReadOnly={true} watch={watch}/>
-        <MeterAddressFormElement control={control} errors={errors} />
+        <MeterFormElement control={control} rates={rates} errors={errors} meterReadOnly={true} watch={watch} clear={clearErrors}/>
+        <MeterAddressFormElement control={control} errors={errors} clear={clearErrors}/>
       </EegPaneTemplate>
     </form>
   )

@@ -3,6 +3,10 @@ import {featureKey} from "../states/participant.state";
 import {eegService} from "../../../service/eeg.service";
 import {EegParticipant} from "../../../models/members.model";
 import {Metering} from "../../../models/meteringpoint.model";
+import {EegTariff} from "../../../models/eeg.model";
+import {tariffService} from "../../../service/tariff.service";
+import {HttpError} from "../../../service/base.service";
+import {participantService} from "../../../service/participant.service";
 
 export const fetchParticipantModel = createAsyncThunk(
   `${featureKey}/fetchParticipants`,
@@ -91,8 +95,24 @@ export const removeMeteringPoint = createAsyncThunk(
 
 export const confirmParticipant = createAsyncThunk(
   `${featureKey}/participant/confirm`,
-  async (args: {tenant: string, participantId: string, data: FormData}) => {
-    const {tenant, participantId, data} = args
-    return await eegService.confirmParticipant(tenant, participantId, data);
+  async (args: {tenant: string, participantId: string/*, data: FormData*/}) => {
+    const {tenant, participantId} = args
+    return await eegService.confirmParticipant(tenant, participantId);
+  }
+)
+
+export const archiveParticipant = createAsyncThunk(
+  `${featureKey}/archive`,
+  async (arg: {participant: EegParticipant, tenant: string}, { rejectWithValue }) => {
+    const {participant, tenant} = arg
+    try {
+      await participantService.archiveParticipant(tenant, participant.id);
+      return participant.id
+    } catch (e) {
+      if (e instanceof HttpError) {
+        return rejectWithValue(e.reasonObject)
+      }
+      return rejectWithValue(e)
+    }
   }
 )

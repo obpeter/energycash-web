@@ -140,15 +140,16 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async confirmParticipant(tenant: string, pid: string, data: FormData): Promise<EegParticipant> {
+  async confirmParticipant(tenant: string, pid: string/*, data: FormData*/): Promise<EegParticipant> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/participant/${pid}/confirm`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
       },
-      body: data
+      // body: data
     }).then(this.handleErrors).then(res => res.json());
 
   }
@@ -351,34 +352,6 @@ class EegService {
         ...this.getSecureHeaders(token, tenant),
       },
     }).then(this.handleErrors).then(res => res.blob());
-  }
-
-  // Filestore Services
-  async loadContractDocumentInfos(tenant: string): Promise<ContractInfo[]> {
-    const token = await this.authClient.getToken();
-    return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
-      method: 'POST',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json',
-        'Content-Type': "application/json"
-      },
-      body: JSON.stringify(loadContractFilesQuery(tenant))
-    }).then(this.handleErrors).then(res => res.json()).then(res => res.data.files);
-  }
-
-  async uploadContractDocuments(tenant: string, participantId: string, files: File[]) {
-    const token = await this.authClient.getToken();
-    return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
-      method: 'POST',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json',
-      },
-      // body: JSON.stringify(uploadContractFilesMutation(tenant, files, participantId))
-      body: await uploadContractFilesMutation(tenant, files, participantId)
-    }).then(this.handleErrors).then(res => res.json());
-
   }
 
   async downloadDocument(tenant: string, fileId: string): Promise<Blob> {
@@ -642,9 +615,9 @@ class EegService {
       },
     }).then(this.handleErrors).then(res => res.json());
   }
-  async getHistories(tenant: string): Promise<EdaHistories> {
+  async getHistories(tenant: string, beginTimestamp: number, endTimestamp: number): Promise<EdaHistories> {
     const token = await this.authClient.getToken();
-    return await fetch(`${API_API_SERVER}/process/history`, {
+    return await fetch(`${API_API_SERVER}/process/history?start=${beginTimestamp}&end=${endTimestamp}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),

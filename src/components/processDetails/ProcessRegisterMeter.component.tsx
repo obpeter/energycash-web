@@ -4,10 +4,12 @@ import InputForm from "../form/InputForm.component";
 import SelectForm from "../form/SelectForm.component";
 import {useForm} from "react-hook-form";
 import {Metering} from "../../models/meteringpoint.model";
-import {Eeg} from "../../models/eeg.model";
+import {EdaProcess, Eeg} from "../../models/eeg.model";
 import {EegParticipant} from "../../models/members.model";
 import CorePageTemplate from "../core/CorePage.template";
 import {eegService} from "../../service/eeg.service";
+import ProcessHeaderComponent from "./ProcessHeader.component";
+import ProcessContentComponent from "./ProcessContent.component";
 
 interface ProcessValues {
   communityId: string | undefined
@@ -18,9 +20,10 @@ interface ProcessRegisterMeterComponentProps {
   eeg: Eeg
   meters: Metering[]
   participants: EegParticipant[]
+  edaProcess: EdaProcess
 }
 
-const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({eeg, meters, participants}) => {
+const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({eeg, meters, participants, edaProcess}) => {
   const processValues = {
     communityId: eeg.communityId,
     participantId: undefined,
@@ -84,6 +87,9 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
   });
 
   return (
+    <>
+    <ProcessHeaderComponent name={edaProcess.name} />
+    <ProcessContentComponent>
     <CorePageTemplate>
       <>
         <InputForm name="communityId" label="Gemeinschafts-Id" control={control} readonly={true}/>
@@ -100,6 +106,8 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
         </IonItem>
       </>
     </CorePageTemplate>
+    </ProcessContentComponent>
+    </>
   )
 }
 

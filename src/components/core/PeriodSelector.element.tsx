@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
 import {IonItem, IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
 import {SelectedPeriod} from "../../models/energy.model";
 import {MONTHNAME} from "../../models/eeg.model";
@@ -45,7 +45,23 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
     return options.sort((a, b) => (a.year+(a.segment*0.01)) > (b.segment*0.01+b.year) ? -1 : 1);
   }
 
+  const onChange = (e: SelectCustomEvent<number>) => {
+    const idx = e.detail.value;
+    if (idx && idx > 0) {
+      onUpdatePeriod(periodOptions[idx - 1]);
+    }
+  }
+
   useEffect(() => {
+    if (activePeriod) {
+      const si = periodOptions.findIndex((p) => p.year === activePeriod.year && p.segment === activePeriod.segment)
+      if (si >= 0) {
+        setUsedPeriod(si + 1)
+      }
+    }
+  }, [periodOptions]);
+
+  const periodSelectOptions = useMemo(() => {
     if (periods && activePeriod) {
       const [beginMonth, beginYear] = yearMonth(periods.begin)
       let [endMonth, endYear] = yearMonth(periods.end)
@@ -55,29 +71,24 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
 
       const options = generatePeriodOptions(activePeriod.type, endMonth, endYear, beginMonth, beginYear)
       setPeroidOptions(options);
+      setUsedPeriod(0);
 
-      const si = options.findIndex((p) => p.year === activePeriod.year && p.segment === activePeriod.segment)
-      if (si >= 0) {
-        setUsedPeriod(si+1)
-      }
+      return (
+        <>
+          {options.map((o, idx) => (
+            <IonSelectOption key={idx} value={idx + 1} aria-selected>{periodDisplayString(o)}</IonSelectOption>
+          ))}
+        </>
+      )
+    } else {
+      return <></>
     }
-  }, [periods, activePeriod])
-
-  const onChange = (e: SelectCustomEvent<number>) => {
-    const idx = e.detail.value;
-    if (idx && idx > 0) {
-      onUpdatePeriod(periodOptions[idx - 1]);
-    }
-    // setUsedPeriod(idx)
-  }
+  }, [activePeriod])
 
   return (
-    <IonItem lines="none" style={{flexGrow: "1"}}>
-      <IonSelect interface="popover" className="select-box" value={usedPeriod}
-                 onIonChange={onChange}>
-        {periodOptions.map((o, idx) => (
-          <IonSelectOption key={idx} value={idx + 1}>{periodDisplayString(o)}</IonSelectOption>
-        ))}
+    <IonItem lines="none" style={{flexGrow: "1", minWidth: "200px"}}>
+      <IonSelect interface="popover" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange}>
+        {periodSelectOptions}
       </IonSelect>
     </IonItem>
   )

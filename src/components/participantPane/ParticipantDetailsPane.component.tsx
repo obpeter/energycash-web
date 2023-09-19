@@ -10,7 +10,7 @@ import {
   IonLabel,
   IonTitle,
   IonToggle,
-  IonToolbar, useIonToast
+  IonToolbar, useIonAlert, useIonToast
 } from "@ionic/react";
 import {
   caretForwardOutline,
@@ -35,6 +35,7 @@ import {Metering} from "../../models/meteringpoint.model";
 import MemberFormComponent from "../MemberForm.component";
 import MeterFormComponent from "../MeterForm.component";
 import {
+  archiveParticipant,
   confirmParticipant, removeMeteringPoint,
   selectedMeterIdSelector,
   selectedParticipantSelector,
@@ -45,13 +46,15 @@ import {selectedTenant} from "../../store/eeg";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import InvoiceDocumentComponent from "./InvoiceDocument.component";
-import {MeterEnergySeries, SelectedPeriod} from "../../models/energy.model";
+import {createPeriodIdentifier, MeterEnergySeries, SelectedPeriod} from "../../models/energy.model";
 import {eegService} from "../../service/eeg.service";
 import {MONTHNAME} from "../../models/eeg.model";
 import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 import ContractDocumentComponent from "./ContractDocument.component";
 import participants from "../../pages/Participants";
 import {ratesSelector} from "../../store/rate";
+import {fetchBillingRun} from "../../store/billingRun";
+import {fileService} from "../../service/file.service";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 interface ParticipantDetailsPaneProps {
@@ -74,6 +77,7 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
   const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries>({} as MeterEnergySeries)
 
   const [toaster] = useIonToast();
+  const [participantAlert] = useIonAlert();
 
   const isMeterNew = () => selectedMeter?.status === 'NEW';
   const isMeterActive = () => selectedMeter?.status === "ACTIVE"
@@ -99,6 +103,7 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
   }, [activePeriod])
 
   const onUpdateParticipant = (participant: EegParticipant) => {
+    console.log("Update participant")
     dispatcher(updateParticipant({tenant, participant})).then(() => console.log("Participant Updated"))
   }
 
@@ -128,12 +133,32 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
   };
 
   function onWillDismiss(participant: EegParticipant, ev: CustomEvent<OverlayEventDetail<FormData>>) {
-    if (ev.detail.role === 'confirm' && ev.detail.data) {
-      const data:FormData = ev.detail.data
-      eegService.uploadContractDocuments(tenant, participant.id, data.getAll("docfiles")
-        .map(e => e as File))
-        .then(() => dispatcher(confirmParticipant({tenant, participantId: participant.id, data: data})))
-      presentToast(`${participant.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${participant.contact.email} gesendet.`)
+
+    const uploadFiles = async (tenant: string, participantId: string, data?: FormData) => {
+      if (data) {
+        const files = data.getAll("docfiles").map(e => e as File)
+        if (files.length > 0) {
+          return fileService.uploadContractDocuments(tenant, participantId, files)
+        }
+      }
+      return new Promise<any>((resolve) => resolve(true))
+    }
+
+    // if (ev.detail.role === 'confirm' && ev.detail.data) {
+    //   const data:FormData = ev.detail.data
+    //   fileService.uploadContractDocuments(tenant, participant.id,
+    //     data.getAll("docfiles").map(e => e as File)
+    //   )
+    //     .then(() => dispatcher(confirmParticipant({tenant, participantId: participant.id})).unwrap())
+    //     .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
+    //     .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
+    // }
+
+    if (ev.detail.role === 'confirm') {
+      uploadFiles(tenant, participant.id, ev.detail.data)
+        .then(() => dispatcher(confirmParticipant({tenant, participantId: participant.id})).unwrap())
+        .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
+        .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
     }
 
     // clearAll();
@@ -180,11 +205,41 @@ const ParticipantDetailsPaneComponent: FC<ParticipantDetailsPaneProps> = ({perio
     }
   }
 
+  const archive = () => {
+    participantAlert({
+      subHeader: "Mitglied archivieren",
+      message: "Das Mitglied ist nach dem ARCHIVIERUNG'S Prozess in deiner Übersicht nicht mehr verhanden.",
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+        },
+      ],
+      onDidDismiss: (e: CustomEvent) => {
+        if (e.detail.role === 'confirm') {
+          dispatcher(archiveParticipant({participant: selectedParticipant, tenant: tenant}))
+            .unwrap()
+            .catch(() => {
+              toaster({
+                message: 'Mitglied konnte nicht gelöscht werden. Bitte kontaktieren Sie ihren Administrator.',
+                duration: 4500,
+                color: "danger"
+              })
+            })
+        }
+      },
+    })
+  }
+
   return (
     <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
       <div className={"details-header"}>
         <div><h4>{selectedParticipant.firstname} {selectedParticipant.lastname}</h4></div>
-        <IonItem lines="none" style={{fontSize: "12px", marginRight: "60px"}} className={"participant-header"}>
+        <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}} className={"participant-header"} onClick={() => archive()}>
           <IonIcon icon={trashBin} slot="start" style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
           <IonLabel>Benutzer archivieren</IonLabel>
         </IonItem>

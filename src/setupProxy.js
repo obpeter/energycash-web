@@ -5,7 +5,7 @@ module.exports = function(app) {
         createProxyMiddleware(['/energystore'], {
             target: 'http://localhost:8080',
             changeOrigin: true,
-            pathRewrite: {'^/energystore' : '/'},
+            pathRewrite: {'^/energystore' : ''},
             headers: {
                 Connection: "keep-alive"
             },

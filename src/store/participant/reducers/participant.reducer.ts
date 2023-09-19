@@ -1,6 +1,6 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {
-  addMeteringPoint,
+  addMeteringPoint, archiveParticipant,
   chancelNewParticipant, confirmParticipant, createParticipant, fetchParticipantModel,
   newParticipant, registerMeteringpoint, removeMeteringPoint,
   saveNewParticipant, selectMetering, selectParticipant, updateMeteringPoint, updateParticipant
@@ -9,6 +9,7 @@ import {adapter, initialState} from "../states";
 import {EegParticipant} from "../../../models/members.model";
 import {v4} from 'uuid';
 import {Address} from "../../../models/eeg.model";
+import {archiveRate} from "../../rate";
 
 export const reducer = createReducer(initialState, builder =>
   builder
@@ -79,5 +80,8 @@ export const reducer = createReducer(initialState, builder =>
               meters: state.entities[participantId] ?
                 state.entities[participantId]!.meters.filter(m => m.meteringPoint !== meter.meteringPoint) : undefined}
         })
+    })
+    .addCase(archiveParticipant.fulfilled, (state, action) => {
+      return adapter.removeOne({...state, selectedParticipant: undefined, selectedMeter: undefined}, action.payload)
     })
 );

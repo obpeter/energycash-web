@@ -54,16 +54,17 @@ export const uploadEnergyGraphqlMutation = async (tenant: string, sheet: string,
   return formData;
 };
 
-export const loadContractFilesQuery = (tenant: string) => {
+export const loadContractFilesQuery = (tenant: string, participantId: string) => {
   return {
     operationName: null,
     query: `query QueryContracts {
-      files(communityId: "${tenant}") {
+      files(tenant: "${tenant}", userId: "${participantId}", category: "contract", attributes: [{key:"category_tag", value: "user"}]) {
         id
         userId
         name
         fileCategory
         attributes {
+          key
           value
         }
         fileDownloadUri
@@ -84,9 +85,10 @@ export const uploadContractFilesMutation = async (tenant: string, files: File[],
   formData.append("operations", JSON.stringify({
     query: `mutation StoreContract ($file: Upload!) {
       addFile(
-        communityId: "${tenant}"
+        tenant: "${tenant}"
         file: $file
         fileCategory: "contract"
+        attributes: [{key: "category_tag", value: "user"}]
         name: "${files[0].name}"
         userId: "${participantId}"
       ) {
@@ -107,4 +109,19 @@ export const uploadContractFilesMutation = async (tenant: string, files: File[],
   formData.append("0", files[0])
 
   return formData;
+};
+
+
+export const deleteContractFilesMutation = (fileId: string) => {
+  return {
+    operationName: "DeleteFile",
+    query: `mutation DeleteFile {
+deleteFile(fileId: "${fileId}") {
+  ... on DeleteFileError {
+      message
+    }
+  }
+}`,
+    variables: {},
+  }
 };

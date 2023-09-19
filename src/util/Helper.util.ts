@@ -13,7 +13,7 @@ export const formatedName = (participant: EegParticipant) => {
 
 const splitDatePattern = /\.|\s|:/
 export const splitDate = (date: string) => date.split(splitDatePattern).map(s=>Number(s))
-export const calc = (e:number[]) => e.length > 2 ? (e[2]*365)+(e[1]*12)+e[0] : 0
+export const calc = (e:number[]) => e.length > 2 ? (e[2]*372)+(e[1]*31)+e[0] : 0
 
 export const yearMonth = (date: string) => splitDate(date).slice(1,3)
 
@@ -74,11 +74,11 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
       case 'YH':
         switch (period.type) {
           case 'Y':
-            return {type: target, segment: Math.min(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
+            return {type: target, segment: Math.max(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
           case 'YQ':
-            return {type: target, segment: Math.min(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
+            return {type: target, segment: Math.max(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
           case 'YM':
-            return {type: target, segment: Math.min(1, Math.ceil(period.segment / 6)), year: period.year}
+            return {type: target, segment: Math.max(1, Math.ceil(period.segment / 6)), year: period.year}
           default:
             return period
         }
