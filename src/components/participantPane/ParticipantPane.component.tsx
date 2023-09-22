@@ -16,7 +16,7 @@ import {
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {createPeriodIdentifier, SelectedPeriod} from "../../models/energy.model";
+import {createPeriodIdentifier, MeterReport, ParticipantReport, SelectedPeriod} from "../../models/energy.model";
 import ParticipantPeriodHeaderComponent from "./ParticipantPeriodHeader.component";
 import MemberComponent from "./Member.component";
 import {
@@ -39,7 +39,7 @@ import {
   selectBillFetchingSelector
 } from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
+import {fetchEnergyReport, fetchEnergyReportV2, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
 import {
   add, archiveOutline,
@@ -74,17 +74,17 @@ import {
 } from "../../store/billingRun";
 
 interface ParticipantPaneProps {
-  participants: EegParticipant[];
-  periods: { begin: string, end: string };
-  activePeriod: SelectedPeriod | undefined;
-  onUpdatePeriod: (e: SelectCustomEvent<number>) => void;
+  // participants: EegParticipant[];
+  // periods: { begin: string, end: string };
+  // activePeriod: SelectedPeriod | undefined;
+  // onUpdatePeriod: (e: SelectCustomEvent<number>) => void;
 }
 
 const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
-                                                              participants,
-                                                              periods,
-                                                              activePeriod,
-                                                              onUpdatePeriod
+                                                              // participants,
+                                                              // periods,
+                                                              // activePeriod,
+                                                              // onUpdatePeriod
                                                             }) => {
 
   const dispatcher = useAppDispatch();
@@ -102,7 +102,6 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
 
   const [searchActive, setSearchActive] = useState(false);
-  const [sortedParticipants, setSortedParticipants] = useState(participants);
   const [result, setResult] = useState<EegParticipant[]>([])
 
   const [loading, dismissLoading] = useIonLoading();
@@ -112,6 +111,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const [toaster] = useIonToast()
 
   const {
+    participants,
+    activePeriod,
     billingEnabled,
     setBillingEnabled,
     checkedParticipant,
@@ -131,6 +132,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   } = useContext(MemberViewContext);
 
   const [presentAlert] = useIonAlert();
+  const [sortedParticipants, setSortedParticipants] = useState(participants);
 
 
   useEffect( () => {
@@ -292,12 +294,26 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   }
 
   const onUpdatePeriodSelection = (selectedPeriod: SelectedPeriod) => {
-    dispatcher(fetchEnergyReport({
-      tenant: tenant!,
-      year: selectedPeriod.year,
-      segment: selectedPeriod.segment,
-      type: selectedPeriod.type,
-    }))
+    // dispatcher(fetchEnergyReport({
+    //   tenant: tenant!,
+    //   year: selectedPeriod.year,
+    //   segment: selectedPeriod.segment,
+    //   type: selectedPeriod.type,
+    // }))
+
+    dispatcher(setSelectedPeriod(selectedPeriod))
+    // dispatcher(fetchEnergyReportV2({tenant: tenant,
+    //   year: selectedPeriod.year,
+    //   segment: selectedPeriod.segment,
+    //   type: selectedPeriod.type,
+    //   participants: participants.map(p => {
+    //     return {
+    //       participantId: p.id,
+    //       meters: p.meters.map(m => {
+    //         return {meterId: m.meteringPoint, meterDir: m.direction, from: new Date(m.registeredSince).getTime(), until: new Date().getTime()} as MeterReport})
+    //     } as ParticipantReport
+    //   })}))
+
     dispatcher(fetchBillingRun({
       tenant: tenant,
       clearingPeriodType : selectedPeriod.type,
@@ -542,7 +558,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                     debounce={500} onIonInput={(ev) => handleInput(ev)}>
                 </IonSearchbar>
               </IonToolbar>}
-          <ParticipantPeriodHeaderComponent periods={periods} activePeriod={activePeriod} selectAll={selectAll}
+          <ParticipantPeriodHeaderComponent activePeriod={activePeriod} selectAll={selectAll}
                                             onUpdatePeriod={onUpdatePeriodSelection}/>
 
           {result.map((p, idx) => {

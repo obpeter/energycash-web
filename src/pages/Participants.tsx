@@ -4,17 +4,20 @@ import ParticipantPaneComponent from "../components/participantPane/ParticipantP
 
 import "./Participants.css"
 import {useAppSelector} from "../store";
-import {participantsSelector, selectedParticipantSelector} from "../store/participant";
-import {periodsSelector, selectedPeriodSelector} from "../store/energy";
+import {
+  selectedParticipantSelector
+} from "../store/participant";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
 import {MemberViewContext} from "../store/hook/MemberViewProvider";
 
 const Participants: FC = () => {
-  const periods = useAppSelector(periodsSelector);
-  const activePeriod = useAppSelector(selectedPeriodSelector);
-  const participants = useAppSelector(participantsSelector);
+  // const periods = useAppSelector(periodsSelector);
+  // const activePeriod = useAppSelector(selectedPeriodSelector);
+  // const participants = useAppSelector(activeParticipantsSelector1);
 
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
+
+  // console.log("PARTICIPANTS:", participants, activePeriod)
 
   const {
     billingEnabled,
@@ -48,7 +51,7 @@ const Participants: FC = () => {
           React.lazy(() => import("../components/participantPane/ParticipantDetailsPane.component"))
         return (
           <Suspense fallback = { <div></div> }>
-            <ParticipantDetailsPaneComponent periods={periods} activePeriod={activePeriod}/>
+            <ParticipantDetailsPaneComponent/>
           </Suspense>
         )
       }
@@ -65,10 +68,10 @@ const Participants: FC = () => {
         <div style={{display:"flex", flexDirection:"row"}}>
           <div style={{height: "100%", overflow: "hidden"}}>
             <ParticipantPaneComponent
-              participants={participants}
-              activePeriod={activePeriod}
-              onUpdatePeriod={(e: SelectCustomEvent<number>) => console.log("Update Period", e)}
-              periods={periods}
+              // participants={participants}
+              // activePeriod={activePeriod}
+              // onUpdatePeriod={(e: SelectCustomEvent<number>) => console.log("Update Period", e)}
+              // periods={periods}
             />
           </div>
           <div style={{flexGrow:"1", background: "#EAE7D9"}}>

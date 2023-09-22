@@ -54,9 +54,9 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
           case 'Y':
             return {type: target, segment: currentSegmentIdx, year: period.year}
           case 'YH':
-            return {type: target, segment: currentSegmentIdx, year: period.year}
+            return {type: target, segment: period.segment === 2 ? 6 : 1, year: period.year}
           case 'YQ':
-            return {type: target, segment: currentSegmentIdx, year: period.year}
+            return {type: target, segment: period.segment === 2 ? 3 : period.segment === 3 ? 6 : period.segment === 4 ? 9 : 1, year: period.year}
           default:
             return period
         }
@@ -65,7 +65,7 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
           case 'Y':
             return {type: target, segment: Math.ceil(currentSegmentIdx / 3), year: period.year}
           case 'YH':
-            return {type: target, segment: Math.ceil(currentSegmentIdx / 3), year: period.year}
+            return {type: target, segment: period.segment === 2 ? 3 : 1, year: period.year}
           case 'YM':
             return {type: target, segment: Math.ceil(period.segment / 3), year: period.year}
           default:
@@ -76,7 +76,7 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
           case 'Y':
             return {type: target, segment: Math.max(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
           case 'YQ':
-            return {type: target, segment: Math.max(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
+            return {type: target, segment: Math.max(1, Math.ceil(period.segment / 2)), year: period.year}
           case 'YM':
             return {type: target, segment: Math.max(1, Math.ceil(period.segment / 6)), year: period.year}
           default:
@@ -110,4 +110,12 @@ export function reformatDateTimeStamp(dateTimeStampString : string) : string {
   } else {
     return "";
   }
+}
+
+export function GetWeek(date: Date) {
+  let currentThursday = new Date(date.getTime() + (3 - ((date.getDay() + 6) % 7)) * 86400000);
+  let yearOfThursday = currentThursday.getFullYear();
+  let firstThursday = new Date(new Date(yearOfThursday, 0, 4).getTime() + (3 - ((new Date(yearOfThursday, 0, 4).getDay() + 6) % 7)) * 86400000);
+  let weekNumber = Math.floor(1 + 0.5 + (currentThursday.getTime() - firstThursday.getTime()) / 86400000 / 7);
+  return weekNumber;
 }

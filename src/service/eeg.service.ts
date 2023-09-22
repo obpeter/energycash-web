@@ -9,7 +9,7 @@ import {
   ParticipantBillType,
   BillingRun
 } from "../models/meteringpoint.model";
-import {EegEnergyReport} from "../models/energy.model";
+import {EegEnergyReport, EnergyReportResponse, ParticipantReport, SelectedPeriod} from "../models/energy.model";
 import {
   eegGraphqlQuery,
   loadContractFilesQuery,
@@ -103,11 +103,15 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async fetchParicipants(tenant: string, token?: string): Promise<EegParticipant[]> {
+  async fetchParicipants(tenant: string, token?: string, period?: SelectedPeriod): Promise<EegParticipant[]> {
     if (!token) {
       token = await this.authClient.getToken();
     }
-    return await fetch(`${API_API_SERVER}/participant`, {
+    let url = "participant"
+    if (period) {
+      url += `?type=${period.type}&year=${period.year}&segment=${period.segment}`
+    }
+    return await fetch(`${API_API_SERVER}/${url}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
@@ -247,6 +251,19 @@ class EegService {
     //       return data.data;
     //     }
     //   })
+  }
+
+  async fetchReportV2(tenant: string, year: number, segment: number, type: string, participants: ParticipantReport[]): Promise<EnergyReportResponse> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${ENERGY_API_SERVER}/eeg/report/v2`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({reportInterval: {type: type, year: year, segment: segment}, participants: participants})
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async fetchLastReportEntryDate(tenant: string, token?: string): Promise<string> {

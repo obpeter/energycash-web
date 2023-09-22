@@ -7,7 +7,7 @@ import cn from "classnames"
 
 import "./Member.component.css";
 import {useAppSelector} from "../../store";
-import {meteringReportSelector} from "../../store/energy";
+import {meteringReportSelectorV2} from "../../store/energy";
 import {ConsumerReport, ProducerReport} from "../../models/energy.model";
 import {selectRateById} from "../../store/rate";
 import {selectBillByMeter} from "../../store/billing";
@@ -33,7 +33,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
 
-  const report = useAppSelector(meteringReportSelector(meter.meteringPoint, `MRP/${year}/${month}`))
+  const report = useAppSelector(meteringReportSelectorV2(participant.id, meter.meteringPoint))
   const tariff = useAppSelector(selectRateById(meter.tariffId))
   const bill = useAppSelector(selectBillByMeter(participant.id, meter.meteringPoint))
 

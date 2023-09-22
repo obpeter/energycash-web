@@ -7,12 +7,13 @@ import {EegTariff} from "../../../models/eeg.model";
 import {tariffService} from "../../../service/tariff.service";
 import {HttpError} from "../../../service/base.service";
 import {participantService} from "../../../service/participant.service";
+import {SelectedPeriod} from "../../../models/energy.model";
 
 export const fetchParticipantModel = createAsyncThunk(
   `${featureKey}/fetchParticipants`,
-  async (arg: { token: string, tenant: string }) => {
-    const { token, tenant } = arg;
-    const result = await eegService.fetchParicipants(tenant, token);
+  async (arg: { token?: string, tenant: string, period?: SelectedPeriod }) => {
+    const { token, tenant, period } = arg;
+    const result = await eegService.fetchParicipants(tenant, token, period);
     return { participants: result };
   }
 )

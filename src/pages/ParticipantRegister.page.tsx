@@ -14,15 +14,17 @@ import {
 
 import "./ParticipantRegister.page.scss"
 import ParticipantRegisterCommonPaneComponent from "../components/ParticipantRegisterCommonPane.component";
-import {createParticipant, participantsSelector, selectParticipant} from "../store/participant";
+import {
+  activeParticipantsSelector1,
+  createParticipant,
+} from "../store/participant";
 import {EegParticipant} from "../models/members.model";
 import {useAppDispatch, useAppSelector} from "../store";
 import {selectedTenant} from "../store/eeg";
 import ParticipantRegisterMeterPaneComponent from "../components/ParticipantRegisterMeterPane.component";
-import {FormProvider, useFieldArray, useForm} from "react-hook-form";
+import {FormProvider, useForm} from "react-hook-form";
 import {Metering} from "../models/meteringpoint.model";
 import {RouteComponentProps} from "react-router";
-import {options} from "ionicons/icons";
 
 const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
 
@@ -30,7 +32,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
   const dispatch = useAppDispatch();
 
   const tenant = useAppSelector(selectedTenant)
-  const participants = useAppSelector(participantsSelector)
+  const participants = useAppSelector(activeParticipantsSelector1);
   const [defaultParticipantNumber, setDefaultParticipantNumber] = useState(participants.length.toString().padStart(3, '0'))
 
   // useEffect(() => {

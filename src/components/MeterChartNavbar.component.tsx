@@ -1,27 +1,35 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
 import {IonButton, IonButtons} from "@ionic/react";
 import {createNewPeriod} from "../util/Helper.util";
-import {EegEnergyReport, EnergySeries, MeterEnergySeries, ReportType, SelectedPeriod} from "../models/energy.model";
+import {
+  EegEnergyReport,
+  EnergySeries,
+  MeterEnergySeries, MeterReport,
+  ParticipantReport,
+  ReportType,
+  SelectedPeriod
+} from "../models/energy.model";
 import {eegService} from "../service/eeg.service";
 import {Exception} from "sass";
 import PeriodSelectorElement from "./core/PeriodSelector.element";
+import {useAppSelector} from "../store";
+import {periodsSelector} from "../store/energy";
 
 interface MeterChartNavbarComponentProps {
-  tenant: string
   selectedMeterId: string
-  periods: { begin: string, end: string }
   activePeriod: SelectedPeriod
-  setEnergySeries: (series: MeterEnergySeries) => void
+  onSelectionChanged: (selectedPeriod: SelectedPeriod) => void
 }
 
-const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({tenant, selectedMeterId, periods, activePeriod, setEnergySeries}) => {
+const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({selectedMeterId, activePeriod, onSelectionChanged}) => {
+  const periods = useAppSelector(periodsSelector);
 
   const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod|undefined>(activePeriod)
   const [lastSegmentIdx, setLastSegmentIdx] = useState<number>(1)
 
   useEffect(() => {
+    console.log("ACTIVE PERIOD: ", activePeriod, selectedPeriod)
     setSelectedPeriod(activePeriod)
-    updateSeries(selectedMeterId, activePeriod)
   }, [activePeriod, selectedMeterId])
 
   const isPeriodSelected = (periodType: string) => selectedPeriod?.type === periodType
@@ -65,10 +73,12 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({tenant, 
   }
 
   const updateSeries = (meterId: string, selectedPeriod: SelectedPeriod) => {
-    eegService.fetchReport(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type)
-      .then((r) => calcSelectedEnergySeries(selectedPeriod.type, meterId, r))
-      .then((r) => selectLastSegmentIdx(r) )
-      .then((r) => setEnergySeries({period: selectedPeriod, series:r}))
+    // eegService.fetchReport(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type)
+    //   .then((r) => calcSelectedEnergySeries(selectedPeriod.type, meterId, r))
+    //   .then((r) => selectLastSegmentIdx(r) )
+    //   .then((r) => setEnergySeries({period: selectedPeriod, series:r}))
+
+    onSelectionChanged(selectedPeriod)
   }
 
   const onChangePeriod = useCallback((selectedPeriod: SelectedPeriod | undefined)  =>{
@@ -77,9 +87,6 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({tenant, 
       updateSeries(selectedMeterId, selectedPeriod)
     }
   }, [selectedPeriod])
-
-  const onSelectAll = ()  => {
-  };
 
   return (
     <div style={{display: "flex", alignItems: "center", justifyContent: "space-around"}}>
