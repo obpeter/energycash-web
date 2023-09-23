@@ -1,12 +1,20 @@
 import {createSelector} from "@reduxjs/toolkit";
 
 // import { EnergyState, adapter, featureKey } from '../states';
-import {featureKey, EnergyEntitieState, metaAdapter, reportAdapter} from "../states";
-import {ConsumerReport, EnergyReport, ProducerReport} from "../../../models/energy.model";
+import {featureKey, EnergyEntitieState, metaAdapter, reportAdapter, participantReportAdapter} from "../states";
+import {
+  ConsumerReport,
+  EnergyReport,
+  EnergySeries,
+  MeterEnergySeries,
+  ProducerReport
+} from "../../../models/energy.model";
 import {calc, splitDate} from "../../../util/Helper.util";
 import {MeteringEnergyGroupType} from "../../../models/meteringpoint.model";
+import {buildSlice} from "@reduxjs/toolkit/dist/query/core/buildSlice";
 
 const {selectAll, selectById, selectEntities} = metaAdapter.getSelectors();
+const {selectById: selectParticipantById} = participantReportAdapter.getSelectors();
 
 
 const nowTimeString = () => {
@@ -47,25 +55,91 @@ const selectReport = createSelector(
   featureStateSelector,
   items => items.report
 )
-export const meteringReportSelector = (meterId: string, reportId: string) => createSelector(
-  selectMeta(meterId),
-  selectReport,
-  (meta, report): ConsumerReport | ProducerReport | undefined => {
-    if (meta && report) {
-      if (meta.dir === "CONSUMPTION") {
-        return {
-          consumed: report.consumed[meta.sourceIdx],
-          allocated: report.allocated[meta.sourceIdx],
-          total_production: report.total_produced
-        } as ConsumerReport
-      } else {
-        return {
-          produced: report.produced[meta.sourceIdx],
-          allocated: report.distributed[meta.sourceIdx],
-          total_production: report.distributed.reduce((s, d) => s + d, 0)
-        } as ProducerReport
-      }
+const selectParticipantReport = (participantId: string | undefined) => createSelector(
+  featureStateSelector,
+  items => participantId ? selectParticipantById(items.participantReports, participantId) : undefined
+)
+
+const selectTotalNumbers = createSelector(
+  featureStateSelector,
+  (state) => [state.totalConsumption, state.totalProduction]
+)
+// export const meteringReportSelector = (meterId: string, reportId: string) => createSelector(
+//   selectMeta(meterId),
+//   selectReport,
+//   (meta, report): ConsumerReport | ProducerReport | undefined => {
+//     if (meta && report) {
+//       if (meta.dir === "CONSUMPTION") {
+//         return {
+//           consumed: report.consumed[meta.sourceIdx],
+//           allocated: report.allocated[meta.sourceIdx],
+//           total_production: report.total_produced
+//         } as ConsumerReport
+//       } else {
+//         return {
+//           produced: report.produced[meta.sourceIdx],
+//           allocated: report.distributed[meta.sourceIdx],
+//           total_production: report.distributed.reduce((s, d) => s + d, 0)
+//         } as ProducerReport
+//       }
+//     }
+//   }
+// )
+
+export const meteringReportSelectorV2 = (participantId: string, meterId: string) => createSelector(
+  selectTotalNumbers,
+  selectParticipantReport(participantId),
+  ([totalConsumption, totalProduction], report): ConsumerReport | ProducerReport | undefined => {
+    if (report) {
+      const r = report.meters.filter(m => m.meterId === meterId).map(m => {
+        if (m.meterDir === "CONSUMPTION") {
+          return {
+            consumed: m.report.summery.consumption,
+            allocated: m.report.summery.utilization,
+            total_production: totalProduction
+          } as ConsumerReport
+        } else {
+          return {
+            produced: m.report.summery.production,
+            allocated: m.report.summery.allocation,
+            total_production: totalProduction
+          } as ProducerReport
+        }
+      })
+      return (r.length > 0) ? r[0] : undefined
     }
+    return undefined
+  }
+)
+
+export const meteringInterReportSelectorV2 = (participantId: string | undefined, meterId: string | undefined) => createSelector(
+  selectedPeriodSelector,
+  selectParticipantReport(participantId),
+  (period, report): MeterEnergySeries | undefined => {
+    if (report) {
+      const r = report.meters.filter(m => m.meterId === meterId).map(m => {
+        if (m.meterDir === 'CONSUMPTION') {
+          return m.report.intermediate.consumption.map((c, i) => {
+            return {
+              segmentIdx: i,
+              allocated: m.report.intermediate.utilization[i],
+              consumed: c,
+            } as EnergySeries
+          })
+        } else {
+          return m.report.intermediate.production.map((c, i) => {
+            return {
+              segmentIdx: i,
+              allocated: m.report.intermediate.allocation[i],
+              consumed: c,
+            } as EnergySeries
+          })
+
+        }
+      })
+      return (r.length > 0) ? {period: period, series: r[0]} as MeterEnergySeries : undefined
+    }
+    return undefined
   }
 )
 

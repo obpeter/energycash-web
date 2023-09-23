@@ -18,7 +18,7 @@ import {selectBillById} from "../../store/billing";
 
 interface MemberProps {
   participant: EegParticipant;
-  children: ReactNode;
+  children?: ReactNode;
   isChecked: boolean;
   hideMember: boolean;
   hideMeter: boolean;

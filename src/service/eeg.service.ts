@@ -1,5 +1,5 @@
-import {Eeg, EegNotification, EegTariff} from "../models/eeg.model";
-import {EegParticipant} from "../models/members.model";
+import {BillingConfig, EdaHistories, Eeg, EegNotification, EegTariff} from "../models/eeg.model";
+import {ContractInfo, EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {
@@ -9,11 +9,12 @@ import {
   ParticipantBillType,
   BillingRun
 } from "../models/meteringpoint.model";
-import {EegEnergyReport} from "../models/energy.model";
+import {EegEnergyReport, EnergyReportResponse, ParticipantReport, SelectedPeriod} from "../models/energy.model";
 import {
   eegGraphqlQuery,
-  energyGraphqlQuery,
+  loadContractFilesQuery,
   reportDateGraphqlQuery,
+  uploadContractFilesMutation,
   uploadEnergyGraphqlMutation
 } from "./graphql-query";
 import {ExcelReportRequest} from "../models/reports.model";
@@ -21,6 +22,7 @@ import {ExcelReportRequest} from "../models/reports.model";
 const ENERGY_API_SERVER = process.env.REACT_APP_ENERGY_SERVER_URL;
 const BILLING_API_SERVER = process.env.REACT_APP_BILLING_SERVER_URL;
 const API_API_SERVER = process.env.REACT_APP_API_SERVER_URL;
+const FILESTORE_API_SERVER = process.env.REACT_APP_FILESTORE_SERVER_URL;
 
 class EegService {
 
@@ -36,13 +38,14 @@ class EegService {
 
   private handleErrors(response: Response) {
     if (!response.ok) {
+      console.log("Error TEXT REST: ", response)
       throw Error(response.statusText);
     }
     return response;
   }
 
   async handleDownload (response : Response, defaultFilename : string) : Promise<boolean> {
-    response.blob().then(file => {
+    return response.blob().then(file => {
       //Build a URL from the file
       const fileURL = URL.createObjectURL(file);
 
@@ -66,8 +69,9 @@ class EegService {
       link.click();
       // 5. Clean up and remove the link
       link.parentNode?.removeChild(link);
+
+      return true;
     });
-    return true;
   }
 
 
@@ -99,11 +103,15 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async fetchParicipants(tenant: string, token?: string): Promise<EegParticipant[]> {
+  async fetchParicipants(tenant: string, token?: string, period?: SelectedPeriod): Promise<EegParticipant[]> {
     if (!token) {
       token = await this.authClient.getToken();
     }
-    return await fetch(`${API_API_SERVER}/participant`, {
+    let url = "participant"
+    if (period) {
+      url += `?type=${period.type}&year=${period.year}&segment=${period.segment}`
+    }
+    return await fetch(`${API_API_SERVER}/${url}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
@@ -136,15 +144,16 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async confirmParticipant(tenant: string, pid: string, data: FormData): Promise<EegParticipant> {
+  async confirmParticipant(tenant: string, pid: string/*, data: FormData*/): Promise<EegParticipant> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/participant/${pid}/confirm`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
       },
-      body: data
+      // body: data
     }).then(this.handleErrors).then(res => res.json());
 
   }
@@ -201,6 +210,17 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
+  async removeMeteringPoint(tenant: string, participantId: string, meter: Metering): Promise<Metering> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/remove/${meter.meteringPoint}`, {
+      method: 'DELETE',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
   async fetchReport(tenant: string, year: number, segment: number, type: string, token?: string): Promise<EegEnergyReport> {
     if (!token) {
       token = await this.authClient.getToken();
@@ -231,6 +251,19 @@ class EegService {
     //       return data.data;
     //     }
     //   })
+  }
+
+  async fetchReportV2(tenant: string, year: number, segment: number, type: string, participants: ParticipantReport[]): Promise<EnergyReportResponse> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${ENERGY_API_SERVER}/eeg/report/v2`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({reportInterval: {type: type, year: year, segment: segment}, participants: participants})
+    }).then(this.handleErrors).then(res => res.json());
   }
 
   async fetchLastReportEntryDate(tenant: string, token?: string): Promise<string> {
@@ -338,6 +371,17 @@ class EegService {
     }).then(this.handleErrors).then(res => res.blob());
   }
 
+  async downloadDocument(tenant: string, fileId: string): Promise<Blob> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${FILESTORE_API_SERVER}/filestore/${fileId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => res.blob());
+  }
+  // END FILESTORE SERVICES ////////////////////////////////////////////
+
   async exportBillingArchive(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
     if (!token) {
       token = await this.authClient.getToken();
@@ -374,6 +418,116 @@ class EegService {
     }).then(this.handleErrors).then(res => true);
   }
 
+  async fetchBillingConfigByTenantId(tenant: string, token?: string): Promise<BillingConfig>  {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch( `${BILLING_API_SERVER}/api/billingConfigs/tenant/${tenant}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      }
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async fetchBillingConfigById(billingConfigId: string, tenant : string, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    return await fetch( `${BILLING_API_SERVER}/api/billingConfigs/${billingConfigId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      }
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async createBillingConfig(tenant: string, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+    const result = fetch( `${BILLING_API_SERVER}/api/billingConfigs`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({tenantId : tenant, invoiceNumberStart : 0,
+        creditNoteNumberStart: 0, documentNumberSequenceLength: 5} as BillingConfig)
+    }).then(this.handleErrors).then(res => res.json())
+
+    return await result.then(
+      data => {
+        return this.fetchBillingConfigById(data, tenant, token);
+      }
+    )
+  }
+
+  async updateBillingConfig(tenant: string, billingConfig: BillingConfig, token?: string): Promise<BillingConfig> {
+    if (!token) {
+      token = await this.authClient.getToken();
+    }
+
+    const result = await fetch( `${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}`, {
+      method: 'PUT',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(billingConfig)
+    }).then(this.handleErrors).then(res => {});
+
+    return this.fetchBillingConfigById(billingConfig.id, tenant, token);
+
+  }
+
+  async uploadImageBillingConfig(tenant: string, billingConfig : BillingConfig, imageType: "logo" | "footer", file: File): Promise<BillingConfig> {
+    const token = await this.authClient.getToken();
+    const body = new FormData();
+    body.append('file', file)
+
+    const result = await fetch(`${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}/${imageType}Image`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      },
+      body: body
+    }).then(this.handleErrors).then(res => {});
+
+    return this.fetchBillingConfigById(billingConfig.id, tenant, token);
+  }
+
+  async deleteImageBillingConfig(tenant: string, billingConfig : BillingConfig, imageType: "logo" | "footer"): Promise<BillingConfig> {
+    const token = await this.authClient.getToken();
+
+    const result = await fetch(`${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}/${imageType}Image`, {
+      method: 'DELETE',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      }
+    }).then(this.handleErrors).then(res => {});
+
+    return this.fetchBillingConfigById(billingConfig.id, tenant, token);
+  }
+
+  async getImageBillingConfig(tenant: string, billingConfig : BillingConfig, imageType: "logo" | "footer"): Promise<Blob> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${BILLING_API_SERVER}/api/billingConfigs/${billingConfig.id}/${imageType}Image`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept': 'application/json',
+      }
+    }).then(this.handleErrors).then(response => response.blob());
+  }
 
   async syncMeteringPointList(tenant: string): Promise<EegEnergyReport> {
     const token = await this.authClient.getToken();
@@ -386,10 +540,10 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async syncMeteringPoint(tenant: string, participantId: string, meter: string, direction: string, from: number, to: number): Promise<EegEnergyReport> {
+  async syncMeteringPoint(tenant: string, participantId: string, meters: {meter: string, direction: string}[], from: number, to: number): Promise<any> {
     const token = await this.authClient.getToken();
 
-    const body = {meteringPoint: meter, direction: direction, from: from, to: to}
+    const body = {meteringPoints: meters, from: from, to: to}
     return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/syncenergy`, {
       method: 'POST',
       headers: {
@@ -426,7 +580,6 @@ class EegService {
       .then(res => true);
   }
 
-
   async createReport(tenant: string, payload: ExcelReportRequest) {
     const token = await this.authClient.getToken();
     return fetch(`${ENERGY_API_SERVER}/eeg/excel/report/download`, {
@@ -436,8 +589,7 @@ class EegService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
-      }
-    )
+      })
       .then(this.handleErrors)
       .then( response => this.handleDownload(response, "energy-export"));
   }
@@ -474,6 +626,15 @@ class EegService {
   async getNotifications(tenant: string, start: number): Promise<EegNotification[]> {
     const token = await this.authClient.getToken();
     return await fetch(`${API_API_SERVER}/eeg/notifications/${start}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => res.json());
+  }
+  async getHistories(tenant: string, beginTimestamp: number, endTimestamp: number): Promise<EdaHistories> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${API_API_SERVER}/process/history?start=${beginTimestamp}&end=${endTimestamp}`, {
       method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),

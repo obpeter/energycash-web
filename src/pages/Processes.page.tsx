@@ -16,11 +16,13 @@ import {EdaProcess} from "../models/eeg.model";
 import * as process from "process";
 import {useAppSelector} from "../store";
 import {EegContext} from "../store/hook/Eeg.provider";
-import {meterSelector, participantsSelector} from "../store/participant";
+import {activeParticipantsSelector1, meterSelector} from "../store/participant";
+import {selectedPeriodSelector} from "../store/energy";
 
 const ProcessesPage: FC = () => {
 
-  const participants = useAppSelector(participantsSelector)
+  const activePeriod = useAppSelector(selectedPeriodSelector);
+  const participants = useAppSelector(activeParticipantsSelector1)
   const meters = useAppSelector(meterSelector)
   const {eeg} = useContext(EegContext)
 
@@ -34,6 +36,11 @@ const ProcessesPage: FC = () => {
       name: "Zählpunkt aktivieren",
       description: "Dieser Prozess dient zur Aktivierung einers Zählpunktes. ",
       type: "EC_REQ_ONL"
+    },
+    {
+      name: "Prozess History",
+      description: "Übersicht der Prozesskommunikation mit den Marktpartner",
+      type: "HISTORY"
     },
   ]
 

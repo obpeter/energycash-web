@@ -1,17 +1,15 @@
-import React, {createContext, FC, ReactNode, useContext, useEffect, useState} from "react";
+import React, {createContext, FC, ReactNode, useCallback, useContext, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../index";
 import {eegSelector, fetchEegModel, selectedTenant, selectTenant} from "../eeg";
-import {KeycloakContext, useKeycloak, useRoles, useTenants} from "./AuthProvider";
+import {useKeycloak, useRoles, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
-import {fetchParticipantModel} from "../participant";
-import {fetchEnergyReport, selectedPeriodSelector, setSelectedPeriod} from "../energy";
-import {eegService} from "../../service/eeg.service";
+import {fetchParticipantModel, participantsSelector1} from "../participant";
 import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
-import {Eeg, EegTariff} from "../../models/eeg.model";
-import {createPeriodIdentifier} from "../../models/energy.model";
-import {EegParticipant} from "../../models/members.model";
-import {billingRunSelector, fetchBillingRun} from "../billingRun";
-import {fetchParticipantAmounts} from "../billing";
+import {Eeg} from "../../models/eeg.model";
+import {eegService} from "../../service/eeg.service";
+import {ParticipantReport, SelectedPeriod} from "../../models/energy.model";
+import {setSelectedPeriod} from "../energy";
+;
 
 
 export interface EegState {
@@ -41,12 +39,23 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   const roles = useRoles();
 
   const tenant = useAppSelector(selectedTenant)
-  const eeg = useAppSelector(eegSelector);
 
-  useEffect(() => {
-    // console.log("APP STATE CHANGED: ", state)
-    if (tenant) init()
-  }, [tenant])
+  const eeg = useAppSelector(eegSelector);
+  const participants = useAppSelector(participantsSelector1)
+
+  const [initTenant, setInitTenant] = useState(tenant)
+
+  useEffect( () => {
+    if (tenant) {
+      initOne()
+    }
+    console.log("Update EEG Data")
+  }, [])
+
+  // useEffect(() => {
+  //   // console.log("APP STATE CHANGED: ", state)
+  //   if (tenant) init()
+  // }, [tenant])
 
   useEffect(() => {
     const storedTenant = localStorage.getItem("tenant")
@@ -56,6 +65,49 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
       }
     }
   }, [tenants])
+
+  // useEffect(() => {
+  //   if (eeg && participants && participants.length > 0) {
+  //     eegService.fetchLastReportEntryDate(tenant).then(lastReportDate => {
+  //       if (lastReportDate && lastReportDate.length > 0) {
+  //         const [date, time] = lastReportDate.split(" ");
+  //         const [day, month, year] = date.split(".");
+  //         let period = "Y"
+  //         let segment = 0
+  //         switch (eeg.settlementInterval) {
+  //           case "MONTHLY":
+  //             period = "YM"
+  //             segment = parseInt(month, 10)
+  //             break;
+  //           case "BIANNUAL":
+  //             period = "YH"
+  //             segment = (parseInt(month, 10) < 7 ? 1 : 2)
+  //             break;
+  //           case "QUARTER":
+  //             const m = parseInt(month, 10)
+  //             period = "YQ"
+  //             segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
+  //             break
+  //         }
+  //         // dispatch(fetchEnergyReport({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period}))
+  //         // dispatch(fetchBillingRun({
+  //         //   tenant: tenant,
+  //         //   clearingPeriodType : period,
+  //         //   clearingPeriodIdentifier : createPeriodIdentifier(period, parseInt(year, 10), segment)
+  //         // }))
+  //
+  //         const participantsReport = participants.map(p => {
+  //           return {
+  //             participantId: p.id,
+  //             meters: p.meters.map(m => {
+  //               return {meterId: m.meteringPoint, meterDir: m.direction, from: new Date(m.registeredSince).getTime(), until: new Date().getTime()} as MeterReport})
+  //           } as ParticipantReport
+  //         })
+  //         dispatch(fetchEnergyReportV2({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period, participants: participantsReport}))
+  //       }
+  //     })
+  //   }
+  // },[eeg, participants])
 
   useEffect(() => {
     if (eeg) {
@@ -80,28 +132,15 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
               segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
               break
           }
-          dispatch(fetchEnergyReport({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period}))
-          dispatch(fetchBillingRun({
-            tenant: tenant,
-            clearingPeriodType : period,
-            clearingPeriodIdentifier : createPeriodIdentifier(period, parseInt(year, 10), segment)
-          }))
+          return {type: period, year: parseInt(year, 10), segment: segment} as SelectedPeriod
         }
+        throw new Error("last report period not exists")
       })
+        .then(p => dispatch(setSelectedPeriod(p)))
     }
-  },[eeg])
+  }, [eeg]);
 
-
-  const init = async () => {
-    let initTenant = tenant
-
-    if (!initTenant) {
-      const storedTenant = localStorage.getItem("tenant")
-      if (storedTenant) {
-        dispatch(selectTenant(storedTenant))
-        initTenant = storedTenant
-      }
-    }
+  const initApplication = useCallback( async () => {
     if (initTenant && initTenant.length > 0) {
       console.log("Fetch EEG DATA")
       keycloak.getToken().then((token) => {
@@ -120,6 +159,19 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
         ])
       })
     }
+  }, [initTenant])
+
+  const initOne = async () => {
+    let initTenant = tenant
+
+    if (!initTenant) {
+      const storedTenant = localStorage.getItem("tenant")
+      if (storedTenant) {
+        dispatch(selectTenant(storedTenant))
+        setInitTenant(storedTenant)
+      }
+    }
+    await initApplication()
   }
 
   // useEffect(() => {
@@ -144,7 +196,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     isAdmin: () => roles.findIndex(r => r === "/EEG_ADMIN") >= 0,
     isOwner: () => roles.findIndex(r => r === "/EEG_OWNER") >= 0,
     isUser: () => roles.findIndex(r => r === "/EEG_USER") >= 0,
-    refresh: async () => await init()
+    refresh: async () => await initApplication()
   } as EegState
 
   return (

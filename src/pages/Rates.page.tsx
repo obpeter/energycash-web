@@ -30,14 +30,14 @@ const RatesPage: FC = () => {
 
   // const [selectedRate, setSelectedRate] = useState<EegTariff|undefined>()
 
-  useEffect(() => {
-    if (rates && rates.length > 0 && (!selectedTariff || selectedTariff.id.length === 0)) {
-      dispatcher(selectRate(rates[0]))
-    }
-    return () => {
-      dispatcher(selectRate(undefined))
-    }
-  }, [rates])
+  // useEffect(() => {
+  //   if (rates && rates.length > 0 && (!selectedTariff || selectedTariff.id.length === 0)) {
+  //     dispatcher(selectRate(rates[0]))
+  //   }
+  //   return () => {
+  //     dispatcher(selectRate(undefined))
+  //   }
+  // }, [rates])
 
   const onSelect = (rate: EegTariff) => {
     setRateType(rate.type)
@@ -63,7 +63,7 @@ const RatesPage: FC = () => {
     <IonPage>
       <IonContent fullscreen color="eeg">
         <div style={{display: "flex", flexDirection: "row", height: "100vh"}}>
-          <div className={"ratePane"}>
+          <div className={"ratePane"} style={{overflowY: "auto"}}>
             <IonToolbar color="eeg">
               <IonButtons slot="end">
                 <IonButton

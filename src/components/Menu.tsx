@@ -1,29 +1,21 @@
 import {
-  createAnimation, IonAvatar, IonButton,
-  IonButtons, IonCard, IonCardContent,
+  createAnimation, IonButton,
+  IonButtons,
   IonContent, IonFooter, IonHeader,
-  IonIcon, IonImg,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
-  IonListHeader,
   IonMenu,
   IonMenuToggle, IonModal,
-  IonNote,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
 
 import {useLocation} from 'react-router-dom';
 import {
-  archiveOutline,
-  archiveSharp,
-  heartOutline,
-  heartSharp, informationCircle, newspaper,
-  paperPlaneOutline,
-  paperPlaneSharp, people, person, personOutline,
-  trashOutline,
-  trashSharp, wallet, walletOutline, walletSharp
+  informationCircle, newspaper,
+  people, person, wallet, walletSharp
 } from 'ionicons/icons';
 import './Menu.css';
 import React, {useRef} from "react";
@@ -198,7 +190,7 @@ const Menu: React.FC = () => {
               <p>Anschrift: Fellingerstraße 9, 4730 Waizenkirchen</p>
             </div>
             <div>
-              <img alt="vfeeg image" src="/assets/leader-image-v1.png"/>
+              <img src="/assets/leader-image-v1.png"/>
               <div style={{padding: "10px"}}>
                 <div>
                 <a href="https://ec.europa.eu/info/departments/agriculture-and-rural-development_de"

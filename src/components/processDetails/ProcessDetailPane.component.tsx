@@ -1,21 +1,18 @@
-import React, {FC, forwardRef, useEffect, useState} from "react";
-import {IonButton, IonContent, IonFooter, IonIcon, IonInput, IonItem, IonLabel, IonToolbar} from "@ionic/react";
-import {eye, trashBin} from "ionicons/icons";
-import RateComponent from "../Rate.component";
+import React, {FC, useState} from "react";
 import {EdaProcess, Eeg} from "../../models/eeg.model";
 
 import './ProcessDetailPane.component.scss'
-import InputForm from "../form/InputForm.component";
-import {Control, useForm} from "react-hook-form";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
-import SelectForm from "../form/SelectForm.component";
-import DatePicker from "react-datepicker";
-import {eegService} from "../../service/eeg.service";
 import {useAppSelector} from "../../store";
 import {selectedTenant} from "../../store/eeg";
 import ProcessRequestValuesComponent from "./ProcessRequestValues.component";
 import ProcessRegisterMeterComponent from "./ProcessRegisterMeter.component";
+import ProcessHistoryComponent from "./ProcessHistory.component";
+import DateComponent from "../dialogs/date.component";
+import {IonButton, IonButtons, IonIcon} from "@ionic/react";
+import {calendar} from "ionicons/icons";
+import DatepickerComponent from "../dialogs/datepicker.component";
 
 
 interface ProcessDetailPaneComponentProps {
@@ -38,22 +35,20 @@ const ProcessDetailPaneComponent: FC<ProcessDetailPaneComponentProps> = ({
     if (selectedProcess) {
       switch (selectedProcess?.type) {
         case 'EC_REQ_ONL':
-          return <ProcessRegisterMeterComponent eeg={eeg} meters={meters} participants={participants} />
+          return <ProcessRegisterMeterComponent eeg={eeg} meters={meters} participants={participants} edaProcess={selectedProcess}/>
         case 'CR_REQ_PT':
-          return <ProcessRequestValuesComponent eeg={eeg} meters={meters} participants={participants} />
+          return <ProcessRequestValuesComponent eeg={eeg} meters={meters} participants={participants} edaProcess={selectedProcess}/>
+        case 'HISTORY':
+          return <ProcessHistoryComponent eeg={eeg} edaProcess={selectedProcess}/>
       }
     }
     return <></>
   }
 
   return (
+
     <div className={"details-body"} style={{height: "100%", display: "flex", flexDirection: "column"}}>
-      <div className={"details-header"}>
-        <div><h4>{selectedProcess?.name}</h4></div>
-      </div>
-      <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
-        {renderProcess()}
-      </div>
+      {renderProcess()}
     </div>
   )
 }

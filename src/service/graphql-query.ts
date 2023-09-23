@@ -9,7 +9,6 @@ export const eegGraphqlQuery = {
     variables: {},
 };
 
-
 const EnergyQuery = (tenant: string, year: number, month: number) => `{
   eeg(name:"${tenant}", year:${year}, month: ${month})
 }`; // graphQl Query
@@ -53,4 +52,76 @@ export const uploadEnergyGraphqlMutation = async (tenant: string, sheet: string,
   formData.append("0", data)
 
   return formData;
+};
+
+export const loadContractFilesQuery = (tenant: string, participantId: string) => {
+  return {
+    operationName: null,
+    query: `query QueryContracts {
+      files(tenant: "${tenant}", userId: "${participantId}", category: "contract", attributes: [{key:"category_tag", value: "user"}]) {
+        id
+        userId
+        name
+        fileCategory
+        attributes {
+          key
+          value
+        }
+        fileDownloadUri
+        createdAt
+      }}`,
+    variables: {},
+  }
+};
+
+export const uploadContractFilesMutation = async (tenant: string, files: File[], participantId: string) => {
+
+  // const fileToBlob = async (file: File) => {
+  //   new Blob([new Uint8Array(await file.arrayBuffer())], {type: file.type });
+  // }
+
+  const formData = new FormData();
+
+  formData.append("operations", JSON.stringify({
+    query: `mutation StoreContract ($file: Upload!) {
+      addFile(
+        tenant: "${tenant}"
+        file: $file
+        fileCategory: "contract"
+        attributes: [{key: "category_tag", value: "user"}]
+        name: "${files[0].name}"
+        userId: "${participantId}"
+      ) {
+        ... on AddFile {
+              id
+              name
+              userId
+              fileCategory
+              fileDownloadUri
+              createdAt
+        }
+      }
+    }`,
+    variables: {"file": null},
+    operationName: "StoreContract"
+  }))
+  formData.append("map", JSON.stringify({"0": ["variables.file"]}))
+  formData.append("0", files[0])
+
+  return formData;
+};
+
+
+export const deleteContractFilesMutation = (fileId: string) => {
+  return {
+    operationName: "DeleteFile",
+    query: `mutation DeleteFile {
+deleteFile(fileId: "${fileId}") {
+  ... on DeleteFileError {
+      message
+    }
+  }
+}`,
+    variables: {},
+  }
 };

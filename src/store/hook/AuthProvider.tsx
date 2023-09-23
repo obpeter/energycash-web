@@ -1,7 +1,5 @@
 import React, {createContext, PureComponent, useContext, useMemo} from "react";
-import {RouteComponentProps} from "react-router";
 import {KeycloakConfig, KeycloakService} from "../../service/keycloak.service";
-import {ParticipantContext} from "./ParticipantProvider";
 
 export interface AuthClient {
   login(username: string, password: string): Promise<boolean>
@@ -101,7 +99,7 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
         roles: authClient.accessGroups,
       });
 
-      console.log("UpdateState: ", this.state, "tenants", authClient);
+      // console.log("UpdateState: ", this.state, "tenants", authClient);
     }
 
     render() {

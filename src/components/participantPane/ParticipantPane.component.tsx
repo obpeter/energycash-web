@@ -16,7 +16,7 @@ import {
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {SelectedPeriod, createPeriodIdentifier} from "../../models/energy.model";
+import {createPeriodIdentifier, MeterReport, ParticipantReport, SelectedPeriod} from "../../models/energy.model";
 import ParticipantPeriodHeaderComponent from "./ParticipantPeriodHeader.component";
 import MemberComponent from "./Member.component";
 import {
@@ -39,7 +39,7 @@ import {
   selectBillFetchingSelector
 } from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {fetchEnergyReport, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
+import {fetchEnergyReport, fetchEnergyReportV2, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
 import {
   add, archiveOutline,
@@ -52,10 +52,14 @@ import {
   searchCircle
 } from "ionicons/icons";
 import {eegPlug, eegSolar} from "../../eegIcons";
-import {selectedParticipantSelector, selectMetering, selectParticipant} from "../../store/participant";
+import {
+  selectedMeterIdSelector,
+  selectedParticipantSelector,
+  selectMetering,
+  selectParticipant
+} from "../../store/participant";
 import cn from "classnames";
 import {isParticipantActivated, reformatDateTimeStamp} from "../../util/Helper.util";
-import DatepickerComponent from "../dialogs/datepicker.component";
 import DatepickerPopover from "../dialogs/datepicker.popover";
 import {ExcelReportRequest, InvestigatorCP} from "../../models/reports.model";
 import {eegService} from "../../service/eeg.service";
@@ -70,23 +74,24 @@ import {
 } from "../../store/billingRun";
 
 interface ParticipantPaneProps {
-  participants: EegParticipant[];
-  periods: { begin: string, end: string };
-  activePeriod: SelectedPeriod | undefined;
-  onUpdatePeriod: (e: SelectCustomEvent<number>) => void;
+  // participants: EegParticipant[];
+  // periods: { begin: string, end: string };
+  // activePeriod: SelectedPeriod | undefined;
+  // onUpdatePeriod: (e: SelectCustomEvent<number>) => void;
 }
 
 const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
-                                                              participants,
-                                                              periods,
-                                                              activePeriod,
-                                                              onUpdatePeriod
+                                                              // participants,
+                                                              // periods,
+                                                              // activePeriod,
+                                                              // onUpdatePeriod
                                                             }) => {
 
   const dispatcher = useAppDispatch();
   const tenant = useAppSelector(selectedTenant);
   const energyMeterGroup = useAppSelector(meteringEnergyGroup);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
+  const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const billingInfo = useAppSelector(billingSelector);
   const eeg = useAppSelector(eegSelector);
 
@@ -97,8 +102,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
 
   const [searchActive, setSearchActive] = useState(false);
-  const [sortedParticipants, setSortedParticipants] = useState(participants);
-  const [result, setResult] = useState(participants)
+  const [result, setResult] = useState<EegParticipant[]>([])
 
   const [loading, dismissLoading] = useIonLoading();
 
@@ -107,6 +111,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const [toaster] = useIonToast()
 
   const {
+    participants,
+    activePeriod,
     billingEnabled,
     setBillingEnabled,
     checkedParticipant,
@@ -126,6 +132,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   } = useContext(MemberViewContext);
 
   const [presentAlert] = useIonAlert();
+  const [sortedParticipants, setSortedParticipants] = useState(participants);
 
 
   useEffect( () => {
@@ -185,9 +192,26 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
       return 0
     })
     // setCheckedParticipant(sorted.map(() => false))
+    const filteredAndSorted = filterMeters(sorted)
     setSortedParticipants(sorted);
-    setResult(sorted);
+    setResult(filteredAndSorted);
   }, [participants])
+
+  useEffect(() => {
+    const filteredAndSorted = filterMeters(sortedParticipants)
+    setResult(filteredAndSorted);
+  }, [hideConsumers, hideProducers]);
+
+  const filterMeters = (p: EegParticipant[]) => {
+    return p.map(ip => { return {...ip,
+      meters: ip.meters.filter(m => {
+        if (m.direction === 'GENERATION' && hideProducers)
+          return false;
+        if (m.direction === 'CONSUMPTION' && hideConsumers)
+          return false;
+        return true;
+      })} as EegParticipant})
+  }
 
   const infoToast = (message: string) => {
     toaster({
@@ -270,12 +294,26 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   }
 
   const onUpdatePeriodSelection = (selectedPeriod: SelectedPeriod) => {
-    dispatcher(fetchEnergyReport({
-      tenant: tenant!,
-      year: selectedPeriod.year,
-      segment: selectedPeriod.segment,
-      type: selectedPeriod.type,
-    }))
+    // dispatcher(fetchEnergyReport({
+    //   tenant: tenant!,
+    //   year: selectedPeriod.year,
+    //   segment: selectedPeriod.segment,
+    //   type: selectedPeriod.type,
+    // }))
+
+    dispatcher(setSelectedPeriod(selectedPeriod))
+    // dispatcher(fetchEnergyReportV2({tenant: tenant,
+    //   year: selectedPeriod.year,
+    //   segment: selectedPeriod.segment,
+    //   type: selectedPeriod.type,
+    //   participants: participants.map(p => {
+    //     return {
+    //       participantId: p.id,
+    //       meters: p.meters.map(m => {
+    //         return {meterId: m.meteringPoint, meterDir: m.direction, from: new Date(m.registeredSince).getTime(), until: new Date().getTime()} as MeterReport})
+    //     } as ParticipantReport
+    //   })}))
+
     dispatcher(fetchBillingRun({
       tenant: tenant,
       clearingPeriodType : selectedPeriod.type,
@@ -288,14 +326,17 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const onSelectParticipant = (p: EegParticipant) => (e: React.MouseEvent<Element, MouseEvent>) => {
     dispatcher(selectParticipant(p.id))
-    dispatcher(selectMetering(p.meters[0].meteringPoint));
+    if (p.meters.length > 0) {
+      dispatcher(selectMetering(p.meters[0].meteringPoint));
+    }
     setShowAddMeterPane(false)
   }
 
   const onShowAddMeterPage = (p: EegParticipant) => (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
     dispatcher(selectParticipant(p.id))
-    dispatcher(selectMetering(p.meters[0].meteringPoint));
-
+    if (p.meters.length > 0) {
+      dispatcher(selectMetering(p.meters[0].meteringPoint));
+    }
     setShowAddMeterPane(true)
     e?.preventDefault()
     e?.stopPropagation()
@@ -310,8 +351,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const billingSum = () => {
     if (billingInfo) {
-      const sum = billingInfo.reduce((i, s) =>
-          i + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
+      const sum = billingInfo.reduce((i, s) => i + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
       return Math.round(sum * 100) / 100;
     }
     return 0
@@ -336,7 +376,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         })
         .catch(() => {
           dismissReport(undefined)
-          dismissLoading()})
+          dismissLoading()
+          errorToast("Export konnte nicht generiert werden.")
+        })
     }
   });
 
@@ -393,27 +435,27 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         preview: preview,
         clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type, activePeriod.year, activePeriod.segment),
         clearingPeriodType: activePeriod.type} as ClearingPreviewRequest;
-        dispatcher(
-            fetchEnergyBills({tenant, invoiceRequest}))
-            .then(() => {
-                dispatcher(fetchBillingRun({
-                  tenant: tenant,
-                  clearingPeriodType: activePeriod.type,
-                  clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type,
-                      activePeriod.year, activePeriod.segment)
-                }))
-              }
-          );
+      dispatcher(
+        fetchEnergyBills({tenant, invoiceRequest}))
+        .then(() => {
+            dispatcher(fetchBillingRun({
+              tenant: tenant,
+              clearingPeriodType: activePeriod.type,
+              clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type,
+                activePeriod.year, activePeriod.segment)
+            }))
+          }
+        );
     }
   }
 
   async function sendBilling (billingRunId : string) {
     if (billingRunId) {
       dispatcher(
-          billingRunSendmail( {tenant, billingRunId}))
-          .then(() => {
-            dispatcher(fetchBillingRunById({tenant, billingRunId }));
-          })
+        billingRunSendmail( {tenant, billingRunId}))
+        .then(() => {
+          dispatcher(fetchBillingRunById({tenant, billingRunId }));
+        })
     }
   }
 
@@ -445,7 +487,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   return (
     <div className={"participant-pane"}>
       <div className={"pane-body"}>
-        <DatepickerComponent range={dismiss} trigger="open-datepicker-dialog" />
+        {/*<DatepickerComponent range={dismiss} trigger="open-datepicker-dialog" />*/}
         <div className={"pane-content"}>
           <IonToolbar color="eeglight" style={{"--min-height": "56px"}} ref={popoverRef}>
             <IonButtons slot="end">
@@ -516,13 +558,40 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                     debounce={500} onIonInput={(ev) => handleInput(ev)}>
                 </IonSearchbar>
               </IonToolbar>}
-          <ParticipantPeriodHeaderComponent periods={periods} activePeriod={activePeriod} selectAll={selectAll}
+          <ParticipantPeriodHeaderComponent activePeriod={activePeriod} selectAll={selectAll}
                                             onUpdatePeriod={onUpdatePeriodSelection}/>
 
           {result.map((p, idx) => {
+            if (p.meters.length > 0) {
+            return (
+            <div key={idx} onClick={onSelectParticipant(p)}
+                 className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
+              <MemberComponent
+                participant={p}
+                onCheck={onCheckParticipant(p)}
+                isChecked={checkedParticipant && (checkedParticipant[p.id] || false)}
+                hideMeter={hideMeter}
+                hideMember={hideMember}
+                showAmount={showAmount}
+                showDetailsPage={showDetailsPage}
+                onShowAddMeterPage={onShowAddMeterPage}
+              >
+                {hideMeter || p.meters.map((m, i) => (
+                  <MeterCardComponent key={"meter"+i}
+                                      participant={p}
+                                      meter={m}
+                                      hideMeter={false}
+                                      showCash={showAmount}
+                                      onSelect={onSelectMeter}
+                                      isSelected={m.meteringPoint === selectedMeterId}/>
+                ))}
+              </MemberComponent>
+            </div>
+            )
+          } else {
             return (
               <div key={idx} onClick={onSelectParticipant(p)}
-                   className={cn("participant", {"selected": p.id === selectedParticipant.id})}>
+                                    className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
                 <MemberComponent
                   participant={p}
                   onCheck={onCheckParticipant(p)}
@@ -532,19 +601,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                   showAmount={showAmount}
                   showDetailsPage={showDetailsPage}
                   onShowAddMeterPage={onShowAddMeterPage}
-                >
-                  {hideMeter || p.meters.filter((m) => {
-                    if (m.direction === 'GENERATION' && hideProducers)
-                      return false;
-                    if (m.direction === 'CONSUMPTION' && hideConsumers)
-                      return false;
-                    return true;
-                  }).map((m, i) => (
-                    <MeterCardComponent key={i} participant={p} meter={m} hideMeter={false} showCash={showAmount} onSelect={onSelectMeter}/>
-                  ))}
-                </MemberComponent>
+                />
               </div>
-            )
+            )}
           })}
         </div>
         <div className={"pane-footer"}>

@@ -9,12 +9,10 @@ import {
 } from "@ionic/react";
 import {eegExclamation} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
-import {useHistory} from "react-router";
-import {amountInEuro} from "../../util/TariffHelper";
 import {EegTariff} from "../../models/eeg.model";
 import {useAppSelector} from "../../store";
 import {selectBillByParticipant} from "../../store/billing";
-import {add, addCircle} from "ionicons/icons";
+import {add} from "ionicons/icons";
 import {ParticipantContext} from "../../store/hook/ParticipantProvider";
 
 
@@ -43,14 +41,6 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
     }
     return ""
   }
-
-  // const onAdd = (e?: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
-  //
-  //   setShowAddMeterPane(true)
-  //   e?.preventDefault()
-  //   e?.stopPropagation()
-  // }
-
 
   const renderMemberName = ():string => {
     let name = ""

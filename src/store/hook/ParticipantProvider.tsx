@@ -1,12 +1,19 @@
-import {createContext, FC, ReactNode, useCallback, useState} from "react";
+import {createContext, FC, ReactNode, useCallback, useContext, useEffect, useState} from "react";
 import {EegParticipant} from "../../models/members.model";
-import {useAppDispatch} from "../index";
-import {selectParticipant} from "../participant";
+import {useAppDispatch, useAppSelector} from "../index";
+import {
+  activeParticipantsSelector1,
+  selectParticipant
+} from "../participant";
 import {EegTariff, RateTypeEnum} from "../../models/eeg.model";
+import {fetchEnergyReportV2, selectedPeriodSelector} from "../energy";
+import {selectedTenant} from "../eeg";
+import {MeterReport, ParticipantReport, SelectedPeriod} from "../../models/energy.model";
 
 
 export interface ParicipantState {
-  // participants: EegParticipant[]
+  participants: EegParticipant[]
+  activePeriod?: SelectedPeriod
   // selectedParticipant: EegParticipant | undefined
   // selectedParticipants: string[]
   // rates: EegTariff[]
@@ -26,7 +33,8 @@ export interface ParicipantState {
 }
 
 const initialState: ParicipantState = {
-  // participants: [],
+  participants: [],
+  activePeriod: undefined,
   // selectedParticipant: undefined,
   // selectedParticipants: [],
   // rates: [],
@@ -48,8 +56,9 @@ export const ParticipantContext = createContext(initialState)
 const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
 
   const dispatch = useAppDispatch();
-  // const participants = useAppSelector(participantsSelector);
-  // const rates = useAppSelector(ratesSelector);
+  const tenant = useAppSelector(selectedTenant)
+  const activePeriod = useAppSelector(selectedPeriodSelector)
+  const participants = useAppSelector(activeParticipantsSelector1)
 
   const [state, setState] = useState<ParicipantState>(initialState);
   const [detailOpen, setDetailOpen] = useState<boolean>(false);
@@ -92,10 +101,8 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
   }
 
   const value = {
-    // participants: participants,
-    // selectedParticipant: state.selectedParticipant,
-    // selectedParticipants: [],
-    // rates: rates,
+    participants: participants,
+    activePeriod: activePeriod,
     selectedRate: undefined,
     detailsPageOpen: detailOpen,
     createNewRate: useCallback<()=>void>(newRateFn, []),
@@ -127,6 +134,25 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
   //   )
   // }, [])
 
+  // useEffect(() => {
+  //   if (activePeriod) {
+  //     dispatch(fetchParticipantModel({tenant: tenant, period: activePeriod}))
+  //   }
+  // }, [activePeriod]);
+
+  useEffect(() => {
+    if (activePeriod && participants && participants.length > 0) {
+      const participantsReport = participants.map(p => {
+        return {
+          participantId: p.id,
+          meters: p.meters.map(m => {
+            return {meterId: m.meteringPoint, meterDir: m.direction, from: new Date(m.registeredSince).getTime(), until: new Date().getTime()} as MeterReport})
+        } as ParticipantReport
+      })
+      dispatch(fetchEnergyReportV2({tenant: tenant, year: activePeriod.year, segment: activePeriod.segment, type: activePeriod.type, participants: participantsReport}))
+    }
+  },[activePeriod, participants])
+
   return (
     <ParticipantContext.Provider value={value}>
       {children}
@@ -137,10 +163,11 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
 export default ParticipantProvider;
 
 
-// export const useParticipants = () => {
-//   const {participants} = useContext(ParticipantContext)
-//   return participants;
-// }
+export const useParticipants = () => {
+  const {participants} = useContext(ParticipantContext)
+  return participants;
+}
+
 // export const useRates = () => {
 //   const {rates} = useContext(ParticipantContext);
 //   return rates;

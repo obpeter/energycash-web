@@ -1,8 +1,9 @@
 import React, {FC, useRef, useState} from "react";
-import {IonItem, IonList, IonModal} from "@ionic/react";
+import {IonButton, IonIcon, IonItem, IonList, IonModal} from "@ionic/react";
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
+import {calendar} from "ionicons/icons";
 
 interface DatepickerComponentProps {
   range: (range: [Date, Date]) => void
@@ -25,7 +26,15 @@ const DatepickerComponent: FC<DatepickerComponentProps> = ({range, trigger}) => 
   }
 
   return (
-    <IonModal ref={modal} trigger={trigger}>
+    <>
+      <div style={{display: "flex", flexDirection: "row"}}>
+        <div>12:08:2023 - 26.08.2023</div>
+        <IonButton size="small" fill="clear" id="open-date-picker">
+          <IonIcon slot="icon-only" icon={calendar}/>
+        </IonButton>
+      </div>
+
+    <IonModal ref={modal} trigger="open-date-picker">
       <div className="wrapper">
         <h1>Zeitraum</h1>
         <IonList lines="none" style={{textAlign: "center"}}>
@@ -49,6 +58,7 @@ const DatepickerComponent: FC<DatepickerComponentProps> = ({range, trigger}) => 
 
       </div>
     </IonModal>
+    </>
   )
 }
 

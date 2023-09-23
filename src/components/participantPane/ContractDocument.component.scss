@@ -1,0 +1,10 @@
+
+ion-modal.upload-contract {
+  --height: fit-content;
+  --width: fit-content;
+  --padding: 10px;
+}
+
+ion-modal.upload-contract::part(content) {
+  //min-height: 300px;
+}

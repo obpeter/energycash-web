@@ -1,33 +1,54 @@
-import React, {FC, useEffect, useState} from "react";
-import {IonChip, IonCol, IonGrid, IonIcon, IonLabel, IonList, IonListHeader, IonRow} from "@ionic/react";
+import React, {FC, useEffect, useState, ClipboardEvent} from "react";
+import {IonCol, IonGrid, IonList, IonListHeader, IonRow} from "@ionic/react";
 import {people} from "ionicons/icons";
 import InputForm from "./form/InputForm.component";
 import {useForm} from "react-hook-form";
 import {EegParticipant} from "../models/members.model";
 import {eegBusiness} from "../eegIcons";
 import ToggleButtonComponent from "./ToggleButton.component";
+import SelectForm from "./form/SelectForm.component";
+import {EegTariff} from "../models/eeg.model";
 
 interface MemberFormComponentProps {
   participant: EegParticipant
+  rates: EegTariff[]
   formId: string
   onSubmit: (data: EegParticipant) => void
 }
 
-const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId, onSubmit}) => {
+const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, formId, onSubmit}) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 
-  const { handleSubmit, control, reset, formState: {errors} } = useForm({
+  const { handleSubmit, setValue, control,clearErrors,  reset, formState: {errors} } = useForm({
     defaultValues: participant, mode: "all"});
 
-  const onChangeBusinessType = (s: number) => {}
+  const onChangeBusinessType = (s: number) => {
+    setSelectedBusinessType(s)
+    setValue("businessRole", s === 0 ? "EEG_PRIVATE" : "EEG_BUSINESS")
+  }
 
   useEffect(() => {
     if (participant) {
       participant.businessRole === 'EEG_PRIVATE' ? setSelectedBusinessType(0) : setSelectedBusinessType(1)
+      console.log("RESET PARTICIPANT")
       reset(participant)
     }
   }, [participant])
+
+  const handlePhonePaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
+    e.persist()
+    e.clipboardData.items[0].getAsString(text=>{
+      setValue("contact.phone", text.replace(/\+/gi, "00").replace(/\s/gi,""))
+    })
+    e.stopPropagation()
+  }
+
+  const getRatesOption = () => {
+    return rates.filter(r => r.type === "EEG").map((r) => {
+      return {key: r.id, value: r.name}
+    })
+  }
 
   return (
     <>
@@ -38,7 +59,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
               buttons={[{label: 'Privat', icon: people}, {label: 'Firma', icon: eegBusiness}]}
               onChange={onChangeBusinessType}
               value={selectedBusinessType}
-              changeable={false}
+              changeable={true}
             />
           </IonCol>
         </IonRow>
@@ -64,22 +85,20 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, formId,
                          rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
             )
           }
-          <InputForm name={"residentAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street}/>
-          <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
-          <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control} type="text"/>
-          <InputForm name={"residentAddress.city"} label="Ort" control={control} type="text"/>
-          <InputForm name={"contact.phone"} label="Telefon" control={control} rules={{pattern: {value: /^[0-9]*$/, message: ""}}} type="text" error={errors.contact?.phone}/>
-          <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email}/>
+          <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()}/>
+          <InputForm name={"billingAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
+          <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
+          <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control} type="text"/>
+          <InputForm name={"billingAddress.city"} label="Ort" control={control} type="text"/>
+          <InputForm name={"contact.phone"} label="Telefon" control={control} onPaste={handlePhonePaste} type="text"/>
+          <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email} clear={clearErrors}/>
+          <InputForm name={"vatNumber"} label="UID" control={control} type="text"/>
         </IonList>
         <IonList>
           <IonListHeader>Bankdaten</IonListHeader>
           <InputForm name={"accountInfo.iban"} label="IBAN" control={control} type="text"/>
           <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} type="text"/>
         </IonList>
-        {/*<IonList>*/}
-        {/*  <IonListHeader>Optional</IonListHeader>*/}
-        {/*  <InputForm name={"optionals.website"} label="Webseite" control={control} type="text"/>*/}
-        {/*</IonList>*/}
       </form>
     </>
   )

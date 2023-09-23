@@ -29,8 +29,6 @@ import Participants from "./pages/Participants";
 import {EegProvider} from "./store/hook/Eeg.provider";
 import ParticipantProvider from "./store/hook/ParticipantProvider";
 import MemberViewProvider from "./store/hook/MemberViewProvider";
-import MemberFormComponent from "./components/MemberForm.component";
-import TestPage from "./pages/TestPage";
 import RatesPage from "./pages/Rates.page";
 import EegPage from "./pages/Eeg.page";
 import ParticipantRegisterPage from "./pages/ParticipantRegister.page";

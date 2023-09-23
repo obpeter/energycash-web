@@ -1,12 +1,12 @@
 import React, {FC} from "react";
 import {EegTariff} from "../models/eeg.model";
-import {IonButton, IonContent, IonFooter, IonIcon, IonItem, IonLabel, IonToolbar} from "@ionic/react";
+import {IonButton, IonContent, IonFooter, IonIcon, IonItem, IonLabel, IonToolbar, useIonToast} from "@ionic/react";
 import {trashBin} from "ionicons/icons";
 import RateComponent from "./Rate.component";
-import {FieldValues} from "react-hook-form";
-import {useRateType} from "../store/hook/Rate.provider";
 import {useAppDispatch, useAppSelector} from "../store";
-import {selectedRateSelector, selectRate, selectRateById} from "../store/rate";
+import {archiveRate, selectedRateSelector, selectRate, selectRateById} from "../store/rate";
+import {selectedTenant} from "../store/eeg";
+import {HttpError} from "../service/base.service";
 
 interface RateDetailPaneComponentProps {
   onSubmit: (data: EegTariff) => void;
@@ -17,9 +17,34 @@ interface RateDetailPaneComponentProps {
 const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, submitId, mode}) => {
   const dispatcher = useAppDispatch();
   const selectedTariff = useAppSelector(selectedRateSelector)
+  const tenant = useAppSelector(selectedTenant)
+
+  const [showToast] = useIonToast();
 
   const getMode = (): (undefined | 'NEW') => {
     return (selectedTariff && selectedTariff.id.length === 0) ? 'NEW' : undefined
+  }
+
+  const archiveTariff = () => {
+    if (selectedTariff) {
+      dispatcher(archiveRate({rate: selectedTariff, tenant: tenant}))
+        .unwrap()
+        .catch((e) => {
+          if (e.state && e.state === 900) {
+            showToast({
+              message: 'Tarif wird noch benutzt!',
+              duration: 4500,
+              color: "warning"
+            })
+          } else {
+            showToast({
+              message: 'Tarif konnte nicht gelöscht werden. Bitte kontaktieren Sie ihren Administrator. Grund: ' + e.message,
+              duration: 4500,
+              color: "danger"
+            })
+          }}
+        )
+    }
   }
 
   if (selectedTariff) {
@@ -27,7 +52,7 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
         <div className={"details-body"} style={{height: "100%"}}>
           <div className={"details-header"}>
             <div><h4>{selectedTariff.name}</h4></div>
-            <IonItem lines="none" style={{fontSize: "12px", marginRight: "60px"}} className={"participant-header"}>
+            <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}} className={"participant-header"} onClick={() => archiveTariff()}>
               <IonIcon icon={trashBin} slot="start" style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
               <IonLabel>Tarif löschen</IonLabel>
             </IonItem>

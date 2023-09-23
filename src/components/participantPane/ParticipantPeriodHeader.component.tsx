@@ -8,15 +8,18 @@ import {CheckboxChangeEventDetail} from "@ionic/core";
 
 import "./ParticipantPeriodHeader.component.css"
 import PeriodSelectorElement from "../core/PeriodSelector.element";
+import {useAppSelector} from "../../store";
+import {periodsSelector} from "../../store/energy";
 
 interface ParticipantPeriodHeaderComponentProps {
-  periods: {begin: string, end: string};
   activePeriod: SelectedPeriod | undefined;
   selectAll: (event: IonCheckboxCustomEvent<CheckboxChangeEventDetail>) => void;
   onUpdatePeriod: (selectedPeriod: SelectedPeriod) => void;
 }
 
-const ParticipantPeriodHeaderComponent: FC<ParticipantPeriodHeaderComponentProps> = ({periods, activePeriod, selectAll, onUpdatePeriod}) => {
+const ParticipantPeriodHeaderComponent: FC<ParticipantPeriodHeaderComponentProps> = ({activePeriod, selectAll, onUpdatePeriod}) => {
+  const periods = useAppSelector(periodsSelector);
+
   return (
     <div className={"fixed-header flex-row"} style={{marginBottom: "16px"}}>
       <IonItem lines="none">

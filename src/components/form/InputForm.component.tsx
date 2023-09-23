@@ -1,14 +1,9 @@
-import React from "react";
-import {IonInput, IonItem, IonLabel} from "@ionic/react";
-import {Control, Controller, FieldError, FieldErrors, UseFormClearErrors} from "react-hook-form";
-import "./form-element.css";
+import React, {ClipboardEvent} from "react";
+import {IonInput} from "@ionic/react";
+import {Control, Controller, FieldError, UseFormClearErrors} from "react-hook-form";
 import {TextFieldTypes} from "@ionic/core";
 
-// export interface InputForm {
-//   label: string
-//   <TValue>(control): Control<TValue, any>
-// }
-
+import "./form-element.css";
 
 interface InputFormProps {
   control: Control<any, any>,
@@ -23,7 +18,8 @@ interface InputFormProps {
   readonly?: boolean,
   inputmode?: "text" | "search" | "numeric" | "none" | "tel" | "url" | "email" | "decimal" | undefined,
   counter?: boolean,
-  maxlength?: number
+  maxlength?: number,
+  onPaste?: (e: ClipboardEvent<HTMLIonInputElement>) => void,
 }
 
 const InputForm: (React.FC<InputFormProps>) =
@@ -39,7 +35,7 @@ const InputForm: (React.FC<InputFormProps>) =
           control={control}
           rules={rules}
           render={({field, fieldState, formState}) => {
-            const { onChange, value, name,ref } = field;
+            const { onChange, value, name, ref } = field;
             return (<IonInput
                               onIonChange={(e) => {
                                 if (fieldState.invalid) {
@@ -51,11 +47,13 @@ const InputForm: (React.FC<InputFormProps>) =
                               //   console.log("Input OnBlure");
                               //   onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))
                               // }}
+                              onChange={onChange}
                               placeholder={placeholder ? placeholder : "Enter Text"}
                               fill="outline"
                               labelPlacement={"floating"}
                               value={value}
                               name={name}
+                              // onChange={onChange}
                               ref={ref}
                               // errorText={rest.error?.message}
                               {...rest}></IonInput>)

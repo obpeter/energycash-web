@@ -19,6 +19,8 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
       handleSubmit,
       control,
       setValue,
+      watch,
+      reset,
       formState: {errors}
     } = useForm({defaultValues: rate, values: rate, mode: 'all'});
 
@@ -26,20 +28,29 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
       // setState((oldState) => {
       //   return {...oldState, useVat: s}
       // })
+
+      if (!s) {
+        setValue("vatInPercent", "0")
+      }
       setValue("useVat", s)
     }
+
+    const useVat = watch("useVat");
 
     const handleRateType = (type: number) => {
       switch (type) {
         case 0:
+          reset()
           setValue("type", "EEG");
           setRateType('EEG')
           break;
         case 1:
+          reset()
           setValue("type", "EZP");
           setRateType('EZP')
           break;
         case 2:
+          reset()
           setValue("type", "VZP");
           setRateType('VZP')
           break;
@@ -65,9 +76,9 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EEG":
           return (
             <div>
-              <InputFormComponent label="Vorauszahlung" control={control} name={"participantFee"}
+              <InputFormComponent label="Vorauszahlung in €" control={control} name={"participantFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.participantFee}/>
-              <InputFormComponent label="Rabatt" control={control} name={"discount"}
+              <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
               {/*<Input label={"Vorauszahlung"} labelPlacement={"floating"} {...register('participantFee',*/}
               {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
@@ -77,7 +88,7 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EZP":
           return (
             <div>
-              <InputFormComponent label="Pauschalbetrag" control={control} name={"baseFee"}
+              <InputFormComponent label="Pauschalbetrag in €" control={control} name={"baseFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.baseFee}/>
               <InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.centPerKWh}/>
@@ -91,9 +102,9 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
             <div>
               <InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" inputmode={"numeric"} error={errors.centPerKWh}/>
-              <InputFormComponent label="Inklusive kWh" control={control} name={"freeKWH"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.freeKWH}/>
-              <InputFormComponent label="Rabatt" control={control} name={"discount"}
+              <InputFormComponent label="Inklusive kWh" control={control} name={"freeKWh"}
+                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.freeKWh}/>
+              <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
               {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh',*/}
               {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
@@ -125,9 +136,9 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
                                   rules={{pattern: {value: /^[A-Za-z0-9\s-_]*$/, message: "Bitte nur Buchstaben, Ziffern und '-_ ' eingeben"}}} type="text" error={errors.name}/>
               {/*<Input label={"Tarifbezeichnung"} labelPlacement={"floating"} {...register('name')} />*/}
               <CheckboxComponent label="Umsatzsteuer anführen" setChecked={(c) => setShowVat(c)}
-                                 checked={rate.useVat!}/>
-              {rate.useVat &&
-                  <InputFormComponent label="Umsatzsteuer in %" control={control} name="vatInPercent" type="number"/>}
+                                 checked={useVat!}/>
+              {useVat &&
+                  <InputFormComponent label="Umsatzsteuer in %" control={control} name="vatInPercent"/>}
               {/*<Input label={"Umsatzsteuer in %"} labelPlacement={"floating"} {...register('vatInPercent')} />}*/}
             </IonList>
             <IonList color="eeglight">

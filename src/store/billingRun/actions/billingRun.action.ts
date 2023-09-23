@@ -7,7 +7,7 @@ export const fetchBillingRun = createAsyncThunk(
     async (arg: {tenant: string, clearingPeriodType: string, clearingPeriodIdentifier: string, token?: string}) => {
         const { tenant, clearingPeriodType, clearingPeriodIdentifier, token} = arg;
         const result = await eegService.fetchBillingRun(tenant, clearingPeriodType, clearingPeriodIdentifier, token);
-        return {billingRun : result};
+        return {billingRunList : result};
     }
 );
 

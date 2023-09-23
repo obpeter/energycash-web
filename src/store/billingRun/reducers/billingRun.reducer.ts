@@ -1,7 +1,6 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {initialState} from "../states";
 import {billingRunSendmail, fetchBillingRun, fetchBillingRunById} from "../actions";
-import {fetchEegModel, selectTenant, updateEegModel} from "../../eeg";
 
 export const reducer = createReducer(initialState, builder =>
     builder
@@ -9,8 +8,8 @@ export const reducer = createReducer(initialState, builder =>
             return { ...state, isFetching: true, errorMessage : null };
         })
         .addCase(fetchBillingRun.fulfilled, (state, action) => {
-            const { billingRun   } = action.payload;
-            return { ...state, billingRun: billingRun[0], isFetching: false, errorMessage : null }
+            const { billingRunList   } = action.payload;
+            return { ...state, billingRun: billingRunList[0], isFetching: false, errorMessage : null }
         })
         .addCase(fetchBillingRun.rejected, state => {
             return { ...state, isFetching: false, errorMessage : 'Fehler beim Laden der Abrechnungsdaten' };

@@ -1,15 +1,13 @@
-import React, {FC, useContext, useEffect, useState} from "react";
+import React, {FC, useEffect, useState} from "react";
 import {useAppSelector} from "../../store";
 import {ratesSelector} from "../../store/rate";
 import {selectBillById} from "../../store/billing";
 import {selectedParticipantSelector} from "../../store/participant";
-import {ParticipantContext} from "../../store/hook/ParticipantProvider";
 import {toRecord} from "../../util/Helper.util";
 import RateCardComponent from "../RateCard.component";
 import MeterCardComponent from "./MeterCard.component";
-import {IonButton, IonGrid, IonIcon, IonItem, IonLabel, IonRow, IonToolbar} from "@ionic/react";
+import {IonGrid, IonIcon, IonItem, IonLabel, IonRow} from "@ionic/react";
 import {eegSumSign} from "../../eegIcons";
-import {closeOutline} from "ionicons/icons";
 import {EegParticipant} from "../../models/members.model";
 
 
@@ -23,7 +21,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
   const rates = useAppSelector(ratesSelector);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
 
-  const memberBill = useAppSelector(selectBillById(selectedParticipant.id))
+  const memberBill = useAppSelector(selectBillById(selectedParticipant?.id))
   const [rateGroups, setRateGroups] = useState<RateModelGroup>({});
 
   useEffect(() => {
@@ -134,17 +132,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
           background: "var(--ion-color-eeglight-tint)"
         }}>
           <div>
-            {/*<IonToolbar>*/}
-            {/*  <IonItem lines="none">*/}
-            {/*    <IonLabel><strong>{selectedParticipant?.firstname} {selectedParticipant?.lastname}</strong></IonLabel>*/}
-            {/*    <IonButton slot="end" fill="clear" onClick={() => closeDetailPage(false)}>*/}
-            {/*      <IonIcon slot="icon-only" icon={closeOutline}/>*/}
-            {/*    </IonButton>*/}
-            {/*  </IonItem>*/}
-            {/*</IonToolbar>*/}
-
             {rateGroups ? Object.entries(rateGroups).map((tariffId) => (createRateCard(tariffId))) : <></>}
-
           </div>
           <div>
             <IonGrid className={"rate-modal-footer"}>

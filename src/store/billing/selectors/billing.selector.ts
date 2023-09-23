@@ -17,11 +17,11 @@ export const selectBillFetchingSelector = createSelector(
     featureStateSelector, billingState => billingState.isFetching
 );
 
-export const selectBillById = (id: string) =>
+export const selectBillById = (id: string | undefined) =>
   createSelector(
     featureStateSelector,
     (billingState: BillingState): ParticipantBillType | undefined => {
-      return selectById(billingState, id) || undefined;
+      return id ? (selectById(billingState, id) || undefined) : undefined;
     }
   );
 

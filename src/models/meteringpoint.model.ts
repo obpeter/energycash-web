@@ -14,7 +14,11 @@ export interface Metering {
   streetNumber: string;
   city: string;
   zip: string,
-  status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED"
+  status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED" | "REVOKED" | "INVALID",
+  registeredSince: Date,
+  modifiedAt: number,
+  modifiedBy: string,
+  inactiveSince: number,
 };
 
 //@TODO: Refactor diesen Type --> billing.model.ts (o.ä.)

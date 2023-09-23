@@ -1,5 +1,3 @@
-import {options} from "ionicons/icons";
-
 export interface Eeg {
   name: string;
   rcNumber: string;
@@ -7,6 +5,7 @@ export interface Eeg {
   salesTax: string;
   taxNumber: string;
   vatNumber: string;
+  businessNr: string;
   settlement: string;
   settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
   allocationMode: "DYNAMIC" | "STATIC"
@@ -59,6 +58,29 @@ export interface AccountInfo {
 
 export interface Optionals {
   website: string;
+}
+
+export interface BillingConfig {
+  id : string;
+  tenantId : string;
+  headerImageFileDataId : string;
+  footerImageFileDataId : string;
+  beforeItemsTextInvoice : string;
+  beforeItemsTextCreditNote : string;
+  beforeItemsTextInfo : string;
+  afterItemsTextInvoice : string;
+  afterItemsTextCreditNote : string;
+  afterItemsTextInfo : string;
+  termsTextInvoice : string;
+  termsTextCreditNote : string;
+  termsTextInfo : string;
+  footerText : string;
+  documentNumberSequenceLength : number;
+  customTemplateFileDataId : string;
+  invoiceNumberPrefix : string;
+  invoiceNumberStart : number;
+  creditNoteNumberPrefix : string;
+  creditNoteNumberStart : number;
 }
 
 export interface EegRateItem {
@@ -115,7 +137,7 @@ export interface EegTariff {
   baseFee?: string
   businessNr?: string
   centPerKWh?: string
-  freeKWH?: string
+  freeKWh?: string
   discount?: string
 }
 
@@ -152,7 +174,7 @@ export enum MONTHNAMESHORT {
 export interface EdaProcess {
   name: string
   description: string
-  type: 'CR_REQ_PT' | 'EC_REQ_ONL'
+  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY'
 }
 
 
@@ -184,3 +206,6 @@ export interface EegNotification {
   type: 'ERROR' | 'MESSAGE' | 'NOTIFICATION';
   message: Message;
 }
+
+export type EdaHistories = Record<string, Record<string, Array<any>>>
+

@@ -1,11 +1,11 @@
-import React, {FC, useEffect, useState} from "react";
-import {IonCol, IonGrid, IonList, IonListHeader, IonRow} from "@ionic/react";
+import React, {ClipboardEvent, FC, useEffect, useState} from "react";
+import {IonCol, IonGrid, IonList, IonRow} from "@ionic/react";
 import SelectForm from "../form/SelectForm.component";
 import InputForm from "../form/InputForm.component";
 import CheckboxComponent from "../form/Checkbox.component";
 import {Metering} from "../../models/meteringpoint.model";
-import {Address, EegTariff} from "../../models/eeg.model";
-import {Control, FieldErrors, UseFormSetValue, UseFormWatch} from "react-hook-form";
+import {EegTariff} from "../../models/eeg.model";
+import {Control, FieldErrors, UseFormClearErrors, UseFormSetValue, UseFormWatch} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
@@ -18,9 +18,10 @@ interface MeterFormElementProps {
   participant?: EegParticipant
   errors?: FieldErrors<Metering>
   meterReadOnly?: boolean
+  clear?: UseFormClearErrors<any>
 }
 
-const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, participant, errors, meterReadOnly, watch}) => {
+const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, participant, errors, meterReadOnly, watch, clear}) => {
 
   const [selectedDirection, setSelectedDirection] = useState(0);
   const [withWechselrichter, setWithWechselrichter] = useState(false);
@@ -52,6 +53,15 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
     }
   }
 
+  const handleMeterPaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
+
+    e.persist()
+    e.clipboardData.items[0].getAsString(text=>{
+      setValue && setValue("meteringPoint", text.replace(/[-_]/gi, "").replace(/\s/gi,""))
+    })
+    e.stopPropagation()
+  }
+
   return (
     <>
       <IonGrid>
@@ -75,6 +85,8 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
                      maxLength: {value: 33, message: "MAX-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern" },
                      pattern: {value: /^AT[0-9A-Z]*$/, message: "Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern od. Großbuchstaben"}}}
                    error={errors?.meteringPoint}
+                   onPaste={handleMeterPaste}
+                   clear={clear}
         />
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>

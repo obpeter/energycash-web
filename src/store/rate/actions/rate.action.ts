@@ -1,7 +1,9 @@
 import {createAction, createAsyncThunk} from "@reduxjs/toolkit";
 import {featureKey} from "../states/rate.state";
 import {eegService} from "../../../service/eeg.service";
-import {EegRate, EegTariff} from "../../../models/eeg.model";
+import {EegTariff} from "../../../models/eeg.model";
+import {tariffService} from "../../../service/tariff.service";
+import {ErrorMessage, HttpError} from "../../../service/base.service";
 
 export const fetchRatesModel = createAsyncThunk(
   `${featureKey}/fetch`,
@@ -27,6 +29,22 @@ export const updateRate = createAsyncThunk(
       const {rate, tenant} = arg
       const result = await eegService.addRate(tenant, rate);
       return result;
+  }
+)
+
+export const archiveRate = createAsyncThunk(
+  `${featureKey}/archive`,
+  async (arg: {rate: EegTariff, tenant: string}, { rejectWithValue }) => {
+    const {rate, tenant} = arg
+    try {
+      await tariffService.archiveTariff(tenant, rate.id);
+      return rate.id
+    } catch (e) {
+      if (e instanceof HttpError) {
+        return rejectWithValue(e.reasonObject)
+      }
+      return rejectWithValue(e)
+    }
   }
 )
 
