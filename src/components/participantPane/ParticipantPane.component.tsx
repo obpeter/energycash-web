@@ -31,7 +31,7 @@ import {MemberViewContext} from "../../store/hook/MemberViewProvider";
 
 import "./ParticipantPane.component.scss"
 import SlideButtonComponent from "../SlideButton.component";
-import {useAppDispatch, useAppSelector} from "../../store";
+import {State, useAppDispatch, useAppSelector} from "../../store";
 import {
   billingSelector,
   fetchEnergyBills,
@@ -39,7 +39,13 @@ import {
   selectBillFetchingSelector
 } from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {fetchEnergyReport, fetchEnergyReportV2, meteringEnergyGroup, setSelectedPeriod} from "../../store/energy";
+import {
+  fetchEnergyReport,
+  fetchEnergyReportV2,
+  meteringEnergyGroup,
+  meteringEnergyGroup11,
+  setSelectedPeriod
+} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
 import {
   add, archiveOutline,
@@ -72,6 +78,7 @@ import {
   billingRunStatusSelector,
   fetchBillingRun, fetchBillingRunById
 } from "../../store/billingRun";
+import {useSelector} from "react-redux";
 
 interface ParticipantPaneProps {
   // participants: EegParticipant[];
@@ -89,7 +96,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const dispatcher = useAppDispatch();
   const tenant = useAppSelector(selectedTenant);
-  const energyMeterGroup = useAppSelector(meteringEnergyGroup);
+  const energyMeterGroup = useAppSelector(meteringEnergyGroup11);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const billingInfo = useAppSelector(billingSelector);
@@ -100,6 +107,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const billingRunIsFetching = useAppSelector(billingRunIsFetchingSelector);
   const selectBillIsFetching = useAppSelector(selectBillFetchingSelector);
   const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
+  const enertyValues = useSelector((state: State) => state.energy.participantReports)
 
   const [searchActive, setSearchActive] = useState(false);
   const [result, setResult] = useState<EegParticipant[]>([])
@@ -134,6 +142,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const [presentAlert] = useIonAlert();
   const [sortedParticipants, setSortedParticipants] = useState(participants);
 
+
+  console.log("ParticipantPane: ", participants)
 
   useEffect( () => {
     if (showAmount && billingRun && billingRun.id) {
@@ -234,6 +244,12 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const buildAllocationMapFromSelected = ():MeteringEnergyGroupType[] => {
     const participantMap =
       participants.reduce((r, p) => ({...r, [p.id]: p}), {} as Record<string, EegParticipant>)
+
+    console.log("Energy Participants: ", enertyValues.entities)
+
+    // return Object.entries(checkedParticipant)
+    //   .flatMap((r) => ([...participantMap[r[0]].meters.filter(m => m.tariffId !== null)]))
+    //   .map(m => { return {meteringPoint: m.meteringPoint, allocationKWh: energyMeterGroup[m.meteringPoint]} as MeteringEnergyGroupType})
 
     return Object.entries(checkedParticipant)
       .flatMap((r) => ([...participantMap[r[0]].meters.filter(m => m.tariffId !== null)]))

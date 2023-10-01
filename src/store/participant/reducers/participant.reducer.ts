@@ -55,12 +55,16 @@ export const reducer = createReducer(initialState, builder =>
     })
     .addCase(updateMeteringPoint.fulfilled, (state, action) => {
       const {meter, participantId} = action.payload;
-        return adapter.updateOne({...state, selectedMeter: meter.meteringPoint},
-          {id: participantId, changes:
-              {...state.entities[participantId],
-                meters: state.entities[participantId] ?
-                  state.entities[participantId]!.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter : m) : undefined}
-          })
+      return adapter.updateOne({...state, selectedMeter: meter.meteringPoint,
+          selectedParticipant: state.selectedParticipant
+            ? {...state.selectedParticipant,
+                meters: state.selectedParticipant.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter: m)}
+            : undefined
+        }, {id: participantId, changes:
+            {...state.entities[participantId],
+              meters: state.entities[participantId] ?
+                state.entities[participantId]!.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter : m) : undefined}
+        })
     })
     .addCase(confirmParticipant.fulfilled, (state, action) => {
       console.log("Confirm Participant Reducer", action.payload)

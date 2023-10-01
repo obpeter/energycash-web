@@ -4,6 +4,8 @@ import {Control, Controller, FieldError, UseFormClearErrors} from "react-hook-fo
 import {TextFieldTypes} from "@ionic/core";
 
 import "./form-element.css";
+import {IonInputCustomEvent} from "@ionic/core/dist/types/components";
+import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/input-interface";
 
 interface InputFormProps {
   control: Control<any, any>,
@@ -20,10 +22,11 @@ interface InputFormProps {
   counter?: boolean,
   maxlength?: number,
   onPaste?: (e: ClipboardEvent<HTMLIonInputElement>) => void,
+  onTransform?: (e: IonInputCustomEvent<InputInputEventDetail>) => string | number,
 }
 
 const InputForm: (React.FC<InputFormProps>) =
-  ({ control, clear, name,rules, error, placeholder,...rest}) => {
+  ({ control, clear, name,rules, error, placeholder, onTransform,...rest}) => {
   return (
     <div className={"form-element"}>
       {/*<IonItem disabled={disabled} style={{"--min-height": "12px"}}>*/}
@@ -35,19 +38,28 @@ const InputForm: (React.FC<InputFormProps>) =
           control={control}
           rules={rules}
           render={({field, fieldState, formState}) => {
-            const { onChange, value, name, ref } = field;
+            const { onChange, value, name, ref,onBlur } = field;
             return (<IonInput
-                              onIonChange={(e) => {
-                                if (fieldState.invalid) {
-                                  if (clear) clear(name)
-                                }
-                                onChange((rest.type === 'number' ? Number(e.detail.value!) : e.detail.value!))
-                              }}
+                              // onIonChange={(e) => {
+                              //   if (fieldState.invalid) {
+                              //     if (clear) clear(name)
+                              //   }
+                              //   console.log("onIonChange: ", e)
+                              //   onChange((rest.type === 'number' ? Number(e.detail.value!) : e.detail.value!))
+                              // }}
                               // onIonBlur={(e) => {
                               //   console.log("Input OnBlure");
                               //   onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))
                               // }}
-                              onChange={onChange}
+                              // onChange={onChange}
+                              onIonChange={onBlur}
+                              onIonInput={(e) => {
+                                let value: string | number = e.detail.value || ""
+                                if (onTransform) {
+                                  value = onTransform(e)
+                                }
+                                onChange((rest.type === 'number' ? Number(value) : value))
+                              }}
                               placeholder={placeholder ? placeholder : "Enter Text"}
                               fill="outline"
                               labelPlacement={"floating"}

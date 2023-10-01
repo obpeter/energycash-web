@@ -146,7 +146,9 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
         return {
           participantId: p.id,
           meters: p.meters.map(m => {
-            return {meterId: m.meteringPoint, meterDir: m.direction, from: new Date(m.registeredSince).getTime(), until: new Date().getTime()} as MeterReport})
+            return {meterId: m.meteringPoint, meterDir: m.direction,
+              from: new Date(m.participantState.activeSince).getTime(),
+              until: new Date(m.participantState.inactiveSince).getTime()} as MeterReport})
         } as ParticipantReport
       })
       dispatch(fetchEnergyReportV2({tenant: tenant, year: activePeriod.year, segment: activePeriod.segment, type: activePeriod.type, participants: participantsReport}))

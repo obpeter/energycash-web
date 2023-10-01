@@ -1,5 +1,10 @@
 import {Address} from "./eeg.model";
 
+export interface ParticipantState {
+  activeSince: Date
+  inactiveSince: Date
+}
+
 export interface Metering {
   meteringPoint: string;
   direction: "GENERATION" | "CONSUMPTION";
@@ -18,7 +23,7 @@ export interface Metering {
   registeredSince: Date,
   modifiedAt: number,
   modifiedBy: string,
-  inactiveSince: number,
+  participantState: ParticipantState,
 };
 
 //@TODO: Refactor diesen Type --> billing.model.ts (o.ä.)

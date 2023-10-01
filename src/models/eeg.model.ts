@@ -136,7 +136,7 @@ export interface EegTariff {
   participantFee?: string
   baseFee?: string
   businessNr?: string
-  centPerKWh?: string
+  centPerKWh?: number
   freeKWh?: string
   discount?: string
 }

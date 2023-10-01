@@ -20,16 +20,6 @@ import {
   trashBin
 } from "ionicons/icons";
 import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
-} from "recharts";
 import {useAppDispatch, useAppSelector} from "../../store";
 import {Metering} from "../../models/meteringpoint.model";
 import MemberFormComponent from "../MemberForm.component";
@@ -37,7 +27,7 @@ import MeterFormComponent from "../MeterForm.component";
 import {
   archiveParticipant,
   confirmParticipant, removeMeteringPoint,
-  selectedMeterIdSelector,
+  selectedMeterSelector,
   selectedParticipantSelector,
   updateParticipant
 } from "../../store/participant";
@@ -46,23 +36,10 @@ import {selectedTenant} from "../../store/eeg";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import InvoiceDocumentComponent from "./InvoiceDocument.component";
-import {
-  createPeriodIdentifier,
-  EnergySeries,
-  MeterEnergySeries,
-  MeterReport, ParticipantReport,
-  SelectedPeriod
-} from "../../models/energy.model";
-import {eegService} from "../../service/eeg.service";
-import {MONTHNAME} from "../../models/eeg.model";
-import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 import ContractDocumentComponent from "./ContractDocument.component";
-import participants from "../../pages/Participants";
 import {ratesSelector} from "../../store/rate";
-import {fetchBillingRun} from "../../store/billingRun";
 import {fileService} from "../../service/file.service";
 import {meteringInterReportSelectorV2, meteringReportSelectorV2, selectedPeriodSelector} from "../../store/energy";
-import {useSelector} from "react-redux";
 import MeterChartComponent from "./MeterChart.component";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
@@ -77,17 +54,19 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   const dispatcher = useAppDispatch();
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
-  const selectedMeterId = useAppSelector(selectedMeterIdSelector);
+  const selectedMeter = useAppSelector(selectedMeterSelector);
   const tenant = useAppSelector(selectedTenant)
   const rates = useAppSelector(ratesSelector);
   const activePeriod = useAppSelector(selectedPeriodSelector);
-  const report = useAppSelector(meteringInterReportSelectorV2(selectedParticipant?.id, selectedMeterId))
+  const report = useAppSelector(meteringInterReportSelectorV2(selectedParticipant?.id, selectedMeter?.meteringPoint))
 
-  const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
+  // const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
 
   const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
   // const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod | undefined>(activePeriod)
   // const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries|undefined>(report)
+
+  console.log("ParticipantDetailsPane: ", selectedMeter, selectedParticipant, report)
 
   const [toaster] = useIonToast();
   const [participantAlert] = useIonAlert();
@@ -98,78 +77,16 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';
 
-  useEffect(() => {
-    if (selectedMeterId && selectedParticipant) {
-      const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
-      if (meter) {
-        setSelectedMeter(meter)
-      }
-    } else {
-      setSelectedMeter(undefined)
-    }
-    // setActiveEnergySeries(report)
-  }, [selectedMeterId])
-
   // useEffect(() => {
-  //   if (activePeriod) {
-  //     setActiveEnergySeries(report)
+  //   if (selectedMeterId && selectedParticipant) {
+  //     const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
+  //     if (meter) {
+  //       setSelectedMeter(meter)
+  //     }
+  //   } else {
+  //     setSelectedMeter(undefined)
   //   }
-  // }, [activePeriod])
-
-  console.log("ParticipantDetailsPane: ", activePeriod)
-
-  // const updateSeries = async (selectedPeriod: SelectedPeriod) => {
-  //   if (selectedParticipant && selectedMeter) {
-  //     return eegService.fetchReportV2(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type,
-  //       [{
-  //         participantId: selectedParticipant.id,
-  //         meters: [
-  //           {
-  //             meterId: selectedMeterId,
-  //             meterDir: selectedMeter.direction,
-  //             from: new Date(selectedMeter.registeredSince).getTime(),
-  //             until: selectedMeter.inactiveSince ? selectedMeter.inactiveSince : new Date().getTime(),
-  //           } as MeterReport]
-  //       } as ParticipantReport])
-  //       .then(res => {
-  //         if (res.participantReports.length !== 1) {
-  //           throw new Error("Keine Daten gefunden")
-  //         }
-  //         return res.participantReports[0]
-  //       })
-  //       .then(rep => {
-  //         if (rep.meters[0].meterDir === "CONSUMPTION") {
-  //           return rep.meters[0].report.intermediate.consumption.map((c, i) => {
-  //             return {
-  //               segmentIdx: i,
-  //               consumed: c,
-  //               allocated: rep.meters[0].report.intermediate.utilization[i]
-  //             } as EnergySeries
-  //           })
-  //         } else {
-  //           return rep.meters[0].report.intermediate.production.map((c, i) => {
-  //             return {
-  //               segmentIdx: i,
-  //               consumed: c,
-  //               allocated: rep.meters[0].report.intermediate.allocation[i]
-  //             } as EnergySeries
-  //           })
-  //         }
-  //       })
-  //       .then(s => {
-  //         return {
-  //           series: s,
-  //           period: selectedPeriod
-  //         } as MeterEnergySeries
-  //       })
-  //   }
-  //   return activeEnergySeries
-  // }
-  //
-  //
-  // const onMeterPeriodSelectionChanged = (selectedPeriod: SelectedPeriod) => {
-  //   updateSeries(selectedPeriod).then(r => setActiveEnergySeries(r))
-  // }
+  // }, [])
 
   const onUpdateParticipant = (participant: EegParticipant) => {
     dispatcher(updateParticipant({tenant, participant})).then(() => console.log("Participant Updated"))
@@ -253,34 +170,6 @@ const ParticipantDetailsPaneComponent: FC = () => {
         return ""
     }
   }
-
-  const calcXAxisName = (i: number, period: SelectedPeriod) => {
-    let offset = 0
-    switch (period && period.type) {
-      case 'YH':
-        if (period.segment === 1 && i === 0) offset = 52
-        else if (period.segment === 2) offset = GetWeek(new Date(period.year, 6,1,0,0,1))
-        // return i > 0 && i <= 12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
-        return `${i+offset} KWo`
-      case 'YQ':
-        // return i > 0 && i <= 12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
-        if (period.segment === 1 && i === 0) {
-          offset = 52
-        } else if (period.segment === 2) {
-          offset = GetWeek(new Date(period.year, 3,1,0,0,1))
-        } else if (period.segment === 3) {
-          offset = GetWeek(new Date(period.year, 6,1,0,0,1))
-        } else if (period.segment === 4) {
-          offset = GetWeek(new Date(period.year, 9,1,0,0,1))
-        }
-        return `${i+offset} KWo`
-      case 'YM':
-        return `${i+1}`
-      case 'Y' :
-        return i >= 0 && i < 12 ? `${MONTHNAME[i+1].substring(0, 3)}` : `${i}`
-    }
-  }
-// const isPeriodSelected = (periodType: string) => selectedPeriod?.type === periodType
 
   if (!selectedParticipant) {
     return <></>
@@ -428,47 +317,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
                     </div>
                     <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"} disabled={true}></IonToggle>
                   </IonItem>
-                  {isMeterActive() && <MeterChartComponent report={report} tenant={tenant} activePeriod={activePeriod} selectedMeter={selectedMeter} selectedParticipant={selectedParticipant}/>}
-                  {/*{isMeterActive() && activePeriod && selectedMeterId && <div style={{marginLeft: "20px"}}>*/}
-                  {/*    <h4>Energiedaten</h4>*/}
-                  {/*    <MeterChartNavbarComponent*/}
-                  {/*        activePeriod={activePeriod}*/}
-                  {/*        selectedMeterId={selectedMeterId}*/}
-                  {/*        onSelectionChanged={onMeterPeriodSelectionChanged}/>*/}
-                  {/*</div>}*/}
-                  {/*{isMeterActive() && activeEnergySeries && activeEnergySeries.series && activeEnergySeries.series.length > 0 &&*/}
-                  {/*    <div style={{height: "200px", width: "100%"}}>*/}
-                  {/*        <ResponsiveContainer width="90%" height={200}>*/}
-                  {/*            <BarChart*/}
-                  {/*                width={500}*/}
-                  {/*                height={300}*/}
-                  {/*                data={activeEnergySeries.series.map((e, i) => {*/}
-                  {/*                  return {*/}
-                  {/*                    name: calcXAxisName(e.segmentIdx, activeEnergySeries.period),*/}
-                  {/*                    distributed: e.allocated,*/}
-                  {/*                    consumed: e.consumed*/}
-                  {/*                  }*/}
-                  {/*                })}*/}
-                  {/*                margin={{*/}
-                  {/*                  top: 5,*/}
-                  {/*                  right: 30,*/}
-                  {/*                  left: 20,*/}
-                  {/*                  bottom: 5,*/}
-                  {/*                }}*/}
-                  {/*                barCategoryGap={0}*/}
-                  {/*                barGap={1}*/}
-                  {/*            >*/}
-                  {/*                <CartesianGrid strokeDasharray="3 3"/>*/}
-                  {/*                <XAxis dataKey="name"/>*/}
-                  {/*                <YAxis fontSize={10} unit={" kWh"}/>*/}
-                  {/*                <Tooltip formatter={(value) => Number(value).toFixed(3) + " kWh"}/>*/}
-                  {/*                <Legend/>*/}
-                  {/*                <Bar name="EEG" dataKey="distributed" fill="#8884d8"/>*/}
-                  {/*                <Bar name="EVU" dataKey="consumed" fill="#82ca9d"/>*/}
-                  {/*            </BarChart>*/}
-
-                  {/*        </ResponsiveContainer>*/}
-                  {/*    </div>}*/}
+                  {isMeterActive() && report && activePeriod && <MeterChartComponent report={report} tenant={tenant} activePeriod={activePeriod} selectedMeter={selectedMeter} selectedParticipant={selectedParticipant}/>}
                 </div>) :
               <></>
             }

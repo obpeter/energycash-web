@@ -52,14 +52,14 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
     }
   }
 
-  useEffect(() => {
-    if (activePeriod) {
-      const si = periodOptions.findIndex((p) => p.year === activePeriod.year && p.segment === activePeriod.segment)
-      if (si >= 0) {
-        setUsedPeriod(si + 1)
-      }
-    }
-  }, [periodOptions]);
+  // useEffect(() => {
+  //   if (activePeriod) {
+  //     const si = periodOptions.findIndex((p) => p.year === activePeriod.year && p.segment === activePeriod.segment)
+  //     if (si >= 0) {
+  //       setUsedPeriod(si + 1)
+  //     }
+  //   }
+  // }, [periodOptions]);
 
   const periodSelectOptions = useMemo(() => {
     if (periods && activePeriod) {
@@ -71,7 +71,14 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
 
       const options = generatePeriodOptions(activePeriod.type, endMonth, endYear, beginMonth, beginYear)
       setPeroidOptions(options);
-      setUsedPeriod(0);
+      // setUsedPeriod(0);
+
+      let selectedOption = 0
+      const si = options.findIndex((p) => p.year === activePeriod.year && p.segment === activePeriod.segment)
+      if (si >= 0) {
+        selectedOption = si + 1
+      }
+      setUsedPeriod(selectedOption)
 
       return (
         <>
@@ -83,7 +90,7 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
     } else {
       return <></>
     }
-  }, [activePeriod])
+  }, [activePeriod, periods])
 
   return (
     <IonItem lines="none" style={{flexGrow: "1", minWidth: "200px"}}>

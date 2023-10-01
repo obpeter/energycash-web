@@ -58,7 +58,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Cent pro kWh</p>
-              <p>{rate.centPerKWh+ " Cent"}</p>
+              <p>{rate.centPerKWh ? rate.centPerKWh.toString().replace(".", ",") + " Cent" : ''}</p>
             </div>
             {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <p>Umsatzsteuer</p>
@@ -79,7 +79,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Cent pro kWh</p>
-              <p>{(Number(rate.centPerKWh)) + " Cent"}</p>
+              <p>{rate.centPerKWh ? rate.centPerKWh.toString().replace(".", ",") + " Cent" : ''}</p>
             </div>
             {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <p>Umsatzsteuer</p>

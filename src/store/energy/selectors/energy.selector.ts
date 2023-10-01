@@ -14,7 +14,7 @@ import {MeteringEnergyGroupType} from "../../../models/meteringpoint.model";
 import {buildSlice} from "@reduxjs/toolkit/dist/query/core/buildSlice";
 
 const {selectAll, selectById, selectEntities} = metaAdapter.getSelectors();
-const {selectById: selectParticipantById} = participantReportAdapter.getSelectors();
+const {selectAll: selectAllParticipants, selectById: selectParticipantById} = participantReportAdapter.getSelectors();
 
 
 const nowTimeString = () => {
@@ -186,4 +186,21 @@ export const meteringEnergyGroup = createSelector(
     }
     return {...e, [m.name]: allocation} //{meteringPoint: m.name, allocationKWh: allocation} as MeteringEnergyGroupType
   }, {} as Record<string, number>)
+)
+
+export const meteringEnergyGroup1 = createSelector(
+  featureStateSelector,
+  (state:EnergyEntitieState) => selectAllParticipants(state.participantReports),
+)
+export const meteringEnergyGroup11 = createSelector(
+  meteringEnergyGroup1,
+  items => items.flatMap(i => i.meters).reduce((i, s) => {
+    let utilization = 0.0
+    if (s.meterDir === "CONSUMPTION") {
+      utilization = s.report.summery.utilization
+    } else {
+      utilization = s.report.summery.production - s.report.summery.allocation
+    }
+    return {...i, [s.meterId]: utilization}
+  }, {} as Record<string, number>),
 )
