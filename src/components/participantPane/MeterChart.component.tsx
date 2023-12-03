@@ -13,26 +13,28 @@ import {GetWeek} from "../../util/Helper.util";
 import {MONTHNAME} from "../../models/eeg.model";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
+import {useIonViewWillEnter} from "@ionic/react";
 
 interface MeterChartComponentProps {
   tenant: string
-  report?: MeterEnergySeries
-  activePeriod?: SelectedPeriod
+  report: MeterEnergySeries
+  activePeriod: SelectedPeriod
   selectedMeter: Metering
   selectedParticipant: EegParticipant
 }
 
 const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, activePeriod, selectedMeter, selectedParticipant}) => {
 
-  // const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries | undefined>(report)
+  const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries>(report)
 
-  // useEffect(() => {
-  //   setActiveEnergySeries(report)
-  // }, [report]);
+  useEffect(() => {
+    setActiveEnergySeries(report)
+  }, [report]);
 
-  let activeEnergySeries = report
+  useIonViewWillEnter( () => {
+    return false
+  })
 
-  console.log("MeterChartComponent: ", activeEnergySeries)
   const updateSeries = async (selectedPeriod: SelectedPeriod) => {
     if (selectedParticipant && selectedMeter) {
       return eegService.fetchReportV2(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type,
@@ -42,8 +44,12 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
             {
               meterId: selectedMeter.meteringPoint,
               meterDir: selectedMeter.direction,
-              from: new Date(selectedMeter.registeredSince).getTime(),
-              until: selectedMeter.inactiveSince ? selectedMeter.inactiveSince : new Date().getTime(),
+              from: selectedMeter.participantState
+                ? new Date(selectedMeter.participantState.activeSince).getTime()
+                : new Date().getTime(),
+              until: selectedMeter.participantState
+                ? new Date(selectedMeter.participantState.inactiveSince).getTime()
+                : new Date().getTime(),
             } as MeterReport]
         } as ParticipantReport])
         .then(res => {
@@ -83,7 +89,7 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
 
 
   const onMeterPeriodSelectionChanged = (selectedPeriod: SelectedPeriod) => {
-    updateSeries(selectedPeriod).then(r => activeEnergySeries = r)
+    updateSeries(selectedPeriod).then(r => setActiveEnergySeries(r))
   }
 
   const calcXAxisName = (i: number, period: SelectedPeriod) => {
@@ -114,7 +120,7 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
   }
 
   return (
-    {activePeriod && activeEnergySeries && activeEnergySeries.series && activeEnergySeries.series.length > 0 ?
+    // activePeriod && activeEnergySeries && activeEnergySeries.series && activeEnergySeries.series.length > 0 &&
     <div>
       <div style={{marginLeft: "20px"}}>
         <h4>Energiedaten</h4>
@@ -155,7 +161,7 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
 
         </ResponsiveContainer>
       </div>
-    </div> : <></>}
+    </div>
   )
 }
 

@@ -1,30 +1,120 @@
-import React, {FC} from "react";
-import {IonButton, IonContent, IonPage} from "@ionic/react";
+import React, {FC, useContext, useEffect, useState} from "react";
+import {
+  IonButton,
+  IonCard,
+  IonCol,
+  IonContent,
+  IonGrid,
+  IonIcon, IonItem,
+  IonLabel,
+  IonList,
+  IonPage,
+  IonRow
+} from "@ionic/react";
 import {useForm} from "react-hook-form";
 import InputForm from "../components/form/InputForm.component";
+import cn from "classnames";
+import {syncCircle} from "ionicons/icons";
+import ProcessDetailPaneComponent from "../components/processDetails/ProcessDetailPane.component";
+import {EegContext} from "../store/hook/Eeg.provider";
+import {KeycloakContext} from "../store/hook/AuthProvider";
+import CorePageTemplate from "../components/core/CorePage.template";
 
+
+interface ProfileEntry {
+  name: string
+  type: string
+}
 
 const ProfilesPage: FC = () => {
 
-  const testvalues = {firstname: "", lastname: "", age: ""}
+  const processes: ProfileEntry[] = [
+    {
+      name: "Zählpunktdaten nachfordern",
+      type: "CR_REQ_PT"
+    },
+    {
+      name: "Zählpunkt aktivieren",
+      type: "EC_REQ_ONL"
+    },
+    {
+      name: "Prozess History",
+      type: "HISTORY"
+    },
+  ]
 
+  const [selectedProcess, setSelectedProcess] = useState<ProfileEntry | undefined>()
+  const [profileState, setProfileState] = useState()
 
-  const {handleSubmit, control, formState: {errors}} =
-    useForm({defaultValues: testvalues})
+  const {eeg} = useContext(EegContext);
+  const {tenants, roles, claims} = useContext(KeycloakContext)
 
-  const onValid = (data: any) => console.log(data)
+  useEffect(() => {
+    setSelectedProcess(processes[0])
+  }, [])
+
+  const onSelect = (processId: number) => {
+    setSelectedProcess(processes[processId])
+  }
+
+  const profileDetails = () => {
+    if (tenants.length > 0) {
+      return (
+        <div className={"details-body"} style={{height: "100%", display: "flex", flexDirection: "column"}}>
+          <div className={"details-header"}>
+            <div><h4>{claims.name}</h4></div>
+          </div>
+          <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
+            <CorePageTemplate>
+              <IonItem>
+                <div>{tenants.join(", ")}</div>
+              </IonItem>
+            </CorePageTemplate>
+          </div>
+        </div>
+      )
+    } else {
+      return <></>
+    }
+  }
 
   return (
     <IonPage>
-      <IonContent>
-        <form onSubmit={handleSubmit(onValid)} id={"submit-test-form"}>
-          <InputForm label="firstname" control={control} name="firstname" type={"text"}></InputForm>
-          <InputForm label="lastname" control={control} name="lastname" type={"text"}></InputForm>
-          <InputForm label="age" control={control} name="age" type={"text"} rules={{pattern: {value: /^[0-9]*$/, message: "Nummer ist gefordert"}}} error={errors.age}></InputForm>
-        </form>
-        <IonButton form={"submit-test-form"} type="submit">submit</IonButton>
+      <IonContent fullscreen color="eeg">
+        <div style={{display: "flex", flexDirection: "row", height: "100vh"}}>
+          <div className={"ratePane"}>
+            <div className={"pane-content"}>
+              <IonList color="eeg">
+                {processes.map((p, i) =>
+                  <div key={p.type} className={cn("eeg-cards", {"selected": processes[i].type === selectedProcess?.type})}>
+                    <IonCard color="eeg" onClick={() => onSelect(i)}>
+                      <IonGrid>
+                        <IonRow>
+                          <IonCol size="auto">
+                            <div style={{paddingTop: "5px", display: "flex", fontSize: "20px"}}>
+                              <IonIcon icon={syncCircle} size="large"></IonIcon>
+                            </div>
+                          </IonCol>
+                          <IonCol>
+                            <IonLabel>
+                              <h2><b>{p.name}</b></h2>
+                            </IonLabel>
+                          </IonCol>
+                        </IonRow>
+                      </IonGrid>
+                    </IonCard>
+                  </div>
+                )}
+              </IonList>
+            </div>
+          </div>
+          <div style={{flexGrow: "1", background: "#EAE7D9"}}>
+            {profileDetails()}
+          </div>
+        </div>
       </IonContent>
     </IonPage>
+
   )
 }
 

@@ -21,7 +21,7 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import React, {lazy, Suspense} from "react";
+import React, {Suspense} from "react";
 import {KeycloakProvider, useKeycloak} from "./store/hook/AuthProvider";
 import {authKeycloak} from "./keycloak";
 import Login from "./pages/Login";

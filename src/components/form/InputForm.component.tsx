@@ -1,13 +1,17 @@
 import React, {ClipboardEvent} from "react";
-import {IonInput} from "@ionic/react";
+import {InputChangeEventDetail, IonInput} from "@ionic/react";
 import {Control, Controller, FieldError, UseFormClearErrors} from "react-hook-form";
 import {TextFieldTypes} from "@ionic/core";
 
 import "./form-element.css";
+import {IonInputCustomEvent} from "@ionic/core/dist/types/components";
+import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/input-interface";
+import {ControllerFieldState} from "react-hook-form/dist/types/controller";
+
+type partialFunction = (name: string, value: any) => void
 
 interface InputFormProps {
   control: Control<any, any>,
-  clear?: UseFormClearErrors<any>
   name: string,
   label: string,
   placeholder?: string,
@@ -20,34 +24,35 @@ interface InputFormProps {
   counter?: boolean,
   maxlength?: number,
   onPaste?: (e: ClipboardEvent<HTMLIonInputElement>) => void,
+  onTransform?: (e: IonInputCustomEvent<InputInputEventDetail>) => string | number,
+  onChangePartial?: (name: string, value: any) => void
 }
 
 const InputForm: (React.FC<InputFormProps>) =
-  ({ control, clear, name,rules, error, placeholder,...rest}) => {
+  ({ control, name,rules, error, placeholder, onTransform, onChangePartial,...rest}) => {
+
+  const handleOnChange = (onChange: partialFunction | undefined, fieldState: ControllerFieldState) => (e:IonInputCustomEvent<InputChangeEventDetail>) => {
+    if (onChange === undefined) return undefined
+    if (!fieldState.invalid && fieldState.isDirty) onChange(name, e.target.value)
+  }
+
   return (
     <div className={"form-element"}>
-      {/*<IonItem disabled={disabled} style={{"--min-height": "12px"}}>*/}
-        {/*{label && (*/}
-        {/*  <IonLabel position="floating">{label}</IonLabel>*/}
-        {/*)}*/}
         <Controller
           name={name}
           control={control}
           rules={rules}
           render={({field, fieldState, formState}) => {
-            const { onChange, value, name, ref } = field;
+            const { onChange, value, name, ref,onBlur } = field;
             return (<IonInput
-                              onIonChange={(e) => {
-                                if (fieldState.invalid) {
-                                  if (clear) clear(name)
+                              onIonChange={handleOnChange(onChangePartial, fieldState)}
+                              onIonInput={(e) => {
+                                let value: string | number = e.detail.value || ""
+                                if (onTransform) {
+                                  value = onTransform(e)
                                 }
-                                onChange((rest.type === 'number' ? Number(e.detail.value!) : e.detail.value!))
+                                onChange((rest.type === 'number' ? Number(value) : value))
                               }}
-                              // onIonBlur={(e) => {
-                              //   console.log("Input OnBlure");
-                              //   onChange((rest.type === 'number' ? Number(e.target.value) : e.target.value!))
-                              // }}
-                              onChange={onChange}
                               placeholder={placeholder ? placeholder : "Enter Text"}
                               fill="outline"
                               labelPlacement={"floating"}
@@ -59,7 +64,6 @@ const InputForm: (React.FC<InputFormProps>) =
                               {...rest}></IonInput>)
           }}
         />
-      {/*</IonItem>*/}
       {error && <div className={"error-line"}>{error.message}</div>}
     </div>
   );

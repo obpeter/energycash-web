@@ -1,15 +1,25 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {
-  addMeteringPoint, archiveParticipant,
-  chancelNewParticipant, confirmParticipant, createParticipant, fetchParticipantModel,
-  newParticipant, registerMeteringpoint, removeMeteringPoint,
-  saveNewParticipant, selectMetering, selectParticipant, updateMeteringPoint, updateParticipant
+  addMeteringPoint,
+  archiveParticipant,
+  chancelNewParticipant,
+  confirmParticipant,
+  createParticipant,
+  fetchParticipantModel,
+  newParticipant,
+  registerMeteringpoint,
+  removeMeteringPoint,
+  saveNewParticipant,
+  selectMetering,
+  selectParticipant,
+  updateMeteringPoint,
+  updateParticipant,
+  updateParticipantPartial
 } from "../actions/participant.action";
 import {adapter, initialState} from "../states";
 import {EegParticipant} from "../../../models/members.model";
 import {v4} from 'uuid';
 import {Address} from "../../../models/eeg.model";
-import {archiveRate} from "../../rate";
 
 export const reducer = createReducer(initialState, builder =>
   builder
@@ -55,15 +65,18 @@ export const reducer = createReducer(initialState, builder =>
     })
     .addCase(updateMeteringPoint.fulfilled, (state, action) => {
       const {meter, participantId} = action.payload;
-        return adapter.updateOne({...state, selectedMeter: meter.meteringPoint},
-          {id: participantId, changes:
-              {...state.entities[participantId],
-                meters: state.entities[participantId] ?
-                  state.entities[participantId]!.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter : m) : undefined}
-          })
+      return adapter.updateOne({...state, selectedMeter: meter.meteringPoint,
+          selectedParticipant: state.selectedParticipant
+            ? {...state.selectedParticipant,
+                meters: state.selectedParticipant.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter: m)}
+            : undefined
+        }, {id: participantId, changes:
+            {...state.entities[participantId],
+              meters: state.entities[participantId] ?
+                state.entities[participantId]!.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter : m) : undefined}
+        })
     })
     .addCase(confirmParticipant.fulfilled, (state, action) => {
-      console.log("Confirm Participant Reducer", action.payload)
       const participant = action.payload
       return adapter.updateOne({...state, selectedParticipant: participant},
         { id: participant.id, changes: participant } )
@@ -83,5 +96,8 @@ export const reducer = createReducer(initialState, builder =>
     })
     .addCase(archiveParticipant.fulfilled, (state, action) => {
       return adapter.removeOne({...state, selectedParticipant: undefined, selectedMeter: undefined}, action.payload)
+    })
+    .addCase(updateParticipantPartial.fulfilled, (state, action) => {
+      return adapter.updateOne(state, {id: action.payload.id, changes: action.payload})
     })
 );

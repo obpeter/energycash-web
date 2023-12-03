@@ -1,6 +1,5 @@
 import {createSelector} from "@reduxjs/toolkit";
 
-// import { EnergyState, adapter, featureKey } from '../states';
 import {EegParticipant} from "../../../models/members.model";
 import {adapter, featureKey, ParticipantState} from "../states";
 import {Metering} from "../../../models/meteringpoint.model";
@@ -33,14 +32,23 @@ export const participantsSelector1 = createSelector(
 
 const getPeriodDates = (period: SelectedPeriod) => {
   switch (period.type) {
-    case 'YM':
-      return [new Date(period.year, period.segment, 1, 0, 0, 0), new Date(period.year, period.segment + 1, 0, 0, 0, 0)]
+    case 'Y':
+      return [
+        new Date(period.year, 0, 1, 0, 0, 0),
+        new Date(period.year, 12, 0, 0, 0, 0)
+      ]
     case 'YQ':
-      return [new Date(period.year, ((period.segment - 1) * 3) + 1, 0, 0, 0, 0), new Date(period.year, ((period.segment) * 3), 0, 0, 0, 0)]
+      return [
+        new Date(period.year, ((period.segment - 1) * 3), 1, 0, 0, 0),
+        new Date(period.year, ((period.segment) * 3), 0, 0, 0, 0)]
     case 'YH':
-      return [new Date(period.year, period.segment, 0, 0, 0, 0), new Date(period.year, period.segment + 1, 0, 0, 0, 0)]
+      return [
+        new Date(period.year, (period.segment - 1)  * 6, 1, 0, 0, 0),
+        new Date(period.year, period.segment * 6, 0, 0, 0, 0)]
     default:
-      return [new Date(period.year, period.segment, 0, 0, 0, 0), new Date(period.year, period.segment + 1, 0, 0, 0, 0)]
+      return [
+        new Date(period.year, period.segment - 1, 1, 0, 0, 0),
+        new Date(period.year, period.segment, 0, 0, 0, 0)]
   }
 }
 
@@ -72,11 +80,16 @@ export const activeParticipantsSelector1 = createSelector(
       const n = participants.map(p => {
         return {
           ...p, meters: p.meters.filter(m =>
-            new Date(m.registeredSince).getTime() <= start.getTime() &&
-            (m.inactiveSince ? new Date(m.inactiveSince).getTime() <= end.getTime() && new Date(m.inactiveSince).getTime() >= start.getTime() : true)
+            // (m.participantState
+            //   ? new Date(m.participantState.activeSince).getTime() <= start.getTime()
+            //   : true) &&
+            (m.participantState
+              ? (new Date(m.participantState.inactiveSince).getTime() >= end.getTime() && new Date(m.participantState.activeSince).getTime() <= end.getTime()) ||
+              (new Date(m.participantState.inactiveSince).getTime() >= start.getTime() && new Date(m.participantState.inactiveSince).getTime() <= end.getTime())
+              : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
           )
         } as EegParticipant
-      })
+      }).filter(p => p.meters.length > 0)
       return n
     }
     return participants
@@ -129,6 +142,7 @@ export const selectedMeterIdSelector = createSelector(
 
 export const selectedMeterSelector = createSelector(
   featureStateSelector,
-  state => state.selectedParticipant ? state.selectedParticipant.meters?.find(m => m.meteringPoint === state.selectedMeter) : undefined
+  selectedMeterIdSelector,
+  (state, meterId) => state.selectedParticipant ? state.selectedParticipant.meters?.find(m => m.meteringPoint === meterId) : undefined
 )
 

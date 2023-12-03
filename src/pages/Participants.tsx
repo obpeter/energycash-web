@@ -74,7 +74,7 @@ const Participants: FC = () => {
               // periods={periods}
             />
           </div>
-          <div style={{flexGrow:"1", background: "#EAE7D9"}}>
+          <div style={{flexGrow:"1", background: "#EAE7D9", height: "100vh", overflow: "hidden"}}>
             {showParticipantDetails()}
           </div>
         </div>

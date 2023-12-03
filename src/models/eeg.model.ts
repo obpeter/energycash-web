@@ -7,6 +7,7 @@ export interface Eeg {
   vatNumber: string;
   businessNr: string;
   settlement: string;
+  description: string;
   settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
   allocationMode: "DYNAMIC" | "STATIC"
   area: "LOCAL" | "REGIONAL"
@@ -136,7 +137,7 @@ export interface EegTariff {
   participantFee?: string
   baseFee?: string
   businessNr?: string
-  centPerKWh?: string
+  centPerKWh?: number
   freeKWh?: string
   discount?: string
 }

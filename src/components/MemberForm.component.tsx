@@ -8,19 +8,21 @@ import {eegBusiness} from "../eegIcons";
 import ToggleButtonComponent from "./ToggleButton.component";
 import SelectForm from "./form/SelectForm.component";
 import {EegTariff} from "../models/eeg.model";
+import DatePickerCoreElement from "./core/elements/DatePickerCore.element";
 
 interface MemberFormComponentProps {
   participant: EegParticipant
   rates: EegTariff[]
   formId: string
   onSubmit: (data: EegParticipant) => void
+  onSubmitPartial: (participantId: string, value: Record<string, any>) => void
 }
 
-const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, formId, onSubmit}) => {
+const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, formId, onSubmit, onSubmitPartial}) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 
-  const { handleSubmit, setValue, control,clearErrors,  reset, formState: {errors} } = useForm({
+  const { setValue, control,  reset, formState: {errors} } = useForm({
     defaultValues: participant, mode: "all"});
 
   const onChangeBusinessType = (s: number) => {
@@ -31,7 +33,6 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
   useEffect(() => {
     if (participant) {
       participant.businessRole === 'EEG_PRIVATE' ? setSelectedBusinessType(0) : setSelectedBusinessType(1)
-      console.log("RESET PARTICIPANT")
       reset(participant)
     }
   }, [participant])
@@ -45,9 +46,22 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
   }
 
   const getRatesOption = () => {
-    return rates.filter(r => r.type === "EEG").map((r) => {
+    const r =  rates.filter(r => r.type === "EEG").map((r) => {
       return {key: r.id, value: r.name}
     })
+    return [{key: null, value: "Kein Tarif"}, ...r]
+  }
+
+  const onUpdateBaseData = (name: string, value: any) => {
+    const nameHirachy = name.split(".")
+    console.log(nameHirachy)
+
+    onSubmitPartial(participant.id, {[name]: value})
+
+  }
+
+  if (!participant) {
+    return <></>
   }
 
   return (
@@ -64,42 +78,64 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
           </IonCol>
         </IonRow>
       </IonGrid>
-      <form onBlur={handleSubmit(onSubmit)}>
+      {/*<form onBlur={handleSubmit(onSubmit)}>*/}
         <IonList>
           <IonListHeader>Kontakt</IonListHeader>
-          <InputForm name={"participantNumber"} label="Mitglieds-Nr" control={control} type="text"/>
+          <InputForm name={"participantNumber"} label="Mitglieds-Nr" control={control} type="text" onChangePartial={onUpdateBaseData}/>
           {selectedBusinessType === 0 ? (
               <>
                 <div style={{display: "grid", gridTemplateColumns: "50% 50%"}}>
-                  <InputForm name={"titleBefore"} label="Titel (Vor)" control={control} type="text"/>
-                  <InputForm name={"titleAfter"} label="Titel (Nach)" control={control} type="text"/>
+                  <InputForm name={"titleBefore"} label="Titel (Vor)" control={control} type="text" onChangePartial={onUpdateBaseData}/>
+                  <InputForm name={"titleAfter"} label="Titel (Nach)" control={control} type="text" onChangePartial={onUpdateBaseData}/>
                 </div>
                 <InputForm name={"firstname"} label="Vorname" control={control}
-                           rules={{required: "Vorname fehlt"}} type="text" error={errors.firstname}/>
+                           rules={{required: "Vorname fehlt"}} type="text" error={errors.firstname} onChangePartial={onUpdateBaseData}/>
                 <InputForm name={"lastname"} label="Nachname" control={control} rules={{required: "Vorname fehlt"}}
-                           type="text" error={errors.lastname}/>
+                           type="text" error={errors.lastname} onChangePartial={onUpdateBaseData}/>
               </>
             ) :
             (
               <InputForm name={"firstname"} label="Firmenname" control={control}
-                         rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
+                         rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname} onChangePartial={onUpdateBaseData}/>
             )
           }
-          <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()}/>
-          <InputForm name={"billingAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
-          <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control} type="text"/>
-          <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control} type="text"/>
-          <InputForm name={"billingAddress.city"} label="Ort" control={control} type="text"/>
-          <InputForm name={"contact.phone"} label="Telefon" control={control} onPaste={handlePhonePaste} type="text"/>
-          <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{required: "Email Adresse fehlt"}} type="text" error={errors.contact?.email} clear={clearErrors}/>
-          <InputForm name={"vatNumber"} label="UID" control={control} type="text"/>
+          <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"billingAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control} type="text" onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control} type="text" onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"billingAddress.city"} label="Ort" control={control} type="text" onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"contact.phone"} label="Telefon" control={control} onPaste={handlePhonePaste} type="text" onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{
+            required: "Email Adresse fehlt",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+              message: 'Email Adresse ist nicht valide'}
+          }} type="text" error={errors.contact?.email} onChangePartial={onUpdateBaseData}/>
+          <InputForm name={"vatNumber"} label="UID" control={control} type="text" onChangePartial={onUpdateBaseData}/>
         </IonList>
+      {/*</form>*/}
         <IonList>
           <IonListHeader>Bankdaten</IonListHeader>
-          <InputForm name={"accountInfo.iban"} label="IBAN" control={control} type="text"/>
-          <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} type="text"/>
+          {/*<InputFieldCoreElement initialValue={participant.accountInfo.iban} onChange1={onUpdateBaseData} name="accountInfo.iban" label="IBAN" type="text"/>*/}
+          {/*<InputFieldCoreElement initialValue={participant.accountInfo.owner} onChange1={onUpdateBaseData} name="accountInfo.owner" label="Kontoinhaber" type="text"/>*/}
+          <InputForm name={"accountInfo.iban"} label="IBAN"
+                     rules={{
+                       required: 'IBAN ist obligatorisch',
+                       pattern: {
+                         value: /^[AT|DE]+[0-9.-]{18,20}$/i,
+                         message: 'IBAN ist nicht valide',
+                       },
+                     }}
+                     control={control} type="text" onChangePartial={onUpdateBaseData} error={errors.accountInfo?.iban}/>
+          <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} type="text" onChangePartial={onUpdateBaseData}/>
         </IonList>
-      </form>
+
+        <IonList>
+          <IonListHeader>Optionals</IonListHeader>
+          <DatePickerCoreElement initialValue={participant.participantSince} name={"participantSince"} label="Mitglied seit"
+                                 placeholder={"Datum"} onChange={onUpdateBaseData}/>
+          {/*<InputForm name={"participantSince"} label="Mitglied seit" control={control} type="text"/>*/}
+        </IonList>
     </>
   )
 }

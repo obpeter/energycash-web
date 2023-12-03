@@ -13,7 +13,7 @@ interface DatepickerComponentProps {
 const DatepickerComponent: FC<DatepickerComponentProps> = ({range, trigger}) => {
   const modal = useRef<HTMLIonModalElement>(null);
 
-  const [dateRange, setDateRange] = useState<[Date|null, Date|null]>([null, null]);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [startDate, endDate] = dateRange;
 
   function dismiss(start: boolean) {
@@ -34,30 +34,30 @@ const DatepickerComponent: FC<DatepickerComponentProps> = ({range, trigger}) => 
         </IonButton>
       </div>
 
-    <IonModal ref={modal} trigger="open-date-picker">
-      <div className="wrapper">
-        <h1>Zeitraum</h1>
-        <IonList lines="none" style={{textAlign: "center"}}>
-          <DatePicker
-            selectsRange={true}
-            startDate={startDate}
-            endDate={endDate}
-            onChange={(update:[Date|null, Date|null]) => {
-              setDateRange(update);
-            }}
-            inline
-          />
+      <IonModal ref={modal} trigger="open-date-picker">
+        <div className="wrapper">
+          <h1>Zeitraum</h1>
+          <IonList lines="none" style={{textAlign: "center"}}>
+            <DatePicker
+              selectsRange={true}
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(update: [Date | null, Date | null]) => {
+                setDateRange(update);
+              }}
+              inline
+            />
 
-          <IonItem button={true} detail={false} onClick={() => dismiss(true)}>
-            Export
-          </IonItem>
-          <IonItem button={true} detail={false} onClick={() => dismiss(false)}>
-            Chancel
-          </IonItem>
-        </IonList>
+            <IonItem button={true} detail={false} onClick={() => dismiss(true)}>
+              Export
+            </IonItem>
+            <IonItem button={true} detail={false} onClick={() => dismiss(false)}>
+              Chancel
+            </IonItem>
+          </IonList>
 
-      </div>
-    </IonModal>
+        </div>
+      </IonModal>
     </>
   )
 }

@@ -40,7 +40,7 @@ export interface IntermediateRecord {
 }
 
 export interface Report {
-  summery: Record
+  summary: Record
   intermediate: IntermediateRecord
 }
 

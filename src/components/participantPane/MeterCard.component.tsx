@@ -34,7 +34,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const month = currentDate.getMonth() + 1;
 
   const report = useAppSelector(meteringReportSelectorV2(participant.id, meter.meteringPoint))
-  const tariff = useAppSelector(selectRateById(meter.tariffId))
+  const tariff = useAppSelector(selectRateById(meter.tariff_id))
   const bill = useAppSelector(selectBillByMeter(participant.id, meter.meteringPoint))
 
   const ratio = (own: number, total: number) => {
@@ -42,7 +42,6 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   }
 
   const barRatio = (report?: ProducerReport | ConsumerReport) => {
-    // console.log("report for ratio: ", report);
     if (report) {
       if ("consumed" in report) {
         if (report.consumed === 0) return 0

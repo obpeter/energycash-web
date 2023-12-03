@@ -57,12 +57,10 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
   }, [participantId])
 
   const onRequest = (data: ProcessValues) => {
-    console.log("ONREQUEST: ", data)
     if (data.participantId && data.meteringPoint) {
 
       const meter = meters.find((m) => m.meteringPoint === data.meteringPoint)
       if (meter) {
-        console.log(data, meter.meteringPoint, meter.direction)
         eegService.registerMeteringPoint(eeg.rcNumber.toUpperCase(), data.participantId, meter.meteringPoint, meter.direction)
           .finally(() => {
             reset()

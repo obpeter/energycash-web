@@ -14,6 +14,7 @@ export interface AuthClient {
   idToken?: string
   tenants: string[]
   accessGroups: string[]
+  claims: Record<string, any>
 }
 
 export type AuthContextInterface<T extends AuthClient> = {
@@ -21,6 +22,7 @@ export type AuthContextInterface<T extends AuthClient> = {
   isAuthenticated: boolean;
   tenants: string[];
   roles: string[];
+  claims: Record<string, any>
 }
 
 // export const authContextDefaults: AuthContextInterface = {
@@ -37,6 +39,7 @@ export function createAuthContext<T extends AuthClient>(
     isAuthenticated: false,
     tenants: [],
     roles: [],
+    claims: {},
     ...initialContext,
   })
 }
@@ -53,6 +56,7 @@ type AuthProviderState = {
   isAuthenticated: boolean
   tenants: string[]
   roles: string[]
+  claims: Record<string, any>
 }
 
 
@@ -63,6 +67,7 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
     isAuthenticated: false,
     tenants: [],
     roles: [],
+    claims: {}
   }
 
   return class AuthProvider extends PureComponent<AuthProviderProps<T>, AuthProviderState> {
@@ -97,6 +102,7 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
         initialized: true,
         tenants: authClient.tenants,
         roles: authClient.accessGroups,
+        claims: authClient.claims,
       });
 
       // console.log("UpdateState: ", this.state, "tenants", authClient);
@@ -104,14 +110,14 @@ export function createAuthProvider<T extends AuthClient>(AuthContext: React.Cont
 
     render() {
       const { children, authClient } = this.props
-      const { initialized, isAuthenticated, tenants, roles } = this.state
+      const { initialized, isAuthenticated, tenants, roles, claims } = this.state
 
       if (!initialized) {
         return <></>
       }
 
       return (
-        <AuthContext.Provider value={{authClient, isAuthenticated, tenants, roles}}>
+        <AuthContext.Provider value={{authClient, isAuthenticated, tenants, roles, claims}}>
           {children}
         </AuthContext.Provider>
       )

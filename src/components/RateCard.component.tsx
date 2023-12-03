@@ -1,10 +1,8 @@
-import React, {FC, useContext} from "react";
-import {EegRate, EegTariff} from "../models/eeg.model";
+import React, {FC} from "react";
+import {EegTariff} from "../models/eeg.model";
 import {IonCard, IonCardContent, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from "@ionic/react";
-import {bug, flash, person} from "ionicons/icons";
+import {bug, person} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../eegIcons";
-import {ParticipantContext} from "../store/hook/ParticipantProvider";
-import {RouteComponentProps, useHistory} from "react-router";
 
 interface RateCardComponentProps {
   rate: EegTariff;
@@ -58,7 +56,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Cent pro kWh</p>
-              <p>{rate.centPerKWh+ " Cent"}</p>
+              <p>{rate.centPerKWh ? rate.centPerKWh.toString().replace(".", ",") + " Cent" : ''}</p>
             </div>
             {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <p>Umsatzsteuer</p>
@@ -79,7 +77,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Cent pro kWh</p>
-              <p>{(Number(rate.centPerKWh)) + " Cent"}</p>
+              <p>{rate.centPerKWh ? rate.centPerKWh.toString().replace(".", ",") + " Cent" : ''}</p>
             </div>
             {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <p>Umsatzsteuer</p>

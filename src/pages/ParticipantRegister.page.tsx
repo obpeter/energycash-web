@@ -66,7 +66,6 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
   // const {append} = useFieldArray<EegParticipant>({control, name: 'meters'})
 
   const onRegisterParticipant = (participant: EegParticipant) => {
-    console.log("Append participant: ", participant);
     dispatch(createParticipant({tenant, participant}))
     history.replace("/page/participants")
   }

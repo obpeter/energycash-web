@@ -7,7 +7,7 @@ import {fetchParticipantModel, participantsSelector1} from "../participant";
 import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
 import {Eeg} from "../../models/eeg.model";
 import {eegService} from "../../service/eeg.service";
-import {ParticipantReport, SelectedPeriod} from "../../models/energy.model";
+import {SelectedPeriod} from "../../models/energy.model";
 import {setSelectedPeriod} from "../energy";
 ;
 
@@ -41,7 +41,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   const tenant = useAppSelector(selectedTenant)
 
   const eeg = useAppSelector(eegSelector);
-  const participants = useAppSelector(participantsSelector1)
+  // const participants = useAppSelector(participantsSelector1)
 
   const [initTenant, setInitTenant] = useState(tenant)
 
@@ -52,10 +52,12 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     console.log("Update EEG Data")
   }, [])
 
-  // useEffect(() => {
-  //   // console.log("APP STATE CHANGED: ", state)
-  //   if (tenant) init()
-  // }, [tenant])
+  useEffect(() => {
+    if (tenant && tenant !== initTenant) {
+      setInitTenant(tenant)
+      initApplication()
+    }
+  }, [tenant])
 
   useEffect(() => {
     const storedTenant = localStorage.getItem("tenant")
@@ -141,13 +143,12 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   }, [eeg]);
 
   const initApplication = useCallback( async () => {
-    if (initTenant && initTenant.length > 0) {
-      console.log("Fetch EEG DATA")
+    if (tenant && tenant.length > 0) {
       keycloak.getToken().then((token) => {
         Promise.all([
-          dispatch(fetchEegModel({token: token, tenant: initTenant!})),
-          dispatch(fetchRatesModel({token: token, tenant: initTenant!})),
-          dispatch(fetchParticipantModel({token: token, tenant: initTenant!})),
+          dispatch(fetchEegModel({token: token, tenant: tenant!})),
+          dispatch(fetchRatesModel({token: token, tenant: tenant!})),
+          dispatch(fetchParticipantModel({token: token, tenant: tenant!})),
           // eegService.fetchLastReportEntryDate(initTenant, token).then(lastReportDate => {
           //   if (lastReportDate && lastReportDate.length > 0) {
           //     const [date, time] = lastReportDate.split(" ");
@@ -159,10 +160,10 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
         ])
       })
     }
-  }, [initTenant])
+  }, [tenant])
 
   const initOne = async () => {
-    let initTenant = tenant
+    // let initTenant = tenant
 
     if (!initTenant) {
       const storedTenant = localStorage.getItem("tenant")
@@ -214,4 +215,9 @@ export const useAccessGroups = () => {
 export const useRefresh = () => {
   const {refresh} = useContext(EegContext);
   return {refresh};
+}
+
+export const useOnlineState = () => {
+  const context = useContext(EegContext)
+  return context.eeg ? context.eeg.online : false
 }

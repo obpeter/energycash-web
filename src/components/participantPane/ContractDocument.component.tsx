@@ -36,7 +36,6 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
     if (tenant && participant) {
       fileService.loadContractDocumentInfos(tenant, participant.id)
         .then(docs => {
-          console.log(docs)
           return docs
         })
         // .then(docs => docs.filter(d => d.userId === participant.id && d.fileCategory === "contract"))
@@ -89,7 +88,6 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
                 createdAt: r.data.addFile.createdAt,
                 name: r.data.addFile.name,
                 userId: participant.id} as ContractInfo
-              console.log("update Contract-Info: ", fileInfo)
               setContractDocs(prev => [...prev, fileInfo])
             })
         }

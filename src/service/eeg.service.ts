@@ -38,7 +38,6 @@ class EegService {
 
   private handleErrors(response: Response) {
     if (!response.ok) {
-      console.log("Error TEXT REST: ", response)
       throw Error(response.statusText);
     }
     return response;
@@ -590,6 +589,19 @@ class EegService {
         },
         body: JSON.stringify(payload)
       })
+      .then(this.handleErrors)
+      .then( response => this.handleDownload(response, "energy-export"));
+  }
+
+  async exportMasterdata(tenant: string) {
+    const token = await this.authClient.getToken();
+    return fetch(`${API_API_SERVER}/eeg/export/masterdata`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
+    })
       .then(this.handleErrors)
       .then( response => this.handleDownload(response, "energy-export"));
   }

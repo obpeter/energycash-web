@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, useEffect} from "react";
 import {IonCard, IonCardContent, IonCol, IonGrid, IonList, IonListHeader, IonRow} from "@ionic/react";
 import InputFormComponent from "./form/InputForm.component";
 import {FieldValues, useForm} from "react-hook-form";
@@ -6,7 +6,7 @@ import {EegTariff} from "../models/eeg.model";
 import CheckboxComponent from "./form/Checkbox.component";
 import ToggleButtonComponent from "./ToggleButton.component";
 import {useRateType} from "../store/hook/Rate.provider";
-import Input from "./form/Input.component";
+import NumberInputForm from "./form/NumberInput.component";
 
 const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, submitId: string, mode?: 'NEW' }> =
   ({rate, onSubmit, submitId, mode}) => {
@@ -34,6 +34,11 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
       }
       setValue("useVat", s)
     }
+
+    // const centPerKwh = watch("centPerKWh")
+    // useEffect(() => {
+    //   console.log("Cent", centPerKwh)
+    // }, [centPerKwh]);
 
     const useVat = watch("useVat");
 
@@ -76,13 +81,10 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EEG":
           return (
             <div>
-              <InputFormComponent label="Vorauszahlung in €" control={control} name={"participantFee"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.participantFee}/>
+              <NumberInputForm label="Mitgliedbeitrag in €" control={control} name={"participantFee"}
+                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} error={errors.participantFee}/>
               <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
-              {/*<Input label={"Vorauszahlung"} labelPlacement={"floating"} {...register('participantFee',*/}
-              {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
-              {/*<Input label={"Rabatt"} labelPlacement={"floating"} {...register('discount')} />*/}
             </div>
           )
         case "EZP":
@@ -90,8 +92,9 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
             <div>
               <InputFormComponent label="Pauschalbetrag in €" control={control} name={"baseFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.baseFee}/>
-              <InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.centPerKWh}/>
+              {/*<InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}*/}
+              {/*                    rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.centPerKWh}/>*/}
+              <NumberInputForm label="Cent pro kWh" control={control} name={"centPerKWh"}/>
               {/*<Input label={"Pauschalbetrag"} labelPlacement={"floating"} {...register('baseFee',*/}
               {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
               {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh')} />*/}
@@ -100,8 +103,9 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "VZP":
           return (
             <div>
-              <InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" inputmode={"numeric"} error={errors.centPerKWh}/>
+              {/*<InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}*/}
+              {/*                    rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" inputmode={"numeric"} error={errors.centPerKWh}/>*/}
+              <NumberInputForm label="Cent pro kWh" control={control} name={"centPerKWh"}/>
               <InputFormComponent label="Inklusive kWh" control={control} name={"freeKWh"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.freeKWh}/>
               <InputFormComponent label="Rabatt in %" control={control} name={"discount"}

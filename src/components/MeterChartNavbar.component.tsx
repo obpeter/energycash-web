@@ -1,16 +1,12 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FC, useCallback, useEffect, useState} from "react";
 import {IonButton, IonButtons} from "@ionic/react";
 import {createNewPeriod} from "../util/Helper.util";
 import {
   EegEnergyReport,
   EnergySeries,
-  MeterEnergySeries, MeterReport,
-  ParticipantReport,
   ReportType,
   SelectedPeriod
 } from "../models/energy.model";
-import {eegService} from "../service/eeg.service";
-import {Exception} from "sass";
 import PeriodSelectorElement from "./core/PeriodSelector.element";
 import {useAppSelector} from "../store";
 import {periodsSelector} from "../store/energy";
@@ -28,7 +24,6 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({selected
   const [lastSegmentIdx, setLastSegmentIdx] = useState<number>(1)
 
   useEffect(() => {
-    console.log("ACTIVE PERIOD: ", activePeriod, selectedPeriod)
     setSelectedPeriod(activePeriod)
   }, [activePeriod, selectedMeterId])
 

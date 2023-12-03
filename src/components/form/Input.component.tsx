@@ -1,6 +1,6 @@
-import React, {FC, HTMLAttributes} from "react";
-import {IonInput, IonItem, IonLabel} from "@ionic/react";
-import {Control, Controller, UseFormRegisterReturn} from "react-hook-form";
+import React from "react";
+import {IonInput} from "@ionic/react";
+import {UseFormRegisterReturn} from "react-hook-form";
 import {TextFieldTypes} from "@ionic/core";
 
 // export interface InputProps {
