@@ -3,8 +3,6 @@ import {featureKey} from "../states/participant.state";
 import {eegService} from "../../../service/eeg.service";
 import {EegParticipant} from "../../../models/members.model";
 import {Metering} from "../../../models/meteringpoint.model";
-import {EegTariff} from "../../../models/eeg.model";
-import {tariffService} from "../../../service/tariff.service";
 import {HttpError} from "../../../service/base.service";
 import {participantService} from "../../../service/participant.service";
 import {SelectedPeriod} from "../../../models/energy.model";
@@ -67,6 +65,15 @@ export const updateParticipant = createAsyncThunk(
     const {participant, tenant} = arg
     return await eegService.updateParticipant(tenant, participant);
   }
+)
+
+export const updateParticipantPartial = createAsyncThunk(
+  `${featureKey}/update/partial`,
+  async (arg: { tenant: string, participantId: string, value: {path: string, value: any }}) => {
+    const {tenant, participantId, value} = arg
+    return await participantService.updateParticipantPartial(tenant, participantId, value);
+  }
+
 )
 
 export const registerMeteringpoint = createAsyncThunk(

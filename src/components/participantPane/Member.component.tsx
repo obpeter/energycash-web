@@ -12,7 +12,6 @@ import {
 import "./Member.component.css";
 import {eegSumSign} from "../../eegIcons";
 import MemberNameComponent from "./MemberName.component";
-import {ParticipantBillType} from "../../models/meteringpoint.model";
 import {useAppSelector} from "../../store";
 import {selectBillById} from "../../store/billing";
 
@@ -59,7 +58,7 @@ const MemberComponent: FC<MemberProps> = ( {participant,
     <IonGrid fixed={true} style={{paddingBottom: "0px", paddingTop: "0px", maxWidth:"380px"}}>
       { hideMember || (
         <IonRow class="ion-align-items-center" style={{"--ion-background-color": "transparent", "--ion-item-background": "transparent", flexWrap: "nowrap"}}>
-          <MemberNameComponent participant={participant} isChecked={isChecked} onCheck={onCheck} showAmount={showAmount} onAdd={onShowAddMeterPage}/>
+          <MemberNameComponent data-testid="member-name" participant={participant} isChecked={isChecked} onCheck={onCheck} showAmount={showAmount} onAdd={onShowAddMeterPage}/>
         </IonRow>
       )}
       <IonRow>

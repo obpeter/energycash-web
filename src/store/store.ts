@@ -8,12 +8,12 @@ import * as billing from './billing';
 import * as billingRun from './billingRun';
 import * as billingConfig from './billingConfig';
 
-import {combineReducers, configureStore, getDefaultMiddleware} from "@reduxjs/toolkit";
+import {combineReducers, configureStore, getDefaultMiddleware, PreloadedState} from "@reduxjs/toolkit";
 
 /**
  * Reducer
  */
-const reducer = combineReducers({
+export const reducer = combineReducers({
   [eeg.featureKey]: eeg.reducer,
   [participant.featureKey]: participant.reducer,
   [rate.featureKey]: rate.reducer,
@@ -41,8 +41,17 @@ export const store = configureStore({
   devTools: true
 });
 
+
+export function setupStore(preloadedState?: PreloadedState<State>) {
+  return configureStore({
+    reducer: reducer,
+    preloadedState
+  })
+}
+
 /**
  * Types
  */
 export type State = ReturnType<typeof reducer>;
+export type AppStore = ReturnType<typeof setupStore>
 export type AppDispatch = typeof store.dispatch;

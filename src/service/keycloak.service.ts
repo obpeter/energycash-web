@@ -33,6 +33,7 @@ export class KeycloakService {
   resourceAccess?: accountType;
   tenants: string[]
   accessGroups: string[];
+  claims: Record<string, any>
 
   onAuthSuccess?: () => void;
 
@@ -40,6 +41,7 @@ export class KeycloakService {
     this.config = config;
     this.tenants = [];
     this.accessGroups = [];
+    this.claims = {}
   }
 
   private getLocalStorage(key: string): string | undefined {
@@ -133,6 +135,7 @@ export class KeycloakService {
 
     this.timeSkew = undefined;
     this.tenants = [];
+    this.claims = {};
 
     this.onAuthSuccess && this.onAuthSuccess();
   }
@@ -146,6 +149,7 @@ export class KeycloakService {
       this.resourceAccess = this.tokenParsed.resource_access;
       this.tenants = this.tokenParsed.tenant;
       this.accessGroups = this.tokenParsed.access_groups;
+      this.claims = {"name": this.tokenParsed.name, "nick": this.tokenParsed.preferred_username, "email": this.tokenParsed.email}
 
       this.onAuthSuccess && this.onAuthSuccess();
     }
@@ -172,10 +176,10 @@ export class KeycloakService {
       })
         .then((response: Response) => response.json())
         .then((jwt: jwtToken) => this.saveToken(jwt, timeLocal))
-        .then(() => {
-          localStorage.setItem("user", username);
-          localStorage.setItem("passwd", password);
-        })
+        // .then(() => {
+        //   localStorage.setItem("user", username);
+        //   localStorage.setItem("passwd", password);
+        // })
         .catch((err) => reject(false))
 
       resolve(true);
@@ -228,14 +232,14 @@ export class KeycloakService {
       refresh_token: this.refreshToken!,
     };
 
-    const loginStoredUser = async (): Promise<void> => {
-      const username: string | undefined = this.getLocalStorage("user");
-      const password: string | undefined = this.getLocalStorage("passwd");
-
-      if (username && password) {
-        await this.login(username, password)
-      }
-    }
+    // const loginStoredUser = async (): Promise<void> => {
+    //   const username: string | undefined = this.getLocalStorage("user");
+    //   const password: string | undefined = this.getLocalStorage("passwd");
+    //
+    //   if (username && password) {
+    //     await this.login(username, password)
+    //   }
+    // }
 
     const timeLocal = new Date().getTime();
     return new Promise<string>((resolve, reject) => {
@@ -253,10 +257,14 @@ export class KeycloakService {
           this.saveToken(jwt, timeLocal)
         })
         .catch(() => {
-          loginStoredUser()
+          this.logout()
         })
         .then(() => resolve(this.token!))
     })
+  }
+
+  logout() {
+    this.clear()
   }
 
   hasRealmRole(role: string): boolean {

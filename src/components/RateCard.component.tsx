@@ -1,10 +1,8 @@
-import React, {FC, useContext} from "react";
-import {EegRate, EegTariff} from "../models/eeg.model";
+import React, {FC} from "react";
+import {EegTariff} from "../models/eeg.model";
 import {IonCard, IonCardContent, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from "@ionic/react";
-import {bug, flash, person} from "ionicons/icons";
+import {bug, person} from "ionicons/icons";
 import {eegPlug, eegSolar} from "../eegIcons";
-import {ParticipantContext} from "../store/hook/ParticipantProvider";
-import {RouteComponentProps, useHistory} from "react-router";
 
 interface RateCardComponentProps {
   rate: EegTariff;

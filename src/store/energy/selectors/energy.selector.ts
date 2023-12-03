@@ -46,6 +46,10 @@ export const selectAllIntermediates = createSelector(
   items => reportAdapter.getSelectors().selectAll(items.intermediateReportResults)
 )
 
+export const selectAllIntermediatesV2 = createSelector(
+  featureStateSelector,
+  items => selectAllParticipants(items.participantReports).flatMap(r => r.meters.map(m => m.report.intermediate)),
+)
 export const selectMeta = (meterId: string) => createSelector(
   featureStateSelector,
   items => selectById(items.meta, meterId)
@@ -94,14 +98,14 @@ export const meteringReportSelectorV2 = (participantId: string, meterId: string)
       const r = report.meters.filter(m => m.meterId === meterId).map(m => {
         if (m.meterDir === "CONSUMPTION") {
           return {
-            consumed: m.report.summery.consumption,
-            allocated: m.report.summery.utilization,
+            consumed: m.report.summary.consumption,
+            allocated: m.report.summary.utilization,
             total_production: totalProduction
           } as ConsumerReport
         } else {
           return {
-            produced: m.report.summery.production,
-            allocated: m.report.summery.allocation,
+            produced: m.report.summary.production,
+            allocated: m.report.summary.allocation,
             total_production: totalProduction
           } as ProducerReport
         }
@@ -197,9 +201,9 @@ export const meteringEnergyGroup11 = createSelector(
   items => items.flatMap(i => i.meters).reduce((i, s) => {
     let utilization = 0.0
     if (s.meterDir === "CONSUMPTION") {
-      utilization = s.report.summery.utilization
+      utilization = s.report.summary.utilization
     } else {
-      utilization = s.report.summery.production - s.report.summery.allocation
+      utilization = s.report.summary.production - s.report.summary.allocation
     }
     return {...i, [s.meterId]: utilization}
   }, {} as Record<string, number>),

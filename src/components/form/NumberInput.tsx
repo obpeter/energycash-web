@@ -61,7 +61,6 @@ const NumberInput1 = <T extends FieldValues>(props: NumberInputFormProps<T>) => 
   const handleValueChange = (onChange: (...event: any[]) => void) => (values: IonInputCustomEvent<InputInputEventDetail>) => {
 
     if (isNumeric(values.detail.value)) {
-      console.log(values.detail.value)
       if(values.detail.value) {
         setInputValue(values.detail.value.toString());
       }
@@ -69,15 +68,10 @@ const NumberInput1 = <T extends FieldValues>(props: NumberInputFormProps<T>) => 
   };
 
   const handleValueChange1 = (values: IonInputCustomEvent<InputInputEventDetail>) => {
-    console.log(values.detail.value)
     if(values.detail.value) {
       if (isNumeric(values.detail.value.toString())) {
-        console.log("NUMMERIC VALUE:", values.detail.value)
         setInputValue(values.detail.value.toString());
-        console.log("floatvalue", parseFloat(values.detail.value.toString().replace(",", ".")))
       } else {
-        console.log("INPUT VALUE: ", inputValue)
-        // setInputValue(old => old)
         if (inputRef.current) {
           inputRef.current.value = inputValue
         }

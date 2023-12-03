@@ -28,8 +28,8 @@ import {
   archiveParticipant,
   confirmParticipant, removeMeteringPoint,
   selectedMeterSelector,
-  selectedParticipantSelector,
-  updateParticipant
+  selectedParticipantSelector, selectParticipantById,
+  updateParticipant, updateParticipantPartial
 } from "../../store/participant";
 import {formatMeteringPointString, GetWeek} from "../../util/Helper.util";
 import {selectedTenant} from "../../store/eeg";
@@ -41,6 +41,7 @@ import {ratesSelector} from "../../store/rate";
 import {fileService} from "../../service/file.service";
 import {meteringInterReportSelectorV2, meteringReportSelectorV2, selectedPeriodSelector} from "../../store/energy";
 import MeterChartComponent from "./MeterChart.component";
+import {participantService} from "../../service/participant.service";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 
@@ -66,8 +67,6 @@ const ParticipantDetailsPaneComponent: FC = () => {
   // const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod | undefined>(activePeriod)
   // const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries|undefined>(report)
 
-  console.log("ParticipantDetailsPane: ", selectedMeter, selectedParticipant, report)
-
   const [toaster] = useIonToast();
   const [participantAlert] = useIonAlert();
 
@@ -89,7 +88,13 @@ const ParticipantDetailsPaneComponent: FC = () => {
   // }, [])
 
   const onUpdateParticipant = (participant: EegParticipant) => {
-    dispatcher(updateParticipant({tenant, participant})).then(() => console.log("Participant Updated"))
+    dispatcher(updateParticipant({tenant, participant})).unwrap().then(() => console.log("Participant Updated"))
+  }
+
+  const onUpdateParticipantPartial = (participantId: string, value: Record<string, any>) => {
+    dispatcher(updateParticipantPartial({tenant: tenant, participantId: participantId, value: {path: Object.keys(value)[0], value: Object.values(value)[0]}})).unwrap()
+      .then(() => console.log("Participant Updated"))
+      .catch((e) => console.log("Error by updating participant: ", e))
   }
 
   const dynamicComponent = (componentKey: DynamicComponentKey) => {
@@ -97,7 +102,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
     switch (componentKey) {
       case "memberForm":
         return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} rates={rates} formId={""}
-                                                          onSubmit={onUpdateParticipant}/> : <></>
+                                                          onSubmit={onUpdateParticipant} onSubmitPartial={onUpdateParticipantPartial}/> : <></>
       case "meterForm":
         return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>
       case "invoiceForm":

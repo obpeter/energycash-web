@@ -142,9 +142,6 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const [presentAlert] = useIonAlert();
   const [sortedParticipants, setSortedParticipants] = useState(participants);
 
-
-  console.log("ParticipantPane: ", participants)
-
   useEffect( () => {
     if (showAmount && billingRun && billingRun.id) {
       dispatcher(fetchParticipantAmounts({tenant: tenant, billingRunId: billingRun.id }))
@@ -245,21 +242,17 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     const participantMap =
       participants.reduce((r, p) => ({...r, [p.id]: p}), {} as Record<string, EegParticipant>)
 
-    console.log("Energy Participants: ", enertyValues.entities)
+    // Object.entries(checkedParticipant).forEach(c => {if (!!participantMap[c[0]]) console.log("Checked Participant not in Map", c)} )
 
-    // return Object.entries(checkedParticipant)
-    //   .flatMap((r) => ([...participantMap[r[0]].meters.filter(m => m.tariffId !== null)]))
-    //   .map(m => { return {meteringPoint: m.meteringPoint, allocationKWh: energyMeterGroup[m.meteringPoint]} as MeteringEnergyGroupType})
-
-    return Object.entries(checkedParticipant)
-      .flatMap((r) => ([...participantMap[r[0]].meters.filter(m => m.tariffId !== null)]))
+    return Object.entries(checkedParticipant).filter(c => participantMap[c[0]])
+      .flatMap((r) => ([...participantMap[r[0]].meters.filter(m => m.tariff_id !== null)]))
       .map(m => { return {meteringPoint: m.meteringPoint, allocationKWh: energyMeterGroup[m.meteringPoint]} as MeteringEnergyGroupType})
   }
 
   const selectAll = (event: IonCheckboxCustomEvent<CheckboxChangeEventDetail>) => {
     participants.forEach((p) => {
       if (p.status === 'ACTIVE') {
-        const tariffConfigured = p.meters.reduce((c, e) => c || (e.tariffId !== undefined && e.tariffId !==null), (p.tariffId !== undefined && p.tariffId != null))
+        const tariffConfigured = p.meters.reduce((c, e) => c || (e.tariff_id !== undefined && e.tariff_id !==null), (p.tariffId !== undefined && p.tariffId != null))
         if (tariffConfigured) {
           setCheckedParticipant(p.id, event.detail.checked);
         }
@@ -378,14 +371,13 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     if (startDate === null || endDate === null) {
       return
     }
-    console.log("Export: ", range);
   }
 
   const [reportPopover, dismissReport] = useIonPopover(DatepickerPopover, {
     tenant: tenant,
-    onDismiss: (startDate: Date, endDate: Date) => {
+    onDismiss: (type: number, startDate: Date, endDate: Date) => {
       loading({message: "Daten exportieren ..."})
-      onExport([startDate, endDate])
+      onExport(type, [startDate, endDate])
         .then(b => {
           dismissReport([startDate, endDate], "")
           dismissLoading()
@@ -403,17 +395,27 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     onDismiss: (data: any, role: string) => dismissUpload(data, role)
   });
 
-  const onExport = async (data: any) => {
+  const onExport = async (type: number, data: any) => {
     if (data && eeg) {
-      const [start, end] = data
-      const exportdata = {
-        start: start.getTime(),
-        end: end.getTime(),
-        communityId: eeg.communityId,
-        cps:  participants.reduce((r, p) =>
-          r.concat(p.meters.map( m => { return { meteringPoint: m.meteringPoint, direction: m.direction, name: p.firstname + " " + p.lastname} as InvestigatorCP})), [] as InvestigatorCP[])
-      } as ExcelReportRequest
-      return eegService.createReport(tenant, exportdata)
+      if (type === 0) {
+        const [start, end] = data
+        const exportdata = {
+          start: start.getTime(),
+          end: end.getTime(),
+          communityId: eeg.communityId,
+          cps: participants.reduce((r, p) =>
+            r.concat(p.meters.map(m => {
+              return {
+                meteringPoint: m.meteringPoint,
+                direction: m.direction,
+                name: p.firstname + " " + p.lastname
+              } as InvestigatorCP
+            })), [] as InvestigatorCP[])
+        } as ExcelReportRequest
+        return eegService.createReport(tenant, exportdata)
+      } else {
+        return eegService.exportMasterdata(tenant)
+      }
     }
   }
 
@@ -436,7 +438,10 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
               .then(() => refresh())
               .then(() => dismissLoading())
               .then(() => infoToast("Stammdaten-Upload beendet."))
-              .catch(() => dismissLoading())
+              .catch((e) => {
+                dismissLoading()
+                errorToast("Stammdaten sind nicht korrekt. " + e.toString())
+              })
             break;
         }
       }

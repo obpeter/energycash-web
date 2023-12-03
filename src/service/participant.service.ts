@@ -1,6 +1,7 @@
 import BaseService, {API_API_SERVER} from "./base.service";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
+import {EegParticipant} from "../models/members.model";
 
 
 class ParticipantService extends BaseService {
@@ -17,6 +18,20 @@ class ParticipantService extends BaseService {
         'Accept-Type': 'application/json'
       },
     }).then(this.handleErrors).then(res => res.json());
+  }
+
+  async updateParticipantPartial(tenant: string, id: string, value: { path: string, value: any }): Promise<EegParticipant> {
+    const token = await this.authClient.getToken();
+    return fetch(`${API_API_SERVER}/participant/v2/${id}`, {
+      method: 'PUT',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Accept-Type': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(value),
+    }).then(this.handleErrors).then(res => res.json());
+
   }
 }
 

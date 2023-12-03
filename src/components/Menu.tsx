@@ -62,12 +62,12 @@ const Menu: React.FC = () => {
       iosIcon: wallet,
       mdIcon: walletSharp
     },
-    {
-      title: 'Profil',
-      url: '/page/profiles',
-      iosIcon: person,
-      mdIcon: person
-    },
+    // {
+    //   title: 'Profil',
+    //   url: '/page/profiles',
+    //   iosIcon: person,
+    //   mdIcon: person
+    // },
   ];
 
   const adminPages: AppPage[] = [
@@ -182,7 +182,7 @@ const Menu: React.FC = () => {
               </IonButtons>
             </IonToolbar>
             <div style={{padding: "25px", fontSize:"14px"}}>
-              <img alt="vfeeg image" src="/assets/vfeeg-image.png"
+              <img alt="vfeeg" src="/assets/vfeeg-image.png"
                    style={{width: "150px", background: "rgb(16, 57, 49)"}}/>
               <p>Verein zur Förderung von Erneuerbaren Energiegemeinschaften</p>
               <p>ZVR-Zahl 1528480260</p>

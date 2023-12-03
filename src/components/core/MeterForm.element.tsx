@@ -5,23 +5,20 @@ import InputForm from "../form/InputForm.component";
 import CheckboxComponent from "../form/Checkbox.component";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegTariff} from "../../models/eeg.model";
-import {Control, FieldErrors, UseFormClearErrors, UseFormSetValue, UseFormWatch} from "react-hook-form";
+import {Control, FieldErrors, UseFormClearErrors, useFormContext, UseFormSetValue, UseFormWatch} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
 
 interface MeterFormElementProps {
-  control: Control<Metering, any>
-  watch: UseFormWatch<Metering>
   rates: EegTariff[]
-  setValue?: UseFormSetValue<Metering>
   participant?: EegParticipant
-  errors?: FieldErrors<Metering>
   meterReadOnly?: boolean
-  clear?: UseFormClearErrors<any>
 }
 
-const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, participant, errors, meterReadOnly, watch, clear}) => {
+const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterReadOnly}) => {
+
+  const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
 
   const [selectedDirection, setSelectedDirection] = useState(0);
   const [withWechselrichter, setWithWechselrichter] = useState(false);
@@ -39,25 +36,22 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
 
   const getRatesOption = () => {
     const expectedRateType = selectedDirection === 0 ? 'VZP' : 'EZP'
-    return rates.filter(r => r.type === expectedRateType).map((r) => {
+    const r =  rates.filter(r => r.type === expectedRateType).map((r) => {
       return {key: r.id, value: r.name}
     })
+    return [{key: null, value: "Kein Tarif"}, ...r]
   }
 
-  const isEditable = setValue !== undefined
-
   const onChangeDirection = (s: number) => {
-    if (isEditable) {
-      // setSelectedDirection(s)
-      setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATION");
-    }
+    // setSelectedDirection(s)
+    setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATION");
   }
 
   const handleMeterPaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
 
     e.persist()
-    e.clipboardData.items[0].getAsString(text=>{
-      setValue && setValue("meteringPoint", text.replace(/[-_]/gi, "").replace(/\s/gi,""))
+    e.clipboardData.items[0].getAsString(text => {
+      setValue && setValue("meteringPoint", text.replace(/[-_]/gi, "").replace(/\s/gi, ""))
     })
     e.stopPropagation()
   }
@@ -71,22 +65,26 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
               buttons={[{label: 'Verbraucher', icon: eegPlug}, {label: 'Erzeuger', icon: eegSolar}]}
               onChange={onChangeDirection}
               value={selectedDirection}
-              changeable={isEditable}
+              changeable={meterReadOnly ? meterReadOnly : true}
             />
           </IonCol>
         </IonRow>
       </IonGrid>
       <IonList>
-        <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()}/>
+        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()}/>
         <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} type="text" readonly={meterReadOnly}
                    counter={true} maxlength={33}
-                   rules={{required: "Zählpunktnummer fehlt",
-                     minLength: {value: 33, message: "MIN-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern" },
-                     maxLength: {value: 33, message: "MAX-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern" },
-                     pattern: {value: /^AT[0-9A-Z]*$/, message: "Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern od. Großbuchstaben"}}}
+                   rules={{
+                     required: "Zählpunktnummer fehlt",
+                     minLength: {value: 33, message: "MIN-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern"},
+                     maxLength: {value: 33, message: "MAX-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern"},
+                     pattern: {
+                       value: /^AT[0-9A-Z]*$/,
+                       message: "Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern od. Großbuchstaben"
+                     }
+                   }}
                    error={errors?.meteringPoint}
                    onPaste={handleMeterPaste}
-                   clear={clear}
         />
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>
@@ -95,7 +93,8 @@ const MeterFormElement: FC<MeterFormElementProps> = ({control, rates, setValue, 
                      type="text"/>
         )}
         <InputForm name={"transformer"} label="Transformator" control={control} rules={{required: false}} type="text"/>
-        <InputForm name={"equipmentNumber"} label="Anlagen-Nr." control={control} rules={{required: false}} type="text"/>
+        <InputForm name={"equipmentNumber"} label="Anlagen-Nr." control={control} rules={{required: false}}
+                   type="text"/>
         <InputForm name={"equipmentName"} label="Anlagename" control={control} rules={{required: false}} type="text"/>
       </IonList>
     </>

@@ -13,8 +13,8 @@ export interface Metering {
   participantId: string;
   equipmentName: string;
   transformer: string;
-  inverterId: string;
-  tariffId: string;
+  inverterid: string;
+  tariff_id: string;
   street: string;
   streetNumber: string;
   city: string;

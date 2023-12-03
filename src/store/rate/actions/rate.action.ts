@@ -3,7 +3,7 @@ import {featureKey} from "../states/rate.state";
 import {eegService} from "../../../service/eeg.service";
 import {EegTariff} from "../../../models/eeg.model";
 import {tariffService} from "../../../service/tariff.service";
-import {ErrorMessage, HttpError} from "../../../service/base.service";
+import {HttpError} from "../../../service/base.service";
 
 export const fetchRatesModel = createAsyncThunk(
   `${featureKey}/fetch`,

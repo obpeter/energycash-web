@@ -20,13 +20,22 @@ interface SelectFormProps {
   onIonBlur?: (event: IonSelectCustomEvent<void>) => void,
   onIonDismiss?: (event: IonSelectCustomEvent<void>) => void,
   onIonChange?: (event: IonSelectCustomEvent<SelectChangeEventDetail>) => void,
-  multiple?: boolean
+  multiple?: boolean,
+  onChangePartial?: (name: string, value: any) => void
 }
 
 const SelectForm: React.FC<SelectFormProps> = (
   { control, name, options, rules,
     error, selectInterface, disabled,
-    ...rest}) => {
+    onChangePartial, ...rest}) => {
+
+  const onSelectionChanged = (onChange: (...event: any[]) => void) => (event: IonSelectCustomEvent<SelectChangeEventDetail>) => {
+    onChange(event)
+    if (onChangePartial) {
+      onChangePartial(name, event.detail.value)
+    }
+  }
+
   return (
     <div className="form-element">
       {/*<IonItem fill="outline" disabled={disabled}>*/}
@@ -44,7 +53,8 @@ const SelectForm: React.FC<SelectFormProps> = (
               labelPlacement={"floating"}
               value={value}
               interface={selectInterface}
-              onIonChange={onChange}  {...rest}>
+              onIonChange={onSelectionChanged(onChange)}
+              {...rest}>
               {options.map((o, i) => (<IonSelectOption key={o.key} value={o.key} disabled={disabled}>{o.value}</IonSelectOption>))}
             </IonSelect>)
           }

@@ -5,7 +5,7 @@ NPMBUILD=$(NPMCMD) run build
 
 BINARY_NAME=vfeeg-web
 DOCKER=docker
-VERSION=v0.1.0
+VERSION=v0.1.3
 
 all: test build
 build:

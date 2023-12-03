@@ -1,6 +1,5 @@
 import {createSelector} from "@reduxjs/toolkit";
 
-// import { EnergyState, adapter, featureKey } from '../states';
 import {EegParticipant} from "../../../models/members.model";
 import {adapter, featureKey, ParticipantState} from "../states";
 import {Metering} from "../../../models/meteringpoint.model";
@@ -87,11 +86,10 @@ export const activeParticipantsSelector1 = createSelector(
             (m.participantState
               ? (new Date(m.participantState.inactiveSince).getTime() >= end.getTime() && new Date(m.participantState.activeSince).getTime() <= end.getTime()) ||
               (new Date(m.participantState.inactiveSince).getTime() >= start.getTime() && new Date(m.participantState.inactiveSince).getTime() <= end.getTime())
-              : true)
+              : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
           )
         } as EegParticipant
-      })
-      console.log("FILTERED Participant: ", n)
+      }).filter(p => p.meters.length > 0)
       return n
     }
     return participants

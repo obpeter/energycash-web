@@ -61,21 +61,18 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
   }, [participantId])
 
   const onRequest = (data: ProcessValues) => {
-    console.log("Mulitple Selection: ", data);
     if (data.participantId && data.meteringPoints && startDate && endDate) {
 
       const meter = meters.filter((m) => data.meteringPoints?.find((s:string) => s === m.meteringPoint))
-      console.log("filtered Meters: ", meter);
       if (meter) {
-        console.log("process Meters: ", meter);
-          eegService.syncMeteringPoint(
-            eeg.rcNumber.toUpperCase(), data.participantId,
-            meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
-            startDate.getTime(), endDate.getTime())
-            .finally(() => {
-              reset()
-              setDateRange([null, null])
-            })
+        eegService.syncMeteringPoint(
+          eeg.rcNumber.toUpperCase(), data.participantId,
+          meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
+          startDate.getTime(), endDate.getTime())
+          .finally(() => {
+            reset()
+            setDateRange([null, null])
+          })
       }
     }
   }
@@ -94,6 +91,13 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
     );
   });
 
+  const meteringDisplayName = (m: Metering): string => {
+    if (m.equipmentName && m.equipmentName.length > 0) {
+      return `${m.equipmentName} - ${m.meteringPoint}`
+    }
+    return m.meteringPoint
+  }
+
   return (
     <>
       <ProcessHeaderComponent name={edaProcess.name} />
@@ -101,11 +105,11 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
         <CorePageTemplate>
           <>
             <InputForm name="communityId" label="Gemeinschafts-Id" control={control} readonly={true}/>
-            <SelectForm control={control} name={"participantId"} options={participants.map((p) => {
+            <SelectForm control={control} name={"participantId"} options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
               return {key: p.id, value: p.firstname + " " + p.lastname}
             })} label={"Mitglied"} selectInterface={"popover"} rules={{required: true}}/>
             <SelectForm control={control} name={"meteringPoints"} options={useableMeters.map((p) => {
-              return {key: p.meteringPoint, value: p.meteringPoint + " (" + p.equipmentName + ")"}
+              return {key: p.meteringPoint, value: meteringDisplayName(p)}
             })} label={"Zählpunkt"} selectInterface={"popover"} multiple={true} rules={{required: true}}/>
             <div className="form-element">
               <DatePicker

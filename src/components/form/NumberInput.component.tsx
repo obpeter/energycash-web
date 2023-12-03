@@ -114,11 +114,7 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
         // values.target.getInputElement().then(e => {
         inputRef.current?.getInputElement().then(e => {
           let currentSelection = cursor
-          // if (!currentSelection) {
-            currentSelection = Math.min((e.selectionStart as number), target.length);
-          // }
-          console.log("SELECTION START ONCHANGE: ", e.selectionStart, currentSelection)
-          // e.value = formatValue(target)
+          currentSelection = Math.min((e.selectionStart as number), target.length);
           values.detail.value = formatValue(target)
           // setCursor(currentSelection)
           e.setSelectionRange(currentSelection, currentSelection)

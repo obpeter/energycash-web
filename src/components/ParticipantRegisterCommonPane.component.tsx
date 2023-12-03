@@ -5,7 +5,7 @@ import ToggleButtonComponent from "./ToggleButton.component";
 import {people} from "ionicons/icons";
 import {eegBusiness} from "../eegIcons";
 import {EegParticipant} from "../models/members.model";
-import {Control, useForm, useFormContext, useWatch} from "react-hook-form";
+import {useFormContext} from "react-hook-form";
 
 interface ParticipantRegisterCommonPaneComponentProps {
   participant: EegParticipant;
@@ -67,28 +67,28 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
                     <InputForm name={"titleAfter"} label="Titel (Nach)" control={control} type="text"/>
                   </div>
                   <InputForm name={"firstname"} label="Vorname" control={control}
-                             rules={{required: "Vorname fehlt"}} type="text" error={errors.firstname} clear={clearErrors}/>
+                             rules={{required: "Vorname fehlt"}} type="text" error={errors.firstname} />
                   <InputForm name={"lastname"} label="Nachname" control={control} rules={{required: "Vorname fehlt"}}
-                             type="text" error={errors.lastname} clear={clearErrors}/>
+                             type="text" error={errors.lastname} />
                 </>
               ) :
               (
                 <InputForm name={"firstname"} label="Firmenname" control={control}
-                           rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname} clear={clearErrors}/>
+                           rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
               )
             }
             <InputForm name={"residentAddress.street"} label="Straße" control={control}
-                       rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} clear={clearErrors}/>
+                       rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street}/>
             <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control}
                        rules={{required: "Hausnummer fehlt"}}
-                       type="text" error={errors.residentAddress?.streetNumber} clear={clearErrors}/>
+                       type="text" error={errors.residentAddress?.streetNumber}/>
             <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control}
-                       rules={{required: "PLZ fehlt"}} type="text" error={errors.residentAddress?.zip} clear={clearErrors}/>
+                       rules={{required: "PLZ fehlt"}} type="text" error={errors.residentAddress?.zip}/>
             <InputForm name={"residentAddress.city"} label="Ort" control={control} rules={{required: "Ort fehlt"}}
-                       type="text" error={errors.residentAddress?.city} clear={clearErrors}/>
+                       type="text" error={errors.residentAddress?.city}/>
             <InputForm name={"contact.phone"} label="Telefon" control={control} type="text"/>
             <InputForm name={"contact.email"} label="E-Mail" control={control} type="text"
-                       rules={{required: "Email Adresse fehlt"}} error={errors.contact?.email} clear={clearErrors}/>
+                       rules={{required: "Email Adresse fehlt"}} error={errors.contact?.email}/>
           </IonList>
 
         </div>
@@ -97,9 +97,9 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
           <IonList>
             <IonListHeader>Bankdaten</IonListHeader>
             <InputForm name={"accountInfo.iban"} label="IBAN" control={control} rules={{required: "IBAN fehlt"}}
-                       type="text" error={errors.accountInfo?.iban} clear={clearErrors}/>
+                       type="text" error={errors.accountInfo?.iban}/>
             <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control}
-                       rules={{required: "Kontoinhaber fehlt"}} type="text" error={errors.accountInfo?.owner} clear={clearErrors}/>
+                       rules={{required: "Kontoinhaber fehlt"}} type="text" error={errors.accountInfo?.owner}/>
           </IonList>
           <IonList>
             <IonListHeader>Optional</IonListHeader>

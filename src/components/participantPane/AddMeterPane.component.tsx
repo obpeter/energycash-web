@@ -6,12 +6,13 @@ import {IonButton, IonFooter, IonToolbar} from "@ionic/react";
 import {ParticipantContext} from "../../store/hook/ParticipantProvider";
 import EegPaneTemplate from "../core/EegPane.template";
 import MeterFormElement from "../core/MeterForm.element";
-import {useForm} from "react-hook-form";
+import {FormProvider, useForm} from "react-hook-form";
 import {registerMeteringpoint, selectedParticipantSelector} from "../../store/participant";
 import {useAppDispatch, useAppSelector} from "../../store";
 import {ratesSelector} from "../../store/rate";
 import {selectedTenant} from "../../store/eeg";
-import MeterAddressFormElement from "../core/MeterAddressForm.element";
+import MeterAddressFormElement from "../core/forms/MeterAddressForm/MeterAddressForm.element";
+import {useOnlineState} from "../../store/hook/Eeg.provider";
 
 
 const AddMeterPaneComponent: FC = () => {
@@ -21,9 +22,18 @@ const AddMeterPaneComponent: FC = () => {
   const tenant = useAppSelector(selectedTenant);
   const participant = useAppSelector(selectedParticipantSelector);
 
-  const meter = {status: "NEW", participantId: "", meteringPoint: "", direction:"CONSUMPTION"} as Metering
+  const isOnline = useOnlineState()
 
-  const {handleSubmit, control, watch, setValue, formState: {errors, isDirty}, reset} = useForm<Metering>({mode: 'onBlur', defaultValues: meter});
+  const meter = {
+    status: isOnline ? "NEW" : "ACTIVE",
+    participantId: "",
+    meteringPoint: "",
+    direction: "CONSUMPTION",
+    registeredSince: new Date(2023, 0, 1, 0, 0, 0, 0)
+  } as Metering
+
+  const formMethods = useForm<Metering>({mode: 'onBlur', defaultValues: meter});
+  const {handleSubmit, control, watch, setValue, formState: {errors, isDirty}, reset} = formMethods
 
   const {
     setShowAddMeterPane,
@@ -54,8 +64,10 @@ const AddMeterPaneComponent: FC = () => {
       <CorePageTemplate>
         <form id="submit-register-meter" onSubmit={handleSubmit((data) => onSubmit(data))}>
           <EegPaneTemplate>
-            <MeterFormElement control={control} rates={rates} errors={errors} setValue={setValue} participant={participant} watch={watch}/>
-            <MeterAddressFormElement control={control} errors={errors} setValue={setValue} participant={participant} showStatus={true}/>
+            <FormProvider {...formMethods}>
+              <MeterFormElement rates={rates} participant={participant}/>
+              <MeterAddressFormElement participant={participant} isEditable={true} isOnline={isOnline}/>
+            </FormProvider>
           </EegPaneTemplate>
         </form>
       </CorePageTemplate>

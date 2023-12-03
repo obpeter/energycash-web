@@ -1,5 +1,4 @@
 import React from "react";
-import {Control, Controller, FieldValues} from "react-hook-form";
 import {IonItem, IonLabel, IonSelect, IonSelectOption, SelectChangeEventDetail, SelectCustomEvent} from "@ionic/react";
 
 interface SelectFormNativeProps {

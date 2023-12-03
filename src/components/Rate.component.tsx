@@ -35,10 +35,10 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
       setValue("useVat", s)
     }
 
-    const centPerKwh = watch("centPerKWh")
-    useEffect(() => {
-      console.log("Cent", centPerKwh)
-    }, [centPerKwh]);
+    // const centPerKwh = watch("centPerKWh")
+    // useEffect(() => {
+    //   console.log("Cent", centPerKwh)
+    // }, [centPerKwh]);
 
     const useVat = watch("useVat");
 
@@ -81,13 +81,10 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EEG":
           return (
             <div>
-              <InputFormComponent label="Vorauszahlung in €" control={control} name={"participantFee"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.participantFee}/>
+              <NumberInputForm label="Mitgliedbeitrag in €" control={control} name={"participantFee"}
+                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} error={errors.participantFee}/>
               <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
-              {/*<Input label={"Vorauszahlung"} labelPlacement={"floating"} {...register('participantFee',*/}
-              {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
-              {/*<Input label={"Rabatt"} labelPlacement={"floating"} {...register('discount')} />*/}
             </div>
           )
         case "EZP":

@@ -12,8 +12,6 @@ export const reducer = createReducer(initialState, builder =>
       return adapter.addOne({...state, selectedRate: action.payload}, action.payload)
     })
     .addCase(updateRate.fulfilled, (state, action) => {
-      // return adapter.setOne(state, action.payload);
-      console.log(action.payload)
       return adapter.updateOne({...state, selectedRate: action.payload}, {id: action.payload.id, changes: action.payload})
     })
     .addCase(selectRate, (state, action) => {

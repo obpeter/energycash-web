@@ -1,36 +1,23 @@
 import React, {FC, useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {BillingConfig} from "../models/eeg.model";
-import {
-    IonButton,
-    IonCard,
-    IonChip,
-    IonIcon,
-    IonImg,
-    IonLabel,
-    IonSpinner,
-    useIonPopover,
-    useIonToast
-} from "@ionic/react";
-import {closeCircle, closeCircleOutline, imageOutline} from "ionicons/icons";
+import {IonButton, IonCard, IonChip, IonIcon, IonImg, IonLabel, useIonPopover, useIonToast} from "@ionic/react";
+import {closeCircleOutline, imageOutline} from "ionicons/icons";
 import {useAppDispatch, useAppSelector} from "../store";
-import {
-    billingConfigErrorSelector,
-    billingConfigIsFetchingSelector,
-    billingConfigSelector
-} from "../store/billingConfig";
+import {billingConfigErrorSelector, billingConfigSelector} from "../store/billingConfig";
 import UploadImagePopup from "./dialogs/uploadImage.popup";
 import {useAccessGroups} from "../store/hook/Eeg.provider";
-import {selectedTenant, updateEegModel} from "../store/eeg";
+import {selectedTenant} from "../store/eeg";
 import {
     createBillingConfig,
     deleteImageBillingConfig,
     fetchBillingConfig,
-    updateBillingConfig, uploadImageBillingConfig
+    updateBillingConfig,
+    uploadImageBillingConfig
 } from "../store/billingConfig/actions";
-import {billingRunErrorSelector} from "../store/billingRun";
 import InputForm from "./form/InputForm.component";
 import {eegService} from "../service/eeg.service";
+
 const EegBillingConfigCardComponent: FC = () => {
 
     const BILLING_API_SERVER = process.env.REACT_APP_BILLING_SERVER_URL;

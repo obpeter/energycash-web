@@ -8,14 +8,9 @@ import RateCardComponent from "../RateCard.component";
 import MeterCardComponent from "./MeterCard.component";
 import {IonGrid, IonIcon, IonItem, IonLabel, IonRow} from "@ionic/react";
 import {eegSumSign} from "../../eegIcons";
-import {EegParticipant} from "../../models/members.model";
 
 
 type RateModelGroup = Record<string, Record<string, number>>
-
-interface ParticipantInvoiceDetailsComponentProps {
-  selectedParticipant: EegParticipant
-}
 
 const ParticipantInvoiceDetailsComponent: FC = () => {
   const rates = useAppSelector(ratesSelector);
@@ -31,8 +26,8 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
 
       const m = selectedParticipant.meters.filter(m => meterBillGroup[m.meteringPoint]).reduce((group, meter) =>
         ({
-          ...group, [meter.tariffId]:
-            {...group[meter.tariffId], [meter.meteringPoint]: meterBillGroup[meter.meteringPoint].amount}
+          ...group, [meter.tariff_id]:
+            {...group[meter.tariff_id], [meter.meteringPoint]: meterBillGroup[meter.meteringPoint].amount}
         }), {} as RateModelGroup)
 
       setRateGroups(m);
@@ -50,8 +45,8 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
         <></>
       )
     }
-    const [tariffId, meters] = tariffGroup
-    const tariff = rates.find((r) => r.id === tariffId)
+    const [tariff_id, meters] = tariffGroup
+    const tariff = rates.find((r) => r.id === tariff_id)
     const meterGroup = toRecord(selectedParticipant!.meters, "meteringPoint")
     const sum = Object.values(meters).reduce((s, m) => s + m, 0)
 
@@ -62,10 +57,9 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     }
 
     return (
-      <div key={tariffId}>
+      <div key={tariff_id}>
         <RateCardComponent rate={tariff!}/>
         {Object.keys(meters).map((m, i) => {
-          console.log("Meter Group: ", meterGroup)
           if (meterGroup[m]) {
             return (
               <MeterCardComponent key={i} participant={selectedParticipant} meter={meterGroup[m]} hideMeter={true}
@@ -116,14 +110,13 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
     }
   }
 
-  console.log("RateGroups: ", rateGroups)
   if (!rateGroups || Object.keys(rateGroups).length === 0) {
     return (
       <></>
     )
   } else {
     return (
-      <div style={{position: "absolute", paddingTop: "16px", paddingLeft: "16px"}}>
+      <div style={{position: "absolute", paddingTop: "16px", paddingLeft: "16px", maxHeight: "100%", overflow: "auto"}}>
         <div style={{
           width: "50%",
           margin: "16px",

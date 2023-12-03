@@ -6,6 +6,7 @@ import MeterCardComponent from "./participantPane/MeterCard.component";
 import {useFieldArray, useFormContext} from "react-hook-form";
 import RegisterMeterPaneComponent from "./RegisterMeterPane.component";
 import {Metering} from "../models/meteringpoint.model";
+import {useOnlineState} from "../store/hook/Eeg.provider";
 
 interface ParticipantRegisterMeterPaneComponentProps {
   participant: EegParticipant;
@@ -13,6 +14,16 @@ interface ParticipantRegisterMeterPaneComponentProps {
 }
 
 const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant, onAddMeter}) => {
+
+  const isOnline = useOnlineState()
+
+  const defaultMeter =  {
+    status: isOnline ? "NEW" : "ACTIVE",
+    participantId: "",
+    meteringPoint: "",
+    direction: "CONSUMPTION",
+    registeredSince: isOnline ? new Date() : new Date(2023, 0, 1, 0, 0, 0, 0)
+  } as Metering
 
   const [addMeterPaneActive, setAddMeterPaneActive] = useState(false)
   const [meteringPoint, setMeteringPoint] = useState<Metering | undefined>()
@@ -80,7 +91,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
             </IonRow>
             <IonRow class="ion-justify-content-end">
               <IonCol size="auto">
-                <IonItem button lines="none" onClick={() => showMeter({direction: "CONSUMPTION", status: "NEW", meteringPoint: ""} as Metering)}>
+                <IonItem button lines="none" onClick={() => showMeter({...defaultMeter})}>
                   <IonIcon icon={add}></IonIcon>
                   <IonLabel>Zählpunkt hinzufügen</IonLabel>
                 </IonItem>

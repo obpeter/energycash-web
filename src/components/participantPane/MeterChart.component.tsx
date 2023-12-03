@@ -35,7 +35,6 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
     return false
   })
 
-  console.log("MeterChartComponent: ", activeEnergySeries)
   const updateSeries = async (selectedPeriod: SelectedPeriod) => {
     if (selectedParticipant && selectedMeter) {
       return eegService.fetchReportV2(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type,

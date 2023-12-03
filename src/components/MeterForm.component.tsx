@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
+import {FormProvider, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../store";
 import {ratesSelector} from "../store/rate";
 import {selectedTenant} from "../store/eeg";
@@ -7,7 +7,7 @@ import {selectedMeterSelector, selectedParticipantSelector, updateMeteringPoint}
 import {Metering} from "../models/meteringpoint.model";
 import MeterFormElement from "./core/MeterForm.element";
 import EegPaneTemplate from "./core/EegPane.template";
-import MeterAddressFormElement from "./core/MeterAddressForm.element";
+import MeterAddressFormElement from "./core/forms/MeterAddressForm/MeterAddressForm.element";
 
 interface MeterFromComponentProps {
   meteringPoint: Metering
@@ -22,16 +22,18 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   const tenant = useAppSelector(selectedTenant);
   const metering = useAppSelector(selectedMeterSelector);
 
-  const [withWechselrichter, setWithWechselrichter] = useState(false);
+  // const [withWechselrichter, setWithWechselrichter] = useState(false);
 
-  const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset, clearErrors} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
+  // const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset, clearErrors} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
+
+  const formMethods = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
+  const {handleSubmit, formState: { dirtyFields}, reset} = formMethods
 
   useEffect(() => {
     reset(metering)
   }, [metering])
 
   const onSubmit = (meter: Metering) => {
-    console.log("MeterForm - Handle onSubmit: ", meter, isDirty, participant, dirtyFields)
     if (Object.keys(dirtyFields).length > 0) {
       let participantId = participant?.id;
       if (participantId) {
@@ -41,17 +43,13 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
     }
   }
 
-  const blurHandler = (e?: React.BaseSyntheticEvent) => {
-    console.log("MeterForm - Handle on Blur: ", e)
-    handleSubmit((data) => onSubmit(data), (invalid) => console.log("MeterForm - Form us Invalid", invalid))(e)
-  }
-
   return (
-    // <form onBlur={handleSubmit((data) => onSubmit(data))}>
-    <form onBlur={blurHandler}>
+    <form onBlur={handleSubmit((data) => onSubmit(data))}>
       <EegPaneTemplate>
-        <MeterFormElement control={control} rates={rates} errors={errors} meterReadOnly={true} watch={watch} clear={clearErrors}/>
-        <MeterAddressFormElement control={control} errors={errors} clear={clearErrors}/>
+        <FormProvider {...formMethods} >
+          <MeterFormElement rates={rates} meterReadOnly={true}/>
+          <MeterAddressFormElement />
+        </FormProvider>
       </EegPaneTemplate>
     </form>
   )
