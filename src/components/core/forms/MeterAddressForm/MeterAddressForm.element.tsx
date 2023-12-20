@@ -1,14 +1,12 @@
-import React, {FC, forwardRef, useEffect, useState} from "react";
-import {Control, FieldErrors, UseFormClearErrors, useFormContext, UseFormSetValue, UseFormWatch} from "react-hook-form";
+import React, {FC, useEffect, useState} from "react";
+import {useFormContext} from "react-hook-form";
 import {Metering} from "../../../../models/meteringpoint.model";
-import {EegTariff} from "../../../../models/eeg.model";
 import {EegParticipant} from "../../../../models/members.model";
 import {IonInput, IonList, IonListHeader} from "@ionic/react";
 import CheckboxComponent from "../../../form/Checkbox.component";
 import InputForm from "../../../form/InputForm.component";
 import SelectForm from "../../../form/SelectForm.component";
-import {useAccessGroups, useOnlineState} from "../../../../store/hook/Eeg.provider";
-import DatePicker from "react-datepicker";
+import {useAccessGroups} from "../../../../store/hook/Eeg.provider";
 
 import DatePickerFormElement from "../../../form/DatePickerForm.element";
 
@@ -21,11 +19,10 @@ interface MeterAddressFormElementProps {
 
 const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                                                                      participant,
-                                                                     // showStatus,
                                                                      isOnline,
                                                                      isEditable,
                                                                    }) => {
-  const {control, watch, setValue, clearErrors, formState: {errors}} = useFormContext<Metering>()
+  const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
   const [withOwner, setWithOwner] = useState(false);
   const {isAdmin} = useAccessGroups()
 
@@ -37,20 +34,16 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
 
   useEffect(() => {
     setWithOwner(false)
-    console.log("Participant changed: ", participant)
   }, [participant])
 
-  console.log("isAdmin", isAdmin())
-  console.log("isOnline", isOnline)
   const takeOverAddress = (ok: boolean) => {
-    if (isTakeOverAddressEnabled() && participant!.residentAddress) {
+    if (isTakeOverAddressEnabled() && participant!.billingAddress) {
       if (ok && setValue) {
-        setValue(`street`, participant!.residentAddress.street);
-        setValue(`streetNumber`, "" + participant!.residentAddress.streetNumber);
-        setValue(`city`, participant!.residentAddress.city);
-        setValue(`zip`, participant!.residentAddress.zip);
+        setValue(`street`, participant!.billingAddress.street);
+        setValue(`streetNumber`, participant!.billingAddress.streetNumber);
+        setValue(`city`, participant!.billingAddress.city);
+        setValue(`zip`, participant!.billingAddress.zip);
       }
-
       setWithOwner(ok);
     }
   }

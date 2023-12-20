@@ -3,7 +3,7 @@ import {EegParticipant} from "../../../models/members.model";
 
 export const featureKey = 'participant';
 
-export interface ParticipantState extends EntityState<EegParticipant> {
+export interface ParticipantState extends EntityState<EegParticipant, string> {
   isFetching: boolean;
   selectedParticipant: EegParticipant | undefined;
   selectedMeter: string | undefined;

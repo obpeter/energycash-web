@@ -54,6 +54,7 @@ export interface Contact {
 export interface AccountInfo {
   iban: string;
   owner: string;
+  bankName: string;
   sepa: boolean;
 }
 
@@ -134,7 +135,7 @@ export interface EegTariff {
   vatInPercent?: string
   accountNetAmount?: string
   accountGrossAmount?: string
-  participantFee?: string
+  participantFee?: number
   baseFee?: string
   businessNr?: string
   centPerKWh?: number

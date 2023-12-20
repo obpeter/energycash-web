@@ -1,6 +1,6 @@
 
 import {render, RenderOptions} from "@testing-library/react";
-import {configureStore, PreloadedState} from "@reduxjs/toolkit";
+import {configureStore} from "@reduxjs/toolkit";
 import {AppStore, reducer, State} from "../store";
 import React, {PropsWithChildren} from "react";
 import { Provider } from 'react-redux'
@@ -9,7 +9,7 @@ import {FormProvider, useForm} from "react-hook-form";
 // This type interface extends the default options for render from RTL, as well
 // as allows the user to specify other things such as initialState, store.
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'queries'> {
-  preloadedState?: PreloadedState<State>
+  preloadedState?: any
   store?: AppStore
 }
 

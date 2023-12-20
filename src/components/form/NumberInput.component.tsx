@@ -1,5 +1,5 @@
-import React, {ChangeEvent, FC, KeyboardEvent, useEffect, useRef, useState} from "react";
-import {InputChangeEventDetail, InputCustomEvent, IonInput} from "@ionic/react";
+import React, {FC, KeyboardEvent, useEffect, useRef, useState} from "react";
+import {InputChangeEventDetail, IonInput} from "@ionic/react";
 import {Control, Controller, FieldError, FieldValues, Path, UseFormClearErrors} from "react-hook-form";
 import {IonInputCustomEvent} from "@ionic/core/dist/types/components";
 import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/input-interface";
@@ -58,7 +58,7 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
   }
 
   // const isNumeric = (value: any): boolean => !new RegExp(/[^\d,]/g).test(value.trim())
-  const isNumeric = (value: any): boolean => new RegExp(/^\d*,{0,1}\d{0,2}$/).test(value.trim())
+  const isNumeric = (value: any): boolean => new RegExp(/^[-]{0,1}\d*,{0,1}\d{0,2}$/).test(value.trim())
 
   const allowNegative = false
   const prefix = ''
@@ -151,7 +151,7 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
               ref={(e) => {if (e) inputRef.current = e }}
               // ref={inputRef}
       onIonChange={onChangeValue}
-              onIonInput={(e) => handleValueChange(e as IonInputCustomEvent<HTMLIonInputElement>)}
+              onIonInput={(e) => handleValueChange(e as IonInputCustomEvent<HTMLInputElement>)}
               // onKeyDown={_onKeyDown}
               // onKeyUp={_onKeyUp}
     >

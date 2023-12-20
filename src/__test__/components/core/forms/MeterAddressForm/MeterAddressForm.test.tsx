@@ -1,15 +1,16 @@
-import {renderWithProviders, renderWithReactHookForm} from "../../../../test-utils";
-import {screen} from "@testing-library/react";
+import {renderWithReactHookForm} from "../../../../test-utils";
+import {screen, waitFor} from "@testing-library/react";
 import React from "react";
 import MeterAddressFormElement from "../../../../../components/core/forms/MeterAddressForm/MeterAddressForm.element";
 import {EegParticipant} from "../../../../../models/members.model";
-import {AccountInfo, Address, Contact, Eeg, Optionals} from "../../../../../models/eeg.model";
+import {AccountInfo, Address, Contact, Optionals} from "../../../../../models/eeg.model";
 import {Metering} from "../../../../../models/meteringpoint.model";
 import {EegContext, EegState} from "../../../../../store/hook/Eeg.provider";
+import userEvent from "@testing-library/user-event";
 
 const defaultParticipant: EegParticipant = {
   accountInfo: {} as AccountInfo,
-  billingAddress: {} as Address,
+  billingAddress: {city: "Solarcity", street: "Sonnenweg", streetNumber: "1", zip: "1111", type: "BILLING" } as Address,
   residentAddress: {} as Address,
   businessRole: 'EEG_PRIVATE',
   contact: {} as Contact,
@@ -37,10 +38,16 @@ const ctxValue = (admin: boolean, owner: boolean, user: boolean) => { return {
   refresh: async () => 1
 } as EegState }
 
-const renderElement = (online: boolean, admin: boolean, owner: boolean, status: string = 'ACTIVE') => {
-  renderWithReactHookForm(
+const findByName = (container: HTMLElement | null, value: string) => {
+  if (container === null) return null
+  return container.querySelector(`[name=${value}]`)
+}
+
+
+const renderElement = (online: boolean, admin: boolean, owner: boolean, status: string = 'ACTIVE', isEditable?: boolean) => {
+  return renderWithReactHookForm(
     <EegContext.Provider value={ctxValue(admin, owner, false)} >
-      <MeterAddressFormElement participant={defaultParticipant} isOnline={online} />
+      <MeterAddressFormElement participant={defaultParticipant} isOnline={online} isEditable={isEditable}/>
     </EegContext.Provider>, { defaultValues: {
         status: status,
         participantId: "",
@@ -57,10 +64,10 @@ describe("<MeterAddressForm />", () => {
     renderElement(true, false, false )
 
     await screen.findByText("Adresse")
-    await screen.findAllByLabelText("Hausnummer")
-    await screen.findAllByLabelText("Straße")
-    await screen.findAllByLabelText("Postleitzahl")
-    await screen.findAllByLabelText("Ort")
+    await screen.findAllByText("Hausnummer")
+    await screen.findAllByText("Straße")
+    await screen.findAllByText("Postleitzahl")
+    await screen.findAllByText("Ort")
 
     expect(screen.queryByText('Noch nicht registriert')).not.toBeInTheDocument()
     expect(screen.queryByText('Bereits registriert')).not.toBeInTheDocument()
@@ -70,10 +77,10 @@ describe("<MeterAddressForm />", () => {
     renderElement(false, true, false, 'ACTIVE' )
 
     await screen.findByText("Adresse")
-    await screen.findAllByLabelText("Hausnummer")
-    await screen.findAllByLabelText("Straße")
-    await screen.findAllByLabelText("Postleitzahl")
-    await screen.findAllByLabelText("Ort")
+    await screen.findAllByText("Hausnummer")
+    await screen.findAllByText("Straße")
+    await screen.findAllByText("Postleitzahl")
+    await screen.findAllByText("Ort")
 
     screen.getByText('Noch nicht registriert')
     const stateBox = screen.getByText((content, element) => element!.tagName.toLowerCase() === 'ion-select');
@@ -85,14 +92,26 @@ describe("<MeterAddressForm />", () => {
     renderElement(false, true, false, 'NEW')
 
     await screen.findByText("Adresse")
-    await screen.findAllByLabelText("Hausnummer")
-    await screen.findAllByLabelText("Straße")
-    await screen.findAllByLabelText("Postleitzahl")
-    await screen.findAllByLabelText("Ort")
+    await screen.findAllByText("Hausnummer")
+    await screen.findAllByText("Straße")
+    await screen.findAllByText("Postleitzahl")
+    await screen.findAllByText("Ort")
 
     screen.getByText('Noch nicht registriert')
     const stateBox = screen.getByText((content, element) => element!.tagName.toLowerCase() === 'ion-select');
     expect(stateBox).toHaveAttribute('label', 'Status')
     expect(stateBox).toHaveValue("NEW")
+  });
+
+  it("render checkbox take over address", async () => {
+    const {container} = renderElement(false, true, false, 'NEW', true)
+    const checkhbox = screen.getByText(/Adresse vom Besitzer übernehmen/i)
+
+    userEvent.click(checkhbox)
+
+    await waitFor(() => {
+      const streetNumber = findByName(container, "street")
+      expect(streetNumber).toHaveValue("Sonnenweg")
+    })
   });
 })

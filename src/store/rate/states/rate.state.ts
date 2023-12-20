@@ -3,7 +3,7 @@ import {EegTariff} from "../../../models/eeg.model";
 
 export const featureKey = 'rate';
 
-export interface RateState extends EntityState<EegTariff> {
+export interface RateState extends EntityState<EegTariff, string> {
   isFetching: boolean;
   selectedRate: EegTariff | undefined;
 }

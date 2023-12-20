@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FC, useEffect, useState} from "react";
 import MeterChartNavbarComponent from "../MeterChartNavbar.component";
 import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {
@@ -31,9 +31,9 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
     setActiveEnergySeries(report)
   }, [report]);
 
-  useIonViewWillEnter( () => {
-    return false
-  })
+  // useIonViewWillEnter( () => {
+  //   return false
+  // })
 
   const updateSeries = async (selectedPeriod: SelectedPeriod) => {
     if (selectedParticipant && selectedMeter) {

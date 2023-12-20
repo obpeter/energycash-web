@@ -1,14 +1,9 @@
-import React, {FC, FormEvent, FormEventHandler, useEffect, useRef, useState} from "react";
-import {NumericFormat, type NumberFormatValues} from "react-number-format";
+import React, {FormEvent, useRef, useState} from "react";
 import {IonInput} from "@ionic/react";
-import {Components} from "ionicons";
-import {Control, Controller, FieldError, FieldValues, Path, useController, UseFormClearErrors} from "react-hook-form";
-import {TextFieldTypes} from "@ionic/core";
+import {Control, FieldValues, Path, UseFormClearErrors} from "react-hook-form";
 import {IonInputCustomEvent} from "@ionic/core/dist/types/components";
 import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/input-interface";
-import InputFormComponent from "./InputForm.component";
-import {InputAttributes} from "react-number-format/types/types";
-import {init} from "http-proxy-middleware/dist/_handlers";
+
 
 type NumberInputFormProps<T extends FieldValues> = {
   control: Control<T>,

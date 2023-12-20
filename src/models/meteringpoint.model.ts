@@ -1,5 +1,3 @@
-import {Address} from "./eeg.model";
-
 export interface ParticipantState {
   activeSince: Date
   inactiveSince: Date
@@ -24,7 +22,7 @@ export interface Metering {
   modifiedAt: number,
   modifiedBy: string,
   participantState: ParticipantState,
-};
+}
 
 //@TODO: Refactor diesen Type --> billing.model.ts (o.ä.)
 export interface ClearingPreviewRequest {
@@ -81,5 +79,6 @@ export interface MeteringBillType {
 export interface ParticipantBillType {
   id: string;
   amount: number;
+  participantFee: number;
   meteringPoints: MeteringBillType[]
 }

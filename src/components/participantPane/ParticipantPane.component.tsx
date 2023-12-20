@@ -1,30 +1,30 @@
-import React, {FC, MouseEventHandler, startTransition, useContext, useEffect, useRef, useState} from "react";
+import React, {FC, useContext, useEffect, useRef, useState} from "react";
 
 import {EegParticipant} from "../../models/members.model";
 import {
-  CheckboxCustomEvent, IonAlert,
+  CheckboxCustomEvent,
+  IonAlert,
   IonButton,
   IonButtons,
-  IonCol, IonGrid,
+  IonCol,
   IonIcon,
   IonItem,
   IonLabel,
-  IonRow, IonSearchbar, IonSpinner,
+  IonRow,
+  IonSearchbar,
+  IonSpinner,
   IonToolbar,
-  SelectCustomEvent,
-  useIonAlert, useIonLoading, useIonPopover, useIonToast
+  useIonAlert,
+  useIonLoading,
+  useIonPopover,
+  useIonToast
 } from "@ionic/react";
 import {CheckboxChangeEventDetail} from "@ionic/core";
 import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {createPeriodIdentifier, MeterReport, ParticipantReport, SelectedPeriod} from "../../models/energy.model";
+import {createPeriodIdentifier, SelectedPeriod} from "../../models/energy.model";
 import ParticipantPeriodHeaderComponent from "./ParticipantPeriodHeader.component";
 import MemberComponent from "./Member.component";
-import {
-  ClearingPreviewRequest,
-  Metering,
-  MeteringEnergyGroupType,
-  ParticipantBillType
-} from "../../models/meteringpoint.model";
+import {ClearingPreviewRequest, Metering, MeteringEnergyGroupType,} from "../../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
 import {ParticipantContext} from "../../store/hook/ParticipantProvider";
 import {MemberViewContext} from "../../store/hook/MemberViewProvider";
@@ -35,27 +35,23 @@ import {State, useAppDispatch, useAppSelector} from "../../store";
 import {
   billingSelector,
   fetchEnergyBills,
-  fetchParticipantAmounts, resetParticipantAmounts,
+  fetchParticipantAmounts,
+  resetParticipantAmounts,
   selectBillFetchingSelector
 } from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {
-  fetchEnergyReport,
-  fetchEnergyReportV2,
-  meteringEnergyGroup,
-  meteringEnergyGroup11,
-  setSelectedPeriod
-} from "../../store/energy";
+import {meteringEnergyGroup11, setSelectedPeriod} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
 import {
-  add, archiveOutline,
-  cloudUploadOutline, documentTextOutline,
+  add,
+  archiveOutline,
+  cloudUploadOutline,
+  documentTextOutline,
   downloadOutline,
   flash,
   mailOutline,
   person,
-  search,
-  searchCircle
+  search
 } from "ionicons/icons";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {
@@ -74,9 +70,11 @@ import {useRefresh} from "../../store/hook/Eeg.provider";
 import {
   billingRunErrorSelector,
   billingRunIsFetchingSelector,
-  billingRunSelector, billingRunSendmail,
+  billingRunSelector,
+  billingRunSendmail,
   billingRunStatusSelector,
-  fetchBillingRun, fetchBillingRunById
+  fetchBillingRun,
+  fetchBillingRunById
 } from "../../store/billingRun";
 import {useSelector} from "react-redux";
 
@@ -107,7 +105,6 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const billingRunIsFetching = useAppSelector(billingRunIsFetchingSelector);
   const selectBillIsFetching = useAppSelector(selectBillFetchingSelector);
   const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
-  const enertyValues = useSelector((state: State) => state.energy.participantReports)
 
   const [searchActive, setSearchActive] = useState(false);
   const [result, setResult] = useState<EegParticipant[]>([])
@@ -217,7 +214,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
         if (m.direction === 'CONSUMPTION' && hideConsumers)
           return false;
         return true;
-      })} as EegParticipant})
+      })} as EegParticipant}).filter(m => m.meters.length > 0 || !(hideProducers || hideConsumers))
   }
 
   const infoToast = (message: string) => {
@@ -360,8 +357,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   const billingSum = () => {
     if (billingInfo) {
-      const sum = billingInfo.reduce((i, s) => i + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
-      return Math.round(sum * 100) / 100;
+      // const sum = billingInfo.reduce((i, s) => i + s.amount + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
+      const sum = billingInfo.reduce((i, s) => i + s.participantFee + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
+      return (Math.round(sum * 100) / 100).toFixed(2);
     }
     return 0
   }

@@ -38,7 +38,7 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
         return (
           <div>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-              <p>Vorauszahlung</p>
+              <p>Mitgliedsbeitrag</p>
               <p>{(Number(rate.participantFee)) + " €"}</p>
             </div>
             {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>

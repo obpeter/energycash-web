@@ -3,7 +3,7 @@ import {ParticipantBillType} from "../../../models/meteringpoint.model";
 
 export const featureKey = 'billing';
 
-export interface BillingState extends EntityState<ParticipantBillType> {
+export interface BillingState extends EntityState<ParticipantBillType, string> {
   isFetching: boolean;
 }
 export const adapter = createEntityAdapter<ParticipantBillType>();
