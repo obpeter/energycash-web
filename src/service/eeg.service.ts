@@ -1,28 +1,23 @@
 import {BillingConfig, EdaHistories, Eeg, EegNotification, EegTariff} from "../models/eeg.model";
-import {ContractInfo, EegParticipant} from "../models/members.model";
+import {EegParticipant} from "../models/members.model";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {
-  ClearingPreviewRequest, ClearingPreviewResponse, InvoiceDocumentResponse,
+  BillingRun,
+  ClearingPreviewRequest,
+  ClearingPreviewResponse,
+  InvoiceDocumentResponse,
   Metering,
-  MeteringEnergyGroupType,
-  ParticipantBillType,
-  BillingRun
+  ParticipantBillType
 } from "../models/meteringpoint.model";
 import {EegEnergyReport, EnergyReportResponse, ParticipantReport, SelectedPeriod} from "../models/energy.model";
-import {
-  eegGraphqlQuery,
-  loadContractFilesQuery,
-  reportDateGraphqlQuery,
-  uploadContractFilesMutation,
-  uploadEnergyGraphqlMutation
-} from "./graphql-query";
+import {eegGraphqlQuery, reportDateGraphqlQuery, uploadEnergyGraphqlMutation} from "./graphql-query";
 import {ExcelReportRequest} from "../models/reports.model";
 
-const ENERGY_API_SERVER = process.env.REACT_APP_ENERGY_SERVER_URL;
-const BILLING_API_SERVER = process.env.REACT_APP_BILLING_SERVER_URL;
-const API_API_SERVER = process.env.REACT_APP_API_SERVER_URL;
-const FILESTORE_API_SERVER = process.env.REACT_APP_FILESTORE_SERVER_URL;
+const ENERGY_API_SERVER = import.meta.env.VITE_ENERGY_SERVER_URL;
+const BILLING_API_SERVER = import.meta.env.VITE_BILLING_SERVER_URL;
+const API_API_SERVER = import.meta.env.VITE_API_SERVER_URL;
+const FILESTORE_API_SERVER = import.meta.env.VITE_FILESTORE_SERVER_URL;
 
 class EegService {
 

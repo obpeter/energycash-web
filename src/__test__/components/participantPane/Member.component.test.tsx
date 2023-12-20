@@ -1,11 +1,10 @@
 import React from "react";
-import {render, screen} from "@testing-library/react";
+import {screen} from "@testing-library/react";
 import MemberComponent from "../../../components/participantPane/Member.component";
 import {EegParticipant} from "../../../models/members.model";
 import {renderWithProviders} from "../../test-utils";
 import {AccountInfo, Address, Contact, Optionals} from "../../../models/eeg.model";
 import {Metering} from "../../../models/meteringpoint.model";
-
 
 const defaultParticipant: EegParticipant = {
   accountInfo: {} as AccountInfo,
@@ -40,7 +39,7 @@ describe("<MemberComponent />", () => {
                        showDetailsPage={(e) => {}}
                        showAmount={false}
                        onCheck={(e) => {}}
-                       onShowAddMeterPage={(e) => jest.fn()} />);
+                       onShowAddMeterPage={(e) => () => jest.fn()} />);
     // console.log(container)
     // const role = screen.getByText(/Max Mustermann/)
     expect(screen.getByText(/Max Mustermann/)).toBeInTheDocument();

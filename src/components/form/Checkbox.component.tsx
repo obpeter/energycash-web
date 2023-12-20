@@ -5,7 +5,7 @@ const CheckboxComponent: FC<{style?: CSSProperties, label: string, setChecked: (
   return (
     <div className={"form-element"} style={style}>
       <IonItem lines="none">
-        <IonCheckbox slot="start" checked={checked} onIonChange={(e) => setChecked(e.detail.checked)} labelPlacement="end" {...rest}>{label}</IonCheckbox>
+        <IonCheckbox slot="start" checked={checked} onIonChange={(e) => setChecked(e.detail.checked)} aria-label={label} labelPlacement="end" {...rest}>{label}</IonCheckbox>
         {/*<IonLabel>{label}</IonLabel>*/}
       </IonItem>
     </div>

@@ -18,9 +18,10 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
 
   const memberBill = useAppSelector(selectBillById(selectedParticipant?.id))
   const [rateGroups, setRateGroups] = useState<RateModelGroup>({});
+  const [participantRate, setParticipantRate] = useState<{ tariff_id: string, fee: number } | undefined>(undefined);
 
   useEffect(() => {
-    if (memberBill && selectedParticipant?.meters) {
+    if (memberBill && selectedParticipant && selectedParticipant.meters) {
 
       const meterBillGroup = toRecord(memberBill.meteringPoints, "id")
 
@@ -29,15 +30,34 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
           ...group, [meter.tariff_id]:
             {...group[meter.tariff_id], [meter.meteringPoint]: meterBillGroup[meter.meteringPoint].amount}
         }), {} as RateModelGroup)
-
       setRateGroups(m);
+
+      if (selectedParticipant.tariffId && memberBill.participantFee !== 0) {
+        setParticipantRate({tariff_id: selectedParticipant.tariffId, fee: memberBill.participantFee})
+      } else {
+        setParticipantRate(undefined)
+      }
     }
 
     if (selectedParticipant && memberBill === undefined) {
       setRateGroups({})
+      setParticipantRate(undefined)
     }
 
   }, [memberBill, selectedParticipant])
+
+  const createParticipantFeeCard = (tariff_id: string, fee: number) => {
+    const tariff = rates.find((r) => r.id === tariff_id)
+    return (
+      <div key={tariff_id}>
+        <RateCardComponent rate={tariff!}/>
+        <IonItem lines="none" fill={undefined} style={{"--background": "transparent"}}>
+          <IonLabel slot="end">{fee.toFixed(2)} €</IonLabel>
+        </IonItem>
+      </div>
+    )
+
+  }
 
   const createRateCard = (tariffGroup: [string, Record<string, number>]) => {
     if (!selectedParticipant) {
@@ -72,6 +92,17 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
       </div>
     )
   }
+  const getParticipantLine = (fee: number) => {
+    if (fee > 0) {
+      return (
+        <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
+          <div style={{padding: "5px"}}>Mitgliedsbeitrag:</div>
+          <div style={{padding: "5px"}}>{fee.toFixed(2)} €</div>
+        </div>
+      )
+    }
+    return (<></>)
+  }
 
   const getCreditLine = (credit: number) => {
     if (credit > 0) {
@@ -103,6 +134,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
         [0, 0] as [credit: number, debit: number])
       return (
         <div style={{width: "100%"}}>
+          {getParticipantLine(memberBill.participantFee)}
           {getCreditLine(credit)}
           {getDebitLine(debit)}
         </div>
@@ -125,6 +157,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
           background: "var(--ion-color-eeglight-tint)"
         }}>
           <div>
+            {participantRate && createParticipantFeeCard(participantRate.tariff_id, participantRate.fee)}
             {rateGroups ? Object.entries(rateGroups).map((tariffId) => (createRateCard(tariffId))) : <></>}
           </div>
           <div>
@@ -141,7 +174,7 @@ const ParticipantInvoiceDetailsComponent: FC = () => {
                   {memberBill ? <>
                     <IonItem lines="none" fill={"outline"} style={{"--min-height": "32px", fontSize: "14px"}}>
                       <IonIcon style={{marginTop: "5px", marginBottom: "5px"}} icon={eegSumSign} slot="start"></IonIcon>
-                      <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, 0).toFixed(2)}</span> €
+                      <span>{memberBill.meteringPoints.reduce((s, m) => s + m.amount, memberBill.participantFee).toFixed(2)}</span> €
                     </IonItem></> : <></>}
                 </div>
               </IonRow>

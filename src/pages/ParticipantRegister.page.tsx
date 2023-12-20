@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useState} from "react";
 import {
   IonButton,
   IonButtons,
@@ -52,7 +52,7 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
     residentAddress: {street: '', type: 'RESIDENCE', city: '', streetNumber: '', zip: ''},
     billingAddress:  {street: '', type: 'BILLING', city: '', streetNumber: '', zip: ''},
     contact: {email: "", phone: ""},
-    accountInfo: {iban: '', owner: '', sepa: false},
+    accountInfo: {iban: '', owner: '', sepa: false, bankName: ''},
     businessRole: 'EEG_PRIVATE',
     role: 'EEG_USER',
     optionals: {website: ''},

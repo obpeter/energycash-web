@@ -67,7 +67,6 @@ const DatePickerFormElement: FC<DatePickerFormProps> = ({name, control, rules, l
         render={({field, fieldState, formState}) => {
           const {onChange, onBlur, value, name, ref} = field;
           const dateValue = typeof value === 'string' ? new Date(value) : value instanceof Date ? value : new Date(Date.now())
-          console.log("Current DATE: ", dateValue, name)
           return (
             <DatePicker
               // selectsRange={false}

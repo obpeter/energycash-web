@@ -156,7 +156,10 @@ const EegPage: FC = () => {
                       {key: "verein", value: "Verein"},
                       {key: "genossenschaft", value: "Genossenschaft"},
                       {key: "gesellschaft", value: "Gesellschaft"}]} placeholder="Rechtsform" disabled={!isAdmin()}/>
-                    <InputFormComponent name={"description"} label="EEG Bezeichnung" control={control} rules={{}}
+                    <InputFormComponent name={"description"} label="EEG Bezeichnung" control={control}
+                                        rules={{maxLength : {
+                                          value: 40, message: 'Beschreibung ist auf 40 Zeichen beschränkt'
+                                        }}}
                                         type="text"
                                         readonly={!isAdmin()}/>
                     <InputFormComponent name={"businessNr"} label="Firmennummer" control={control} rules={{}}
@@ -211,6 +214,8 @@ const EegPage: FC = () => {
                     <InputFormComponent name={"accountInfo.iban"} label="IBAN" control={control} rules={{}} type="text"
                                         readonly={!isAdmin()}/>
                     <InputFormComponent name={"accountInfo.owner"} label="Kontoinhaber" control={control}
+                                        rules={{regex: /[a-zA-Z\s]*/}} type="text" readonly={!isAdmin()}/>
+                    <InputFormComponent name={"accountInfo.bankName"} label="Bank Name" control={control}
                                         rules={{regex: /[a-zA-Z\s]*/}} type="text" readonly={!isAdmin()}/>
                   </IonCard>
                 </div>

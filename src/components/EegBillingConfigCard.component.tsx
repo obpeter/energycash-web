@@ -20,7 +20,7 @@ import {eegService} from "../service/eeg.service";
 
 const EegBillingConfigCardComponent: FC = () => {
 
-    const BILLING_API_SERVER = process.env.REACT_APP_BILLING_SERVER_URL;
+    // const BILLING_API_SERVER = import.meta.env.VITA_BILLING_SERVER_URL;
 
     const {isAdmin} = useAccessGroups()
     const tenant = useAppSelector(selectedTenant);

@@ -30,5 +30,5 @@
 
 IonButton.stateButton {
     min-width: 32px;
-    man-height: 32px;
+    min-height: 32px;
 }

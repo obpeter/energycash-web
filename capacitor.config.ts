@@ -5,6 +5,9 @@ const config: CapacitorConfig = {
   appName: 'vfeeg-web',
   webDir: 'build',
   bundledWebRuntime: false
+  server: {
+    androidScheme: 'https'
+  }
 };
 
 export default config;

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "esnext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -25,5 +25,8 @@
   ],
   "exclude": [
     "src/config/keycloak.json"
+  ],
+  "references": [
+    { "path": "./tsconfig.node.json" }
   ]
 }

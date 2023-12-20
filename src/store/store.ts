@@ -8,7 +8,7 @@ import * as billing from './billing';
 import * as billingRun from './billingRun';
 import * as billingConfig from './billingConfig';
 
-import {combineReducers, configureStore, getDefaultMiddleware, PreloadedState} from "@reduxjs/toolkit";
+import {combineReducers, configureStore} from "@reduxjs/toolkit";
 
 /**
  * Reducer
@@ -42,7 +42,7 @@ export const store = configureStore({
 });
 
 
-export function setupStore(preloadedState?: PreloadedState<State>) {
+export function setupStore(preloadedState?: any) {
   return configureStore({
     reducer: reducer,
     preloadedState

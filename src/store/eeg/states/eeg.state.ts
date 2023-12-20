@@ -4,12 +4,12 @@ import {createEntityAdapter, EntityState} from "@reduxjs/toolkit";
 
 export const featureKey = 'eeg';
 
-export interface EegState extends EntityState<Eeg> {
+export interface EegState extends EntityState<Eeg, string> {
   isFetching: boolean;
   selectedTenant: string | null;
 }
 
-export const adapter = createEntityAdapter<Eeg>({
+export const adapter = createEntityAdapter<Eeg, string>({
   selectId: (eeg) => eeg.rcNumber
 });
 // export const adapter = createEntityAdapter<Eeg>();
