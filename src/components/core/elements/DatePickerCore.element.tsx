@@ -1,11 +1,9 @@
 import React, {FC, forwardRef, useEffect, useState} from "react";
 import DatePicker from "react-datepicker";
-import {Control, Controller, FieldError, Noop, UseFormClearErrors, useWatch} from "react-hook-form";
-import {IonIcon, IonInput, IonItem, IonLabel} from "@ionic/react";
+import {Noop} from "react-hook-form";
+import {IonInput} from "@ionic/react";
 
 import "./DatePickerCore.element.scss"
-import {calendar} from "ionicons/icons";
-import {type} from "os";
 
 interface DatePickerCoreProps {
   initialValue: Date
@@ -44,18 +42,7 @@ const DatePickerCoreElement: FC<DatePickerCoreProps> = ({name, initialValue, onC
           fill="outline"
           labelPlacement={"floating"}
           ref={ref}
-        >
-        </IonInput>
-
-      // <IonItem
-      //   fill="outline"
-      //   lines="none"
-      //   >
-      //   <IonLabel inputMode="text" placeholder={placeholder}>{p.value}</IonLabel>
-      //   {/*<IonInput {...p} ref={ref}></IonInput>*/}
-      //   {/*<IonIcon icon={calendar} slot="end"/>*/}
-      //   <input ref={ref}/>
-      // </IonItem>
+        />
     );
   });
 
@@ -76,5 +63,4 @@ const DatePickerCoreElement: FC<DatePickerCoreProps> = ({name, initialValue, onC
     </div>
   )
 }
-
 export default DatePickerCoreElement;

@@ -54,10 +54,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
 
   const onUpdateBaseData = (name: string, value: any) => {
     const nameHirachy = name.split(".")
-    console.log(nameHirachy)
-
     onSubmitPartial(participant.id, {[name]: value})
-
   }
 
   if (!participant) {

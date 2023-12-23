@@ -21,7 +21,7 @@ interface SelectFormProps {
   onIonDismiss?: (event: IonSelectCustomEvent<void>) => void,
   onIonChange?: (event: IonSelectCustomEvent<SelectChangeEventDetail>) => void,
   multiple?: boolean,
-  onChangePartial?: (name: string, value: any) => void
+  onChangePartial?: (name: string, value: any, event?: any) => void
 }
 
 const SelectForm: React.FC<SelectFormProps> = (
@@ -32,7 +32,7 @@ const SelectForm: React.FC<SelectFormProps> = (
   const onSelectionChanged = (onChange: (...event: any[]) => void) => (event: IonSelectCustomEvent<SelectChangeEventDetail>) => {
     onChange(event)
     if (onChangePartial) {
-      onChangePartial(name, event.detail.value)
+      onChangePartial(name, event.detail.value, event)
     }
   }
 

@@ -3,7 +3,6 @@ import {AuthClient} from "../store/hook/AuthProvider";
 export const API_API_SERVER = import.meta.env.REACT_APP_API_SERVER_URL;
 export const FILESTORE_API_SERVER = import.meta.env.REACT_APP_FILESTORE_SERVER_URL;
 
-
 export interface ErrorMessage {
   status: string
 }

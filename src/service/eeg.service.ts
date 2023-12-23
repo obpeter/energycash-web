@@ -183,7 +183,8 @@ class EegService {
       method: 'PUT',
       headers: {
         ...this.getSecureHeaders(token, tenant),
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(meter)
     }).then(this.handleErrors)
@@ -198,7 +199,8 @@ class EegService {
       method: 'PUT',
       headers: {
         ...this.getSecureHeaders(token, tenant),
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(meter)
     }).then(this.handleErrors).then(res => res.json());

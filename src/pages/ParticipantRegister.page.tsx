@@ -75,11 +75,11 @@ const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
   }
 
   const onSubmit = (data: EegParticipant) => {
-    data.billingAddress.type = "BILLING"
-    data.billingAddress.city = data.residentAddress.city
-    data.billingAddress.zip = data.residentAddress.zip
-    data.billingAddress.street = data.residentAddress.street
-    data.billingAddress.streetNumber = data.residentAddress.streetNumber
+    data.residentAddress.type = "RESIDENCE"
+    data.residentAddress.city = data.billingAddress.city
+    data.residentAddress.zip = data.billingAddress.zip
+    data.residentAddress.street = data.billingAddress.street
+    data.residentAddress.streetNumber = data.billingAddress.streetNumber
     onRegisterParticipant(data)
     reset()
   }

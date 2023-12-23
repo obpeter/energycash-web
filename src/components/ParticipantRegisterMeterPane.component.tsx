@@ -90,7 +90,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
               </IonCol>
             </IonRow>
             <IonRow class="ion-justify-content-end">
-              <IonCol size="auto">
+              <IonCol size="5">
                 <IonItem button lines="none" onClick={() => showMeter({...defaultMeter})}>
                   <IonIcon icon={add}></IonIcon>
                   <IonLabel>Zählpunkt hinzufügen</IonLabel>

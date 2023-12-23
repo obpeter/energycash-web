@@ -93,11 +93,9 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
   }, [activePeriod, periods])
 
   return (
-    <IonItem lines="none" style={{flexGrow: "1", minWidth: "200px"}}>
-      <IonSelect interface="popover" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange}>
+      <IonSelect interface="popover" justify="space-between" labelPlacement="stacked" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange} style={{minHeight: "0"}}>
         {periodSelectOptions}
       </IonSelect>
-    </IonItem>
   )
 }
 

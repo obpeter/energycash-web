@@ -47,14 +47,14 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({
   return (
     <div style={{display: "grid", gridTemplateColumns: "50% 50%", justifyContent: "space-between"}}>
       <FormProvider {...formMethods}>
-      <div style={{flexGrow: "1", height: "100%"}}>
-        <MeterFormElement rates={rates} participant={participant}/>
-      </div>
-      <div style={{flexGrow: "1", height: "100%"}}>
-        <MeterAddressFormElement participant={participant} isOnline={isOnline} isEditable={true}/>
-      </div>
+        <div style={{flexGrow: "1", height: "100%"}}>
+          <MeterFormElement rates={rates} participant={participant}/>
+        </div>
+        <div style={{flexGrow: "1", height: "100%"}}>
+          <MeterAddressFormElement participant={participant} isOnline={isOnline} isEditable={true}/>
+        </div>
       </FormProvider>
-      <div style={{gridColumnStart: "1", gridColumnEnd: "2", display: "grid"}}>
+      <div style={{gridColumnStart: "1", gridColumnEnd: "3", display: "grid"}}>
         <IonFooter>
           <IonToolbar className={"ion-padding-horizontal"}>
             <IonButton fill="clear" slot="start" onClick={() => onChancel()}>Abbrechen</IonButton>

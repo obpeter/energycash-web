@@ -1,6 +1,6 @@
 import React, {FC, useContext, useEffect} from "react";
 import CorePageTemplate from "../core/CorePage.template";
-import {Metering} from "../../models/meteringpoint.model";
+import {Metering, ParticipantState} from "../../models/meteringpoint.model";
 import EegWebContentPaneComponent from "../EegWebContentPane.component";
 import {IonButton, IonFooter, IonToolbar} from "@ionic/react";
 import {ParticipantContext} from "../../store/hook/ParticipantProvider";
@@ -13,7 +13,7 @@ import {ratesSelector} from "../../store/rate";
 import {selectedTenant} from "../../store/eeg";
 import MeterAddressFormElement from "../core/forms/MeterAddressForm/MeterAddressForm.element";
 import {useOnlineState} from "../../store/hook/Eeg.provider";
-
+import moment from "moment";
 
 const AddMeterPaneComponent: FC = () => {
 
@@ -29,11 +29,12 @@ const AddMeterPaneComponent: FC = () => {
     participantId: "",
     meteringPoint: "",
     direction: "CONSUMPTION",
-    registeredSince: new Date(2023, 0, 1, 0, 0, 0, 0)
+    registeredSince: moment.utc().toDate(),
+    participantState: {activeSince: new Date(Date.now()), inactiveSince: moment.utc([2999, 11, 31]).toDate()} as ParticipantState,
   } as Metering
 
   const formMethods = useForm<Metering>({mode: 'onBlur', defaultValues: meter});
-  const {handleSubmit, control, watch, setValue, formState: {errors, isDirty}, reset} = formMethods
+  const {handleSubmit, control, watch, setValue, formState: {errors, isDirty, isValid}, reset} = formMethods
 
   const {
     setShowAddMeterPane,
@@ -74,7 +75,7 @@ const AddMeterPaneComponent: FC = () => {
       <IonFooter>
         <IonToolbar className={"ion-padding-horizontal"}>
           <IonButton fill="clear" slot="start" onClick={onChancel}>Zurück</IonButton>
-          <IonButton form="submit-register-meter" type="submit" slot="end">Registrieren</IonButton>
+          <IonButton form="submit-register-meter" type="submit" slot="end" disabled={!isDirty || !isValid}>Registrieren</IonButton>
         </IonToolbar>
       </IonFooter>
     </EegWebContentPaneComponent>
