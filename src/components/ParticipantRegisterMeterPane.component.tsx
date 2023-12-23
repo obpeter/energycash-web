@@ -13,7 +13,7 @@ interface ParticipantRegisterMeterPaneComponentProps {
   onAddMeter: (meter: Metering) => void
 }
 
-const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant, onAddMeter}) => {
+const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant}) => {
 
   const isOnline = useOnlineState()
 
@@ -70,7 +70,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
         </IonCard>
       )
     }
-    return fields.map((m, idx) => (
+    return fields.map((m) => (
       <MeterCardComponent key={m.id} participant={participant} meter={m} hideMeter={true} onSelect={() => showMeter(m)}/>
     ))
   }

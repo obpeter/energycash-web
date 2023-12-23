@@ -27,7 +27,7 @@ const DatePickerFormElement: FC<DatePickerFormProps> = ({name, control, rules, l
     }
   }
 
-  const Component = forwardRef<HTMLIonInputElement, {onIonChange: (event: IonInputCustomEvent<InputChangeEventDetail>) => void}>(function CustomInput(p, ref) {
+  const Component = forwardRef<HTMLIonInputElement, {onIonChange: (event: IonInputCustomEvent<InputChangeEventDetail>) => void}>(function CustomInput(p) {
     return (
         <IonInput
           {...p}

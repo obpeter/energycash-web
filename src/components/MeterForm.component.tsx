@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useEffect} from "react";
 import {FormProvider, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../store";
 import {ratesSelector} from "../store/rate";

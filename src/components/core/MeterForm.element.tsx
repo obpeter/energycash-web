@@ -5,7 +5,7 @@ import InputForm from "../form/InputForm.component";
 import CheckboxComponent from "../form/Checkbox.component";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegTariff} from "../../models/eeg.model";
-import {Control, FieldErrors, UseFormClearErrors, useFormContext, UseFormSetValue, UseFormWatch} from "react-hook-form";
+import {useFormContext} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";

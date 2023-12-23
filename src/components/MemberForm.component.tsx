@@ -18,7 +18,7 @@ interface MemberFormComponentProps {
   onSubmitPartial: (participantId: string, value: Record<string, any>) => void
 }
 
-const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, formId, onSubmit, onSubmitPartial}) => {
+const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, onSubmitPartial}) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 

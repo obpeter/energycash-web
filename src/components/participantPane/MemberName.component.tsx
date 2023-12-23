@@ -1,12 +1,5 @@
-import React, {BaseSyntheticEvent, FC, MouseEventHandler, useContext} from "react";
-import {
-  CheckboxCustomEvent, IonButton,
-  IonCheckbox,
-  IonCol,
-  IonIcon,
-  IonItem,
-  IonLabel,
-} from "@ionic/react";
+import React, {FC, useContext} from "react";
+import {CheckboxCustomEvent, IonButton, IonCheckbox, IonCol, IonIcon, IonItem, IonLabel,} from "@ionic/react";
 import {eegExclamation} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
 import {EegTariff} from "../../models/eeg.model";

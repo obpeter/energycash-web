@@ -16,7 +16,7 @@ interface DatePickerCoreProps {
 
 }
 
-const DatePickerCoreElement: FC<DatePickerCoreProps> = ({name, initialValue, onChange, rules, label, placeholder}) => {
+const DatePickerCoreElement: FC<DatePickerCoreProps> = ({name, initialValue, onChange, label, placeholder}) => {
 
   const [currentDate, setCurrentDate] = useState<Date>(initialValue ? new Date(initialValue) : new Date())
 

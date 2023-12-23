@@ -9,7 +9,6 @@ import SelectForm from "../../../form/SelectForm.component";
 import {useAccessGroups} from "../../../../store/hook/Eeg.provider";
 
 import DatePickerFormElement from "../../../form/DatePickerForm.element";
-import DatePickerCoreElement from "../../elements/DatePickerCore.element";
 
 interface MeterAddressFormElementProps {
   participant?: EegParticipant

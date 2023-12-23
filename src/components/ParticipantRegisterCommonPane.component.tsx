@@ -14,9 +14,7 @@ interface ParticipantRegisterCommonPaneComponentProps {
 }
 
 const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneComponentProps> = ({
-                                                                                                   participant,
-                                                                                                   submitId,
-                                                                                                   onAdd
+                                                                                                   participant
                                                                                                  }) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)

@@ -1,5 +1,5 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
-import {IonItem, IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
+import React, {FC, useMemo, useState} from "react";
+import {IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
 import {SelectedPeriod} from "../../models/energy.model";
 import {MONTHNAME} from "../../models/eeg.model";
 import {getPeriodSegment, yearMonth} from "../../util/Helper.util";
