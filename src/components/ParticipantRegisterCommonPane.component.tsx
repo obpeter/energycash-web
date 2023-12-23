@@ -14,18 +14,11 @@ interface ParticipantRegisterCommonPaneComponentProps {
 }
 
 const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneComponentProps> = ({
-                                                                                                   participant,
-                                                                                                   submitId,
-                                                                                                   onAdd
+                                                                                                   participant
                                                                                                  }) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
-  // const {handleSubmit, control, register, setValue, formState: {errors}} = useForm({defaultValues: participant});
-
-  const {handleSubmit, control, setValue, formState: {errors}, clearErrors} = useFormContext<EegParticipant>();
-  // const onSubmit = (data: EegParticipant) => {
-  //   onAdd(data)
-  // }
+  const {control, setValue, formState: {errors}} = useFormContext<EegParticipant>();
 
   const onChangeBusinessType = (s: number) => {
     setSelectedBusinessType(s)
@@ -54,7 +47,6 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
           </IonCol>
         </IonRow>
       </IonGrid>
-      {/*<form id={submitId} onSubmit={handleSubmit(onSubmit)}>*/}
       <div style={{display: "flex", flexDirection: "row"}}>
         <div style={{flexGrow: "1", height: "100%", width: "50%"}}>
           <IonList>
@@ -77,15 +69,15 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
                            rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname}/>
               )
             }
-            <InputForm name={"residentAddress.street"} label="Straße" control={control}
-                       rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street}/>
-            <InputForm name={"residentAddress.streetNumber"} label="Hausnummer" control={control}
+            <InputForm name={"billingAddress.street"} label="Straße" control={control}
+                       rules={{required: "Straße fehlt"}} type="text" error={errors.billingAddress?.street}/>
+            <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control}
                        rules={{required: "Hausnummer fehlt"}}
-                       type="text" error={errors.residentAddress?.streetNumber}/>
-            <InputForm name={"residentAddress.zip"} label="Postleitzahl" control={control}
-                       rules={{required: "PLZ fehlt"}} type="text" error={errors.residentAddress?.zip}/>
-            <InputForm name={"residentAddress.city"} label="Ort" control={control} rules={{required: "Ort fehlt"}}
-                       type="text" error={errors.residentAddress?.city}/>
+                       type="text" error={errors.billingAddress?.streetNumber}/>
+            <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control}
+                       rules={{required: "PLZ fehlt"}} type="text" error={errors.billingAddress?.zip}/>
+            <InputForm name={"billingAddress.city"} label="Ort" control={control} rules={{required: "Ort fehlt"}}
+                       type="text" error={errors.billingAddress?.city}/>
             <InputForm name={"contact.phone"} label="Telefon" control={control} type="text"/>
             <InputForm name={"contact.email"} label="E-Mail" control={control} type="text"
                        rules={{required: "Email Adresse fehlt"}} error={errors.contact?.email}/>
@@ -108,8 +100,6 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
 
         </div>
       </div>
-
-      {/*</form>*/}
     </div>
   )
 }

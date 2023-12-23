@@ -92,7 +92,8 @@ export const activeParticipantsSelector1 = createSelector(
       }).filter(p => p.meters.length > 0)
       return n
     }
-    return participants
+//    return participants
+    return []
   }
 )
 

@@ -5,7 +5,7 @@ import InputForm from "../form/InputForm.component";
 import CheckboxComponent from "../form/Checkbox.component";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegTariff} from "../../models/eeg.model";
-import {Control, FieldErrors, UseFormClearErrors, useFormContext, UseFormSetValue, UseFormWatch} from "react-hook-form";
+import {useFormContext} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
@@ -14,9 +14,10 @@ interface MeterFormElementProps {
   rates: EegTariff[]
   participant?: EegParticipant
   meterReadOnly?: boolean
+  onChange?: (values: {name: string, value: any}[], event?: any) => void
 }
 
-const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterReadOnly}) => {
+const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterReadOnly, onChange}) => {
 
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
 
@@ -56,6 +57,10 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
     e.stopPropagation()
   }
 
+  const _onChange = (name: string, value: any, event?: any) => {
+    if (onChange) onChange([{name, value}], event)
+  }
+
   return (
     <>
       <IonGrid>
@@ -71,7 +76,7 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
         </IonRow>
       </IonGrid>
       <IonList>
-        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()}/>
+        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={_onChange}/>
         <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} type="text" readonly={meterReadOnly}
                    counter={true} maxlength={33}
                    rules={{
@@ -85,17 +90,18 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
                    }}
                    error={errors?.meteringPoint}
                    onPaste={handleMeterPaste}
+                   onChangePartial={_onChange}
         />
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>
         {withWechselrichter && (
           <InputForm name={"inverterId"} label="Wechselrichternummer" control={control} rules={{required: false}}
-                     type="text"/>
+                     type="text" onChangePartial={_onChange}/>
         )}
-        <InputForm name={"transformer"} label="Transformator" control={control} rules={{required: false}} type="text"/>
+        <InputForm name={"transformer"} label="Transformator" control={control} rules={{required: false}} type="text" onChangePartial={_onChange}/>
         <InputForm name={"equipmentNumber"} label="Anlagen-Nr." control={control} rules={{required: false}}
-                   type="text"/>
-        <InputForm name={"equipmentName"} label="Anlagename" control={control} rules={{required: false}} type="text"/>
+                   type="text" onChangePartial={_onChange}/>
+        <InputForm name={"equipmentName"} label="Anlagename" control={control} rules={{required: false}} type="text" onChangePartial={_onChange}/>
       </IonList>
     </>
   )

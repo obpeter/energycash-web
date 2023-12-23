@@ -1,8 +1,9 @@
-import BaseService, {API_API_SERVER} from "./base.service";
+import BaseService from "./base.service";
 import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {EegParticipant} from "../models/members.model";
 
+const API_API_SERVER = import.meta.env.VITE_API_SERVER_URL;
 
 class ParticipantService extends BaseService {
   public constructor(authClient: AuthClient) {

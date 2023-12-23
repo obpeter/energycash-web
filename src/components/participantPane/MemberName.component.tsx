@@ -1,12 +1,5 @@
-import React, {BaseSyntheticEvent, FC, MouseEventHandler, useContext} from "react";
-import {
-  CheckboxCustomEvent, IonButton,
-  IonCheckbox,
-  IonCol,
-  IonIcon,
-  IonItem,
-  IonLabel,
-} from "@ionic/react";
+import React, {FC, useContext} from "react";
+import {CheckboxCustomEvent, IonButton, IonCheckbox, IonCol, IonIcon, IonItem, IonLabel,} from "@ionic/react";
 import {eegExclamation} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
 import {EegTariff} from "../../models/eeg.model";
@@ -75,17 +68,17 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
               </div>
             </IonLabel>
           ) : (
-            <>
-            <IonLabel style={{margin: "0px"}}>
-              <div style={{display: "flex", justifyContent: "space-between"}}>
-                <span style={{fontSize: "16px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{renderMemberName()}</span>
-                {showAmount && <span>{euroAmount()}</span>}
-              </div>
-            </IonLabel>
-            <IonButton slot="end" fill="clear" onClick={onAdd(participant)}>
-              <IonIcon slot="icon-only" icon={add}/>
-            </IonButton>
-            </>
+            <div style={{display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between"}}>
+              <IonLabel style={{margin: "0px", width: "200px"}}>
+                <div style={{display: "flex", justifyContent: "space-between"}}>
+                  <span style={{fontSize: "15px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{renderMemberName()}</span>
+                  {showAmount && <span>{euroAmount()}</span>}
+                </div>
+              </IonLabel>
+              <IonButton slot="end" fill="clear" onClick={onAdd(participant)} style={{"margin-inline-start": "2px"}}>
+                <IonIcon slot="icon-only" icon={add}/>
+              </IonButton>
+            </div>
           )}
         </IonItem>
       </IonCol>

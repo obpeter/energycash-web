@@ -13,7 +13,7 @@ interface ParticipantRegisterMeterPaneComponentProps {
   onAddMeter: (meter: Metering) => void
 }
 
-const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant, onAddMeter}) => {
+const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant}) => {
 
   const isOnline = useOnlineState()
 
@@ -70,7 +70,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
         </IonCard>
       )
     }
-    return fields.map((m, idx) => (
+    return fields.map((m) => (
       <MeterCardComponent key={m.id} participant={participant} meter={m} hideMeter={true} onSelect={() => showMeter(m)}/>
     ))
   }
@@ -90,7 +90,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
               </IonCol>
             </IonRow>
             <IonRow class="ion-justify-content-end">
-              <IonCol size="auto">
+              <IonCol size="5">
                 <IonItem button lines="none" onClick={() => showMeter({...defaultMeter})}>
                   <IonIcon icon={add}></IonIcon>
                   <IonLabel>Zählpunkt hinzufügen</IonLabel>

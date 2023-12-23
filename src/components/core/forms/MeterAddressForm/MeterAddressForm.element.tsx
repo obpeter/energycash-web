@@ -2,7 +2,7 @@ import React, {FC, useEffect, useState} from "react";
 import {useFormContext} from "react-hook-form";
 import {Metering} from "../../../../models/meteringpoint.model";
 import {EegParticipant} from "../../../../models/members.model";
-import {IonInput, IonList, IonListHeader} from "@ionic/react";
+import {IonList, IonListHeader} from "@ionic/react";
 import CheckboxComponent from "../../../form/Checkbox.component";
 import InputForm from "../../../form/InputForm.component";
 import SelectForm from "../../../form/SelectForm.component";
@@ -15,12 +15,14 @@ interface MeterAddressFormElementProps {
   isEditable?: boolean
   // showStatus?: boolean
   isOnline?: boolean
+  onChange?: (values: {name: string, value: any}[], event?: any) => void
 }
 
 const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                                                                      participant,
                                                                      isOnline,
                                                                      isEditable,
+                                                                     onChange,
                                                                    }) => {
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
   const [withOwner, setWithOwner] = useState(false);
@@ -38,14 +40,28 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
 
   const takeOverAddress = (ok: boolean) => {
     if (isTakeOverAddressEnabled() && participant!.billingAddress) {
-      if (ok && setValue) {
-        setValue(`street`, participant!.billingAddress.street);
-        setValue(`streetNumber`, participant!.billingAddress.streetNumber);
-        setValue(`city`, participant!.billingAddress.city);
-        setValue(`zip`, participant!.billingAddress.zip);
+      if (ok) {
+        if (onChange) {
+          const values = [
+            {name: `street`, value: participant!.billingAddress.street},
+            {name: `streetNumber`, value: participant!.billingAddress.streetNumber},
+            {name: `city`, value: participant!.billingAddress.city},
+            {name: `zip`, value: participant!.billingAddress.zip}
+          ]
+          onChange(values)
+        } else {
+          setValue(`street`, participant!.billingAddress.street, {shouldDirty: true, shouldValidate: true});
+          setValue(`streetNumber`, participant!.billingAddress.streetNumber, {shouldDirty: true, shouldValidate: true});
+          setValue(`city`, participant!.billingAddress.city, {shouldDirty: true, shouldValidate: true});
+          setValue(`zip`, participant!.billingAddress.zip, {shouldDirty: true, shouldValidate: true});
+        }
       }
       setWithOwner(ok);
     }
+  }
+
+  const _onChange = (name: string, value: any) => {
+    if (onChange) onChange([{name, value}])
   }
 
   return (
@@ -53,15 +69,22 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
       <IonListHeader style={{minHeight: "60px"}}>Adresse</IonListHeader>
       {isTakeOverAddressEnabled() &&
           <CheckboxComponent label="Adresse vom Besitzer übernehmen" setChecked={takeOverAddress}
-                             checked={withOwner}></CheckboxComponent>}
+                             checked={withOwner} style={{paddingTop: "0px"}}></CheckboxComponent>}
       <InputForm name={"street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text"
-                 error={errors?.street} disabled={disableAddressFields}/>
-      <InputForm name={"streetNumber"} label="Hausnummer" control={control} rules={{required: "Hausnummer fehlt"}}
-                 type="text" error={errors?.streetNumber} disabled={disableAddressFields}/>
+                 error={errors?.street} disabled={disableAddressFields} onChangePartial={_onChange}/>
+      <InputForm name={"streetNumber"} label="Hausnummer" control={control}
+                 rules={{
+                   required: "Hausnummer fehlt",
+                   pattern: {
+                     value: /^[0-9A-Za-z\/-\\\s]*$/,
+                     message: "Ungültige Zeichen. Erlaubt sind 0-9, A-Z, a-z, \,/,-, ]"
+                   }
+                 }}
+                 type="text" error={errors?.streetNumber} disabled={disableAddressFields} onChangePartial={_onChange}/>
       <InputForm name={"zip"} label="Postleitzahl" control={control} rules={{required: "Postleitzahl fehlt"}}
-                 type="text" error={errors?.zip} disabled={disableAddressFields}/>
+                 type="text" error={errors?.zip} disabled={disableAddressFields} onChangePartial={_onChange}/>
       <InputForm name={"city"} label="Ort" control={control} rules={{required: "Ortsangabe fehlt"}} type="text"
-                 error={errors?.city} disabled={disableAddressFields}/>
+                 error={errors?.city} disabled={disableAddressFields} onChangePartial={_onChange}/>
       {isAdmin() && !isOnline &&
           <>
               <SelectForm control={control}
@@ -72,10 +95,13 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                               {key: 'ACTIVE', value: "Bereits registriert"}
                             ]}
                           label={"Status"}
+                          onChangePartial={_onChange}
               />
             {currentMeterState === "ACTIVE" &&
-                <DatePickerFormElement control={control} name={"registeredSince"} label="Registriert seit"
-                                       placeholder={"Datum"} error={errors?.registeredSince}/>
+                <DatePickerFormElement control={control} name={"participantState.activeSince"} label="Aktiv seit"
+                                       placeholder={"Datum"} error={errors?.registeredSince} onChangeDate={_onChange}/>
+
+              // <DatePickerCoreElement initialValue={watch("participantState.activeSince")} onChange={_onChange} name={"participantState.activeSince"} label={"Aktiv seit"}/>
             }
           </>
       }

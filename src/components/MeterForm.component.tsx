@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useEffect} from "react";
 import {FormProvider, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../store";
 import {ratesSelector} from "../store/rate";
@@ -27,15 +27,16 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   // const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset, clearErrors} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
 
   const formMethods = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
-  const {handleSubmit, formState: { dirtyFields}, reset} = formMethods
+  const {handleSubmit, formState: { dirtyFields}, reset, setValue} = formMethods
 
   useEffect(() => {
     reset(metering)
   }, [metering])
 
   const onSubmit = (meter: Metering) => {
+    console.log("dirtyFields ", dirtyFields)
     if (Object.keys(dirtyFields).length > 0) {
-      let participantId = participant?.id;
+      const participantId = participant?.id;
       if (participantId) {
         dispatcher(updateMeteringPoint({tenant, participantId, meter}))
         reset(meter);
@@ -43,15 +44,27 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
     }
   }
 
+  const onChangeDate = (name: string, value: any) => {
+    console.log("handle change ", value)
+    handleSubmit((data) => onSubmit(data))()
+  }
+
+  const onChange = (values: {name: string, value: any}[], event?: any) => {
+    values.forEach(v => {
+      setValue(v.name as keyof Metering, v.value, {shouldDirty: true, shouldValidate: true})
+    })
+    handleSubmit((data) => onSubmit(data))(event)
+  }
+
   return (
-    <form onBlur={handleSubmit((data) => onSubmit(data))}>
+    // <form onBlur={handleSubmit((data) => onSubmit(data))}>
       <EegPaneTemplate>
         <FormProvider {...formMethods} >
           <MeterFormElement rates={rates} meterReadOnly={true}/>
-          <MeterAddressFormElement />
+          <MeterAddressFormElement onChange={onChange}/>
         </FormProvider>
       </EegPaneTemplate>
-    </form>
+    // </form>
   )
 }
 

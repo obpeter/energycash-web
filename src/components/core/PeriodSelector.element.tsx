@@ -1,5 +1,5 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
-import {IonItem, IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
+import React, {FC, useMemo, useState} from "react";
+import {IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
 import {SelectedPeriod} from "../../models/energy.model";
 import {MONTHNAME} from "../../models/eeg.model";
 import {getPeriodSegment, yearMonth} from "../../util/Helper.util";
@@ -93,11 +93,9 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
   }, [activePeriod, periods])
 
   return (
-    <IonItem lines="none" style={{flexGrow: "1", minWidth: "200px"}}>
-      <IonSelect interface="popover" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange}>
+      <IonSelect interface="popover" justify="space-between" labelPlacement="stacked" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange} style={{minHeight: "0"}}>
         {periodSelectOptions}
       </IonSelect>
-    </IonItem>
   )
 }
 
