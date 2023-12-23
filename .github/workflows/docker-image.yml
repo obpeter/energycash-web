@@ -27,6 +27,6 @@ jobs:
     - name: Compile 
       run: npm run build
     - name: Build the Docker image
-      run: "docker build . --file Dockerfile --tag ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION"
+      run: echo 'docker build . --file Dockerfile --tag "ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION"'
     - name: Upload
       run: docker push ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION
