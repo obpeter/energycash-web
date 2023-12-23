@@ -7,7 +7,6 @@ on:
     branches: [ "master" ]
 
 env:
-  IMAGE_VERSION: "$(date +%s)"
   IMAGE_NAME: "vfeeg-web"
   
 jobs:
@@ -26,6 +25,8 @@ jobs:
       run: npm install
     - name: Compile 
       run: npm run build
+    - name: Set current version string
+      run: echo "IMAGE_VERSION=latest-$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV      
     - name: Build the Docker image
       run: echo `docker build . --file Dockerfile --tag "ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION"`
     - name: Upload
