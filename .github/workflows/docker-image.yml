@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 env:
-  IMAGE_VERSION: "latest-$(date +%s)"
+  IMAGE_VERSION: $(date +%s)
   IMAGE_NAME: "vfeeg-web"
   
 jobs:
