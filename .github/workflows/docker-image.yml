@@ -28,6 +28,6 @@ jobs:
     - name: Set current version string
       run: echo "IMAGE_VERSION=latest-$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV      
     - name: Build the Docker image
-      run: echo `docker build . --file Dockerfile --tag "ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION"`
+      run: docker build . --file Dockerfile --tag ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION
     - name: Upload
-      run: echo "docker push ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION"
+      run: docker push ghcr.io/vfeeg-development/$IMAGE_NAME:$IMAGE_VERSION
