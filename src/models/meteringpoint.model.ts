@@ -31,6 +31,7 @@ export interface ClearingPreviewRequest {
   clearingPeriodIdentifier: string;
   allocations: MeteringEnergyGroupType[];
   preview: boolean;
+  clearingDocumentDate: String;
 }
 
 //@TODO: Refactor diesen Type --> billing.model.ts (o.ä.)
