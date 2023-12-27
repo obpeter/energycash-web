@@ -29,35 +29,6 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({selected
 
   const isPeriodSelected = (periodType: string) => selectedPeriod?.type === periodType
 
-  const calcSelectedEnergySeries = (reportType: ReportType, meterId: string, report: EegEnergyReport): EnergySeries[] => {
-    const meta = report.eeg.meta.find(m => m.name === meterId)
-    return report.eeg.intermediateReportResults.map(r => {
-      if (meta) {
-        const [period, year, segment, idx] = r.id.split('/')
-        switch (meta.dir) {
-          case "CONSUMPTION":
-            if ((r.allocated.length > meta.sourceIdx) && (r.consumed.length > meta.sourceIdx)) {
-              return {
-                segmentIdx: Number(idx),
-                allocated: r.allocated[meta.sourceIdx],
-                consumed: r.consumed[meta.sourceIdx] - r.allocated[meta.sourceIdx]
-              } as EnergySeries
-            }
-            break;
-          case "GENERATION":
-            if ((r.produced.length > meta.sourceIdx) && (r.distributed.length > meta.sourceIdx)) {
-              return {
-                segmentIdx: Number(idx),
-                allocated: r.produced[meta.sourceIdx] - r.distributed[meta.sourceIdx],
-                consumed: r.produced[meta.sourceIdx]
-              } as EnergySeries
-            }
-        }
-      }
-      return  { segmentIdx: 0, allocated: 0, consumed: 0 } as EnergySeries
-    })
-  }
-
   const selectLastSegmentIdx = (series: EnergySeries[]) => {
     if (series && series.length > 0) {
       setLastSegmentIdx(series[series.length-1].segmentIdx)
@@ -102,7 +73,7 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({selected
           ))}
         </IonButtons>
       </div>
-      <div>
+      <div style={{width: "30%"}}>
         <PeriodSelectorElement periods={periods} activePeriod={selectedPeriod} onUpdatePeriod={onChangePeriod} />
       </div>
     </div>

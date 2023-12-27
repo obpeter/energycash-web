@@ -1,4 +1,28 @@
-.select-box {
-  width: 100%;
-  justify-content: space-between;
+::slotted(.select-box) {
+    .select-wrapper-inner {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
+
+:host(.select-box) .select-wrapper-inner {
+    width: 100%;
+    justify-content: space-between;
+}
+
+:host {
+    ion-select.select-box div.select-wrapper-inner {
+        //display: flex;
+        //align-items: center;
+        //overflow: hidden;
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+.select-wrapper-inner {
+    width: 100%;
+    justify-content: space-between;
+}
+
+
