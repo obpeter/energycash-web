@@ -144,9 +144,9 @@ const EegPage: FC = () => {
                   <div className={"header"}>Allgemeines</div>
                   <IonCard color="eeglight">
 
-                    <InputFormComponent name={"rcNumber"} label="RC Nummer" control={control} rules={{}} type="text"
+                    <InputFormComponent name={"rcNumber"} label="EC-Nummer" control={control} rules={{}} type="text"
                                         readonly={true}/>
-                    <InputFormComponent name={"communityId"} label="Gemeinschafts-Id" control={control} rules={{}}
+                    <InputFormComponent name={"communityId"} label="ID" control={control} rules={{}}
                                         type="text"
                                         readonly={true}/>
 
