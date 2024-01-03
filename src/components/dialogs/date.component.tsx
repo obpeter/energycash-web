@@ -1,6 +1,6 @@
 import React, {FC, forwardRef, useRef, useState} from "react";
 import DatePicker from "react-datepicker";
-import {IonButton, IonIcon, IonInput, IonLabel} from "@ionic/react";
+import {IonButton, IonIcon, IonInput, IonLabel, IonRow} from "@ionic/react";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./data.component.scss"
@@ -22,31 +22,31 @@ const DateComponent: FC<DateComponentProps> = ({range, initialDate}) => {
 
   const DateInputComponent = forwardRef<HTMLIonButtonElement, any>(function CustomInput(p, ref) {
     return (
-      <IonButton fill="clear" size="small" ref={ref} {...p}>
-        <IonIcon slot="icon-only" icon={calendar}/>
-      </IonButton>
+      <IonRow ref={ref} {...p} style={{alignItems:"center"}}>
+        <div><span>{startDate?.toDateString()}</span> - <span>{endDate?.toDateString()}</span></div>
+        <IonButton fill="clear" size="small">
+          <IonIcon slot="icon-only" icon={calendar}/>
+        </IonButton>
+      </IonRow>
     );
   });
 
   return (
-    <div style={{display: "flex", flexDirection: "row", alignItems:"center"}}>
-      <div><span>{startDate?.toDateString()}</span> - <span>{endDate?.toDateString()}</span></div>
-    <DatePicker
-      showIcon={true}
-      className={"ion-date-picker"}
-      selectsRange={true}
-      startDate={startDate}
-      endDate={endDate}
-      onChange={(update:[Date|null, Date|null]) => {
-        setRange(update);
-      }}
-      customInput={
-            <DateInputComponent />
-      }
-      dateFormat="dd.MMM yyyy"
-      portalId="root-portal"
-    />
-    </div>
+      <DatePicker
+        showIcon={false}
+        className={"ion-date-picker"}
+        selectsRange={true}
+        startDate={startDate}
+        endDate={endDate}
+        onChange={(update: [Date | null, Date | null]) => {
+          setRange(update);
+        }}
+        customInput={
+          <DateInputComponent/>
+        }
+        dateFormat="dd.MMM yyyy"
+        portalId="root-portal"
+      />
   )
 }
 

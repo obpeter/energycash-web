@@ -83,7 +83,7 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
       return (
         <>
           {options.map((o, idx) => (
-            <IonSelectOption key={idx} value={idx + 1} aria-selected>{periodDisplayString(o)}</IonSelectOption>
+            <IonSelectOption key={idx} value={idx + 1}>{periodDisplayString(o)}</IonSelectOption>
           ))}
         </>
       )
@@ -93,7 +93,7 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
   }, [activePeriod, periods])
 
   return (
-      <IonSelect interface="popover" justify="space-between" labelPlacement="stacked" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange} style={{minHeight: "0"}}>
+      <IonSelect interface="popover" justify="space-between" className="select-box" value={usedPeriod} defaultValue={0} onIonChange={onChange} style={{minHeight: "0"}}>
         {periodSelectOptions}
       </IonSelect>
   )

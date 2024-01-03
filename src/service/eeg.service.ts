@@ -13,11 +13,9 @@ import {
 import {EegEnergyReport, EnergyReportResponse, ParticipantReport, SelectedPeriod} from "../models/energy.model";
 import {eegGraphqlQuery, reportDateGraphqlQuery, uploadEnergyGraphqlMutation} from "./graphql-query";
 import {ExcelReportRequest} from "../models/reports.model";
+import {API_API_SERVER, ENERGY_API_SERVER} from "./base.service";
 
-const ENERGY_API_SERVER = import.meta.env.VITE_ENERGY_SERVER_URL;
 const BILLING_API_SERVER = import.meta.env.VITE_BILLING_SERVER_URL;
-const API_API_SERVER = import.meta.env.VITE_API_SERVER_URL;
-const FILESTORE_API_SERVER = import.meta.env.VITE_FILESTORE_SERVER_URL;
 
 class EegService {
 
@@ -36,6 +34,15 @@ class EegService {
       throw Error(response.statusText);
     }
     return response;
+  }
+
+  private async handleGQLResponse(response: Response) {
+    return response.json().then(d => {
+      if (d.errors)
+        throw Error(d.errors[0].message)
+      else
+        return d.data
+    })
   }
 
   async handleDownload (response : Response, defaultFilename : string) : Promise<boolean> {
@@ -367,17 +374,6 @@ class EegService {
     }).then(this.handleErrors).then(res => res.blob());
   }
 
-  async downloadDocument(tenant: string, fileId: string): Promise<Blob> {
-    const token = await this.authClient.getToken();
-    return await fetch(`${FILESTORE_API_SERVER}/filestore/${fileId}`, {
-      method: 'GET',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-      },
-    }).then(this.handleErrors).then(res => res.blob());
-  }
-  // END FILESTORE SERVICES ////////////////////////////////////////////
-
   async exportBillingArchive(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
     if (!token) {
       token = await this.authClient.getToken();
@@ -613,7 +609,7 @@ class EegService {
         // 'Content-Type': 'multipart/form-data'
       },
       body: await uploadEnergyGraphqlMutation(tenant, sheet, data)
-    }).then(this.handleErrors).then(res => true);
+    }).then(this.handleErrors).then(this.handleGQLResponse).then(res => true);
   }
 
   async uploadMasterDataFile(tenant: string, sheet: string, data: File): Promise<boolean> {

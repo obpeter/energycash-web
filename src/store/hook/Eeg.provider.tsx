@@ -137,8 +137,10 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
           return {type: period, year: parseInt(year, 10), segment: segment} as SelectedPeriod
         }
         throw new Error("last report period not exists")
+        // return {type: "Y", year: new Date(Date.now()).getFullYear(), segment: 0} as SelectedPeriod
       })
         .then(p => dispatch(setSelectedPeriod(p)))
+        .catch(e => console.log(e))
     }
   }, [eeg]);
 

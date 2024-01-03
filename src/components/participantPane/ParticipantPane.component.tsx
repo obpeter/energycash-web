@@ -434,7 +434,10 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
               .then(() => refresh())
               .then(() => dismissLoading())
               .then(() => infoToast("Energiedaten-Upload beendet."))
-              .catch(() => dismissLoading())
+              .catch((e) => {
+                errorToast("Energiedatenfile nicht korrekt. [" + e.toString()+"]")
+                dismissLoading()
+              })
             break
           case 1:
             loading({message: "Stammdaten importieren ..."})

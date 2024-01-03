@@ -50,6 +50,17 @@ class FileService extends BaseService {
     }).then(this.handleFilestoreResponse);
 
   }
+
+  async downloadDocument(tenant: string, fileId: string): Promise<Blob> {
+    const token = await this.authClient.getToken();
+    return await fetch(`${FILESTORE_API_SERVER}/filestore/${fileId}`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors).then(res => res.blob());
+  }
+
 }
 
 export const fileService = new FileService(authKeycloak);

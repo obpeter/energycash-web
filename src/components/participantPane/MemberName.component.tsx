@@ -75,7 +75,7 @@ const MemberNameComponent: FC<MemberNameComponentProps> =
                   {showAmount && <span>{euroAmount()}</span>}
                 </div>
               </IonLabel>
-              <IonButton slot="end" fill="clear" onClick={onAdd(participant)} style={{"margin-inline-start": "2px"}}>
+              <IonButton slot="end" fill="clear" onClick={onAdd(participant)} style={{"marginInlineStart": "2px"}}>
                 <IonIcon slot="icon-only" icon={add}/>
               </IonButton>
             </div>

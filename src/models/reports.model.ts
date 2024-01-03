@@ -12,3 +12,8 @@ export type ExcelReportRequest = {
   communityId: string;
   cps: InvestigatorCP[];
 }
+
+export type CpPeriodType = {
+  begin: string;
+  end: string;
+}

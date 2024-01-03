@@ -12,6 +12,7 @@ import {
 import {calc, splitDate} from "../../../util/Helper.util";
 import {MeteringEnergyGroupType} from "../../../models/meteringpoint.model";
 import {buildSlice} from "@reduxjs/toolkit/dist/query/core/buildSlice";
+import {transformMeterReportToEnergySeries} from "../../../util/ReportHelper";
 
 const {selectAll, selectById, selectEntities} = metaAdapter.getSelectors();
 const {selectAll: selectAllParticipants, selectById: selectParticipantById} = participantReportAdapter.getSelectors();
@@ -121,26 +122,27 @@ export const meteringInterReportSelectorV2 = (participantId: string | undefined,
   selectParticipantReport(participantId),
   (period, report): MeterEnergySeries | undefined => {
     if (report) {
-      const r = report.meters.filter(m => m.meterId === meterId).map(m => {
-        if (m.meterDir === 'CONSUMPTION') {
-          return m.report.intermediate.consumption.map((c, i) => {
-            return {
-              segmentIdx: i,
-              allocated: m.report.intermediate.utilization[i],
-              consumed: c,
-            } as EnergySeries
-          })
-        } else {
-          return m.report.intermediate.production.map((c, i) => {
-            return {
-              segmentIdx: i,
-              allocated: m.report.intermediate.allocation[i],
-              consumed: c,
-            } as EnergySeries
-          })
-
-        }
-      })
+      // const r = report.meters.filter(m => m.meterId === meterId).map(m => {
+      //   if (m.meterDir === 'CONSUMPTION') {
+      //     return m.report.intermediate.consumption.map((c, i) => {
+      //       return {
+      //         segmentIdx: i,
+      //         allocated: m.report.intermediate.utilization[i],
+      //         consumed: c,
+      //       } as EnergySeries
+      //     })
+      //   } else {
+      //     return m.report.intermediate.production.map((c, i) => {
+      //       return {
+      //         segmentIdx: i,
+      //         allocated: m.report.intermediate.allocation[i],
+      //         consumed: c,
+      //       } as EnergySeries
+      //     })
+      //
+      //   }
+      // })
+      const r = report.meters.filter(m => m.meterId === meterId).map(transformMeterReportToEnergySeries)
       return (r.length > 0) ? {period: period, series: r[0]} as MeterEnergySeries : undefined
     }
     return undefined

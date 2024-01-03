@@ -14,6 +14,7 @@ import {MONTHNAME} from "../../models/eeg.model";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
 import {useIonViewWillEnter} from "@ionic/react";
+import {transformMeterReportToEnergySeries} from "../../util/ReportHelper";
 
 interface MeterChartComponentProps {
   tenant: string
@@ -58,25 +59,7 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
           }
           return res.participantReports[0]
         })
-        .then(rep => {
-          if (rep.meters[0].meterDir === "CONSUMPTION") {
-            return rep.meters[0].report.intermediate.consumption.map((c, i) => {
-              return {
-                segmentIdx: i,
-                consumed: c,
-                allocated: rep.meters[0].report.intermediate.utilization[i]
-              } as EnergySeries
-            })
-          } else {
-            return rep.meters[0].report.intermediate.production.map((c, i) => {
-              return {
-                segmentIdx: i,
-                consumed: c,
-                allocated: rep.meters[0].report.intermediate.allocation[i]
-              } as EnergySeries
-            })
-          }
-        })
+        .then(rep => transformMeterReportToEnergySeries(rep.meters[0]))
         .then(s => {
           return {
             series: s,
@@ -155,8 +138,8 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
             <YAxis fontSize={10} unit={" kWh"}/>
             <Tooltip formatter={(value) => Number(value).toFixed(3) + " kWh"}/>
             <Legend/>
-            <Bar name="EEG" dataKey="distributed" fill="#8884d8"/>
-            <Bar name="EVU" dataKey="consumed" fill="#82ca9d"/>
+            <Bar name="EEG" dataKey="distributed" fill="#82ca9d"/>
+            <Bar name="EVU" dataKey="consumed" fill="#8884d8"/>
           </BarChart>
 
         </ResponsiveContainer>

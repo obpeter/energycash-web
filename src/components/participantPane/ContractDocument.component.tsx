@@ -17,12 +17,8 @@ import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-compo
 import UploadContractFilesDialog from "../dialogs/UploadContractFiles.dialog";
 
 import "./ContractDocument.component.scss"
-import {trash, trashBin} from "ionicons/icons";
+import {trash} from "ionicons/icons";
 import {fileService} from "../../service/file.service";
-import {fetchBillingRun} from "../../store/billingRun";
-import {createPeriodIdentifier} from "../../models/energy.model";
-import {IonButtonCustomEvent} from "@ionic/core/dist/types/components";
-
 
 interface ContractDocumentComponentProps {
   tenant: string;
@@ -46,7 +42,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
 
   async function createReport(fileDownloadUrl: string, filename: string) {
     try {
-      eegService.downloadDocument(tenant, fileDownloadUrl).then(b => {
+      fileService.downloadDocument(tenant, fileDownloadUrl).then(b => {
         const fileURL = URL.createObjectURL(b);
         // //Open the URL on new Window
         window.open(fileURL, '_blank');

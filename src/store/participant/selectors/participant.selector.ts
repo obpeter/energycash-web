@@ -71,6 +71,11 @@ const getPeriodDates = (period: SelectedPeriod) => {
 //   }
 // )
 
+/**
+ * Selector: Returns Participants with active metering points
+ *
+ * TODO: Return all participants and their active meteringpoints in cose of unset period informations
+ */
 export const activeParticipantsSelector1 = createSelector(
   participantsSelector1,
   selectedPeriodSelector,
@@ -80,9 +85,6 @@ export const activeParticipantsSelector1 = createSelector(
       const n = participants.map(p => {
         return {
           ...p, meters: p.meters.filter(m =>
-            // (m.participantState
-            //   ? new Date(m.participantState.activeSince).getTime() <= start.getTime()
-            //   : true) &&
             (m.participantState
               ? (new Date(m.participantState.inactiveSince).getTime() >= end.getTime() && new Date(m.participantState.activeSince).getTime() <= end.getTime()) ||
               (new Date(m.participantState.inactiveSince).getTime() >= start.getTime() && new Date(m.participantState.inactiveSince).getTime() <= end.getTime())
@@ -92,8 +94,8 @@ export const activeParticipantsSelector1 = createSelector(
       }).filter(p => p.meters.length > 0)
       return n
     }
-//    return participants
-    return []
+    return [...participants]
+    // return []
   }
 )
 
