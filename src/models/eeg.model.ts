@@ -67,6 +67,7 @@ export interface BillingConfig {
   tenantId : string;
   headerImageFileDataId : string;
   footerImageFileDataId : string;
+  createCreditNotesForAllProducers : boolean;
   beforeItemsTextInvoice : string;
   beforeItemsTextCreditNote : string;
   beforeItemsTextInfo : string;
