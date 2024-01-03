@@ -61,7 +61,7 @@ const MeterChartNavbarComponent: FC<MeterChartNavbarComponentProps> = ({selected
           {(["Y", "YH", "YQ", "YM"] as ('YH' | "YQ" | 'YM' | 'Y')[]).map((p, i) => (
             <IonButton
               key={i}
-              onClick={() => onChangePeriod(createNewPeriod(selectedPeriod, p, lastSegmentIdx))}
+              onClick={() => onChangePeriod(createNewPeriod(selectedPeriod, p, lastSegmentIdx, periods))}
               shape="round"
               size="small"
               className="stateButton"

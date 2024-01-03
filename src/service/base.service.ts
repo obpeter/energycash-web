@@ -1,7 +1,8 @@
 import {AuthClient} from "../store/hook/AuthProvider";
 
-export const API_API_SERVER = import.meta.env.REACT_APP_API_SERVER_URL;
-export const FILESTORE_API_SERVER = import.meta.env.REACT_APP_FILESTORE_SERVER_URL;
+export const API_API_SERVER = import.meta.env.VITE_API_SERVER_URL;
+export const FILESTORE_API_SERVER = import.meta.env.VITE_FILESTORE_SERVER_URL;
+export const ENERGY_API_SERVER = import.meta.env.VITE_ENERGY_SERVER_URL;
 
 export interface ErrorMessage {
   status: string

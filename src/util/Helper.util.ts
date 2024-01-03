@@ -1,5 +1,6 @@
 import {EegParticipant} from "../models/members.model";
 import {ReportType, SelectedPeriod} from "../models/energy.model";
+import {CpPeriodType} from "../models/reports.model";
 
 
 export const formatedName = (participant: EegParticipant) => {
@@ -44,7 +45,14 @@ export const getPeriodSegment = (period: string, month: number) => {
   }
 }
 
-export const createNewPeriod = (period: SelectedPeriod | undefined, target: ReportType, currentSegmentIdx: number) => {
+const splitCpPeriod = (cpPeriod: CpPeriodType) => {
+  const [beginMonth, beginYear] = yearMonth(cpPeriod.begin)
+  const [endMonth, endYear] = yearMonth(cpPeriod.end)
+
+  return [beginYear, beginMonth, endYear, endMonth]
+}
+
+export const createNewPeriod = (period: SelectedPeriod | undefined, target: ReportType, currentSegmentIdx: number, cpPeriod?: CpPeriodType) => {
   if (period !== undefined) {
     switch (target) {
       case 'Y':
@@ -52,18 +60,18 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
       case 'YM':
         switch (period.type) {
           case 'Y':
-            return {type: target, segment: currentSegmentIdx, year: period.year}
+            return {type: target, segment: cpPeriod ? splitCpPeriod(cpPeriod)[3] : currentSegmentIdx, year: period.year}
           case 'YH':
-            return {type: target, segment: period.segment === 2 ? 6 : 1, year: period.year}
+            return {type: target, segment: cpPeriod ? splitCpPeriod(cpPeriod)[3] : period.segment === 2 ? 6 : 1, year: period.year}
           case 'YQ':
-            return {type: target, segment: period.segment === 2 ? 3 : period.segment === 3 ? 6 : period.segment === 4 ? 9 : 1, year: period.year}
+            return {type: target, segment: cpPeriod ? splitCpPeriod(cpPeriod)[3] : period.segment === 2 ? 3 : period.segment === 3 ? 6 : period.segment === 4 ? 9 : 1, year: period.year}
           default:
             return period
         }
       case 'YQ':
         switch (period.type) {
           case 'Y':
-            return {type: target, segment: Math.ceil(currentSegmentIdx / 3), year: period.year}
+            return {type: target, segment: Math.ceil((cpPeriod ? splitCpPeriod(cpPeriod)[3] : currentSegmentIdx) / 3), year: period.year}
           case 'YH':
             return {type: target, segment: period.segment === 2 ? 3 : 1, year: period.year}
           case 'YM':
@@ -74,7 +82,7 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
       case 'YH':
         switch (period.type) {
           case 'Y':
-            return {type: target, segment: Math.max(1, Math.ceil(currentSegmentIdx / 6)), year: period.year}
+            return {type: target, segment: Math.max(1, Math.ceil((cpPeriod ? splitCpPeriod(cpPeriod)[3] : currentSegmentIdx) / 6)), year: period.year}
           case 'YQ':
             return {type: target, segment: Math.max(1, Math.ceil(period.segment / 2)), year: period.year}
           case 'YM':

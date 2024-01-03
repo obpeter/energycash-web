@@ -3,7 +3,6 @@ import {AuthClient} from "../store/hook/AuthProvider";
 import {Eeg} from "../models/eeg.model";
 import {authKeycloak} from "../keycloak";
 
-
 class TariffService extends EegBaseService {
   public constructor(authClient: AuthClient) {
     super(authClient);
