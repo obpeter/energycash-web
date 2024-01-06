@@ -29,13 +29,6 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
 
   const participants = useAppSelector(participantsSelector1)
 
-  console.log(participants.forEach(p => console.log(p)));
-
-  console.log(selectedTariff!.id);
-
-  console.log(participants.filter(p => p.tariffId === selectedTariff!.id));
-
-
   const archiveTariff = () => {
     if(participants.filter(p => p.tariffId === selectedTariff!.id).length > 0) {
       presentAlert(
