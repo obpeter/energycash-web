@@ -81,7 +81,7 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EEG":
           return (
             <div>
-              <NumberInputForm label="Mitgliedbeitrag in €" control={control} name={"participantFee"}
+              <NumberInputForm label="Mitgliedbeitrag in € (je Abrechnungsintervall, netto)" control={control} name={"participantFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} error={errors.participantFee}/>
               <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
@@ -90,11 +90,11 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EZP":
           return (
             <div>
-              <InputFormComponent label="Pauschalbetrag in €" control={control} name={"baseFee"}
+              <InputFormComponent label="Pauschalbetrag in € (je Abrechnungsintervall, netto)" control={control} name={"baseFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.baseFee}/>
               {/*<InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}*/}
               {/*                    rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.centPerKWh}/>*/}
-              <NumberInputForm label="Cent pro kWh" control={control} name={"centPerKWh"}/>
+              <NumberInputForm label="Arbeitspreis in ct/kWh (netto)" control={control} name={"centPerKWh"}/>
               {/*<Input label={"Pauschalbetrag"} labelPlacement={"floating"} {...register('baseFee',*/}
               {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
               {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh')} />*/}
@@ -105,17 +105,37 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
             <div>
               {/*<InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}*/}
               {/*                    rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" inputmode={"numeric"} error={errors.centPerKWh}/>*/}
-              <NumberInputForm label="Cent pro kWh" control={control} name={"centPerKWh"}/>
-              <InputFormComponent label="Inklusive kWh" control={control} name={"freeKWh"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.freeKWh}/>
-              <InputFormComponent label="Rabatt in %" control={control} name={"discount"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.discount}/>
+              <NumberInputForm
+                label="Arbeitspreis in ct/kWh (netto)"
+                control={control}
+                name={"centPerKWh"}
+              />
+              <InputFormComponent
+                label="Kostenlose Energie in kWh (je Abrechnungsintervall)"
+                control={control}
+                name={"freeKWh"}
+                rules={{
+                  pattern: { value: /^[0-9]*$/, message: "Nur Zahlen erlaubt" },
+                }}
+                type="text"
+                error={errors.freeKWh}
+              />
+              <InputFormComponent
+                label="Rabatt in %"
+                control={control}
+                name={"discount"}
+                rules={{
+                  pattern: { value: /^[0-9]*$/, message: "Nur Zahlen erlaubt" },
+                }}
+                type="text"
+                error={errors.discount}
+              />
               {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh',*/}
               {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
               {/*<Input label={"Inklusive kWh"} labelPlacement={"floating"} {...register('freeKWH')} />*/}
               {/*<Input label={"Rabatt"} labelPlacement={"floating"} {...register('discount')} />*/}
             </div>
-          )
+          );
       }
     }
 
