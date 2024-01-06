@@ -1,12 +1,13 @@
 import React, {FC} from "react";
 import {EegTariff} from "../models/eeg.model";
-import {IonButton, IonContent, IonFooter, IonIcon, IonItem, IonLabel, IonToolbar, useIonToast} from "@ionic/react";
+import {IonButton, IonContent, IonFooter, IonIcon, IonItem, IonLabel, IonToolbar, useIonAlert, useIonToast} from "@ionic/react";
 import {trashBin} from "ionicons/icons";
 import RateComponent from "./Rate.component";
 import {useAppDispatch, useAppSelector} from "../store";
 import {archiveRate, selectedRateSelector, selectRate, selectRateById} from "../store/rate";
 import {selectedTenant} from "../store/eeg";
 import {HttpError} from "../service/base.service";
+import {participantsSelector1} from "../store/participant";
 
 interface RateDetailPaneComponentProps {
   onSubmit: (data: EegTariff) => void;
@@ -19,14 +20,35 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
   const selectedTariff = useAppSelector(selectedRateSelector)
   const tenant = useAppSelector(selectedTenant)
 
+  const [presentAlert] = useIonAlert();
   const [showToast] = useIonToast();
 
   const getMode = (): (undefined | 'NEW') => {
     return (selectedTariff && selectedTariff.id.length === 0) ? 'NEW' : undefined
   }
 
+  const participants = useAppSelector(participantsSelector1)
+
+  console.log(participants.forEach(p => console.log(p)));
+
+  console.log(selectedTariff!.id);
+
+  console.log(participants.filter(p => p.tariffId === selectedTariff!.id));
+
+
   const archiveTariff = () => {
-    if (selectedTariff) {
+    if(participants.filter(p => p.tariffId === selectedTariff!.id).length > 0) {
+      presentAlert(
+        {
+          header: 'Tarif löschen nicht möglich',
+          message: 'Der Tarif wird noch von folgenden Teilnehmern verwendet: ' + participants.filter(p => p.tariffId === selectedTariff!.id).map(p => p.firstname + " " + p.lastname).join(', ') + ' und kann daher nicht gelöscht werden.  Bitte weisen Sie den Teilnehmern einen anderen Tarif zu.',
+          buttons: [
+            {text: 'Abbrechen', role: 'cancel'},
+          ]
+        }
+      )
+    } else if (selectedTariff) {
+
       dispatcher(archiveRate({rate: selectedTariff, tenant: tenant}))
         .unwrap()
         .catch((e) => {
@@ -73,7 +95,8 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
         </div>
     )
   }
-  return <></>
+  
+return <></>
 }
 
 export default RateDetailPaneComponent;
