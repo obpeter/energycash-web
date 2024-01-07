@@ -29,9 +29,6 @@ const RegisterMeterPaneComponent: FC<RegisterMeterPaneComponentProps> = ({
   const {getValues} = useFormContext<EegParticipant>();
   const participant = useMemo(() => getValues(), [getValues])
 
-  // const editable = () => getValues(`status`) === "NEW";
-
-  // const onAppend = (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
   const onAppend = (m: Metering) => {
     onAdd(m)
   }

@@ -31,7 +31,7 @@ import {MemberViewContext} from "../../store/hook/MemberViewProvider";
 
 import "./ParticipantPane.component.scss"
 import SlideButtonComponent from "../SlideButton.component";
-import {State, useAppDispatch, useAppSelector} from "../../store";
+import {State, store, useAppDispatch, useAppSelector} from "../../store";
 import {
   billingSelector,
   fetchEnergyBills,
@@ -40,7 +40,7 @@ import {
   selectBillFetchingSelector
 } from "../../store/billing";
 import {eegSelector, selectedTenant} from "../../store/eeg";
-import {meteringEnergyGroup11, setSelectedPeriod} from "../../store/energy";
+import {meteringEnergyGroup11, selectMetaRecord, setSelectedPeriod} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
 import {
   add,
@@ -80,6 +80,8 @@ import DatePickerCoreElement from "../core/elements/DatePickerCore.element";
 import DatePicker from "react-datepicker";
 
 import {useSelector} from "react-redux";
+import {filterActiveMeter, filterActiveParticipantAndMeter} from "../../util/FilterHelper.unit";
+import moment from "moment";
 
 interface ParticipantPaneProps {
   // participants: EegParticipant[];
@@ -386,10 +388,10 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
           dismissReport([startDate, endDate], "")
           dismissLoading()
         })
-        .catch(() => {
+        .catch((e) => {
           dismissReport(undefined)
           dismissLoading()
-          errorToast("Export konnte nicht generiert werden.")
+          errorToast("Export konnte nicht generiert werden." + e.toString())
         })
     }
   });
@@ -402,13 +404,14 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const onExport = async (type: number, data: any) => {
     if (data && eeg) {
       if (type === 0) {
+        const meta = selectMetaRecord(store.getState())
         const [start, end] = data
         const exportdata = {
           start: start.getTime(),
           end: end.getTime(),
           communityId: eeg.communityId,
-          cps: participants.reduce((r, p) =>
-            r.concat(p.meters.map(m => {
+          cps: filterActiveParticipantAndMeter(participants, start, end).reduce((r, p) =>
+            r.concat(p.meters.filter(m=> m.status==="ACTIVE" && filterActiveMeter(meta, m, moment(start), moment(end)) ).map(m => {
               return {
                 meteringPoint: m.meteringPoint,
                 direction: m.direction,

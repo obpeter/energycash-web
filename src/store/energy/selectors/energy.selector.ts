@@ -3,7 +3,7 @@ import {createSelector} from "@reduxjs/toolkit";
 // import { EnergyState, adapter, featureKey } from '../states';
 import {featureKey, EnergyEntitieState, metaAdapter, reportAdapter, participantReportAdapter} from "../states";
 import {
-  ConsumerReport,
+  ConsumerReport, EnergyMeta,
   EnergyReport,
   EnergySeries,
   MeterEnergySeries,
@@ -20,7 +20,7 @@ const {selectAll: selectAllParticipants, selectById: selectParticipantById} = pa
 
 const nowTimeString = () => {
  const now = new Date()
- return `${now.getDay()}.${now.getMonth()}.${now.getFullYear()}`
+ return `${now.getDay()}.${now.getMonth()+1}.${now.getFullYear()}`
 }
 
 const featureStateSelector = (state: { [featureKey]: EnergyEntitieState }) => state[featureKey];
@@ -209,4 +209,11 @@ export const meteringEnergyGroup11 = createSelector(
     }
     return {...i, [s.meterId]: utilization}
   }, {} as Record<string, number>),
+)
+
+export const selectMetaRecord = createSelector(
+  selectAllMeta,
+  (meta) => meta.reduce((out, m) => {
+    return {...out, [m.name]: m}
+  }, {} as Record<string, EnergyMeta>)
 )
