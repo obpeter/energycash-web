@@ -3,7 +3,7 @@ import {createSelector} from "@reduxjs/toolkit";
 // import { EnergyState, adapter, featureKey } from '../states';
 import {featureKey, EnergyEntitieState, metaAdapter, reportAdapter, participantReportAdapter} from "../states";
 import {
-  ConsumerReport,
+  ConsumerReport, EnergyMeta,
   EnergyReport,
   EnergySeries,
   MeterEnergySeries,
@@ -209,4 +209,11 @@ export const meteringEnergyGroup11 = createSelector(
     }
     return {...i, [s.meterId]: utilization}
   }, {} as Record<string, number>),
+)
+
+export const selectMetaRecord = createSelector(
+  selectAllMeta,
+  (meta) => meta.reduce((out, m) => {
+    return {...out, [m.name]: m}
+  }, {} as Record<string, EnergyMeta>)
 )

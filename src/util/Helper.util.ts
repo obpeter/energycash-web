@@ -39,7 +39,7 @@ export const getPeriodSegment = (period: string, month: number) => {
     case 'Y': return 0
     case 'YH': return month < 7 ? 1 : 2
     case 'YQ': return (month < 4 ? 1 : month < 7 ? 2 : month < 10 ? 3 : 4)
-    case 'YM': return month
+    case 'YM': return month > 12 ? 12 : month < 1 ? 1 : month
     default:
       return 0
   }
@@ -52,19 +52,42 @@ const splitCpPeriod = (cpPeriod: CpPeriodType) => {
   return [beginYear, beginMonth, endYear, endMonth]
 }
 
+export const determinePeriodEnd = (period: SelectedPeriod) => {
+  switch (period.type) {
+    case "Y": return [12, period.year]
+    case "YH": return [period.segment * 6, period.year]
+    case "YQ": return [period.segment * 3, period.year]
+    default: return [period.segment, period.year]
+  }
+}
+
+export const calcSegment = (period: SelectedPeriod, cpPeriod?: CpPeriodType) => {
+  const [month, year] = determinePeriodEnd(period)
+  if (cpPeriod) {
+    const [beginYear, beginMonth, endYear, endMonth] = splitCpPeriod(cpPeriod)
+    if (endYear > period.year) {
+      return [year, month]
+    } else {
+      return [year, Math.min(endMonth, month)]
+    }
+  }
+  return [year, month]
+}
+
 export const createNewPeriod = (period: SelectedPeriod | undefined, target: ReportType, currentSegmentIdx: number, cpPeriod?: CpPeriodType) => {
   if (period !== undefined) {
     switch (target) {
       case 'Y':
         return {type: target, segment: 0, year: period.year}
       case 'YM':
+        const splitedPeriod = cpPeriod && splitCpPeriod(cpPeriod)
         switch (period.type) {
           case 'Y':
-            return {type: target, segment: cpPeriod ? splitCpPeriod(cpPeriod)[3] : currentSegmentIdx, year: period.year}
+            return {type: target, segment: splitedPeriod ? splitedPeriod[3] : currentSegmentIdx, year: splitedPeriod ? splitedPeriod[2] : period.year}
           case 'YH':
-            return {type: target, segment: cpPeriod ? splitCpPeriod(cpPeriod)[3] : period.segment === 2 ? 6 : 1, year: period.year}
+            return {type: target, segment: splitedPeriod ? splitedPeriod[3] : period.segment === 2 ? 6 : 1, year: splitedPeriod ? splitedPeriod[2] : period.year}
           case 'YQ':
-            return {type: target, segment: cpPeriod ? splitCpPeriod(cpPeriod)[3] : period.segment === 2 ? 3 : period.segment === 3 ? 6 : period.segment === 4 ? 9 : 1, year: period.year}
+            return {type: target, segment: splitedPeriod ? splitedPeriod[3] : period.segment === 2 ? 3 : period.segment === 3 ? 6 : period.segment === 4 ? 9 : 1, year: splitedPeriod ? splitedPeriod[2] : period.year}
           default:
             return period
         }

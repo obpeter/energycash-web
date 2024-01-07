@@ -60,7 +60,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
     // <form onBlur={handleSubmit((data) => onSubmit(data))}>
       <EegPaneTemplate>
         <FormProvider {...formMethods} >
-          <MeterFormElement rates={rates} meterReadOnly={true}/>
+          <MeterFormElement rates={rates} meterReadOnly={true} onChange={onChange}/>
           <MeterAddressFormElement onChange={onChange}/>
         </FormProvider>
       </EegPaneTemplate>
