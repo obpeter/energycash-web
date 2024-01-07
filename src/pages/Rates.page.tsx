@@ -7,7 +7,8 @@ import {
   IonContent,
   IonIcon,
   IonPage,
-  IonToolbar
+  IonToolbar,
+  useIonToast
 } from "@ionic/react";
 import {EegTariff} from "../models/eeg.model";
 import cn from "classnames";
@@ -24,6 +25,8 @@ const RatesPage: FC = () => {
   const selectedTariff = useAppSelector(selectedRateSelector)
   const rates = useAppSelector(ratesSelector)
   const tenant = useAppSelector(selectedTenant)
+
+  const [showToast] = useIonToast();
 
   const {setRateType} = useRateType()
 
@@ -52,10 +55,28 @@ const RatesPage: FC = () => {
 
   const onSubmitRateChange = (rate: EegTariff) => {
     if (rate.id.length === 0) {
-      dispatcher(saveNewRate({rate, tenant}))
+      if(checkValidName(rate)){
+        dispatcher(saveNewRate({ rate, tenant }));
+      }
     } else {
-      dispatcher(updateRate({rate, tenant}))
+      if(checkValidName(rate)){
+        dispatcher(updateRate({ rate, tenant }));
+      }
     }
+  }
+  
+  const checkValidName = (rate: EegTariff) => {
+    rates.forEach((r) => {
+      if (r.name === rate.name) {
+        showToast({
+          message:
+            "Es existiert bereits ein Tarif mit diesem Namen. Bitte wählen Sie einen anderen Namen.",
+          duration: 4500,
+          color: "warning",
+        });
+      }
+    });
+    return false;
   }
 
   return (
