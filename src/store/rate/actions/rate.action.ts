@@ -26,6 +26,7 @@ export const saveNewRate = createAsyncThunk(
 export const updateRate = createAsyncThunk(
   `${featureKey}/update`,
   async (arg: {rate: EegTariff, tenant: string}) => {
+    
       const {rate, tenant} = arg
       const result = await eegService.addRate(tenant, rate);
       return result;

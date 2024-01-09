@@ -59,13 +59,12 @@ const RatesPage: FC = () => {
         dispatcher(saveNewRate({ rate, tenant }));
       }
     } else {
-      if(checkValidName(rate)){
         dispatcher(updateRate({ rate, tenant }));
-      }
     }
   }
   
   const checkValidName = (rate: EegTariff) => {
+    var found = false;
     rates.forEach((r) => {
       if (r.name === rate.name) {
         showToast({
@@ -74,9 +73,14 @@ const RatesPage: FC = () => {
           duration: 4500,
           color: "warning",
         });
+        found = true;
       }
     });
-    return false;
+
+    if(found){
+      return false;
+    }
+    return true;
   }
 
   return (
