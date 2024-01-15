@@ -18,6 +18,7 @@ import {add} from "ionicons/icons";
 import RateDetailPaneComponent from "../components/RateDetailPane.component";
 import {selectedTenant} from "../store/eeg";
 import {useRateType} from "../store/hook/Rate.provider";
+import { get } from "react-hook-form";
 
 const RatesPage: FC = () => {
 
@@ -59,8 +60,30 @@ const RatesPage: FC = () => {
         dispatcher(saveNewRate({ rate, tenant }));
       }
     } else {
+      const doubleID = getDuplicateRate(rate);
+
+      if(doubleID === rate.id){
         dispatcher(updateRate({ rate, tenant }));
+      }
+      else if (checkValidName(rate)) {
+        dispatcher(updateRate({ rate, tenant }));
+      }
     }
+  }
+
+  const getDuplicateRate = (rate: EegTariff) => {
+    var found = false;
+    var foundRate = null;
+    rates.forEach((r) => {
+      if (r.name === rate.name) {
+        found = true;
+        foundRate = r;
+      }
+    });
+    if(found){
+      return foundRate!.id;
+    }
+    return null;
   }
   
   const checkValidName = (rate: EegTariff) => {
