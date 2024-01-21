@@ -1,7 +1,17 @@
 import React, {FC, useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
+import {Controller, useForm} from "react-hook-form";
 import {BillingConfig} from "../models/eeg.model";
-import {IonButton, IonCard, IonChip, IonIcon, IonImg, IonLabel, useIonPopover, useIonToast} from "@ionic/react";
+import {
+    IonButton,
+    IonCard,
+    IonChip,
+    IonIcon,
+    IonImg,
+    IonItem,
+    IonLabel, IonToggle,
+    useIonPopover,
+    useIonToast
+} from "@ionic/react";
 import {closeCircleOutline, imageOutline} from "ionicons/icons";
 import {useAppDispatch, useAppSelector} from "../store";
 import {billingConfigErrorSelector, billingConfigSelector} from "../store/billingConfig";
@@ -198,6 +208,24 @@ const EegBillingConfigCardComponent: FC = () => {
                                                 rules={{min: 1, max: 6}}
                                                 control={control}
                                                 type="number" readonly={!isAdmin()}/>
+                            <IonItem lines="none">
+                                <Controller
+                                    name={"createCreditNotesForAllProducers"}
+                                    control={control}
+                                    render={({field}) => {
+                                        const {onChange, value} = field;
+                                        return (<IonToggle
+                                            style={{width: "100%"}}
+                                            slot="start"
+                                            labelPlacement="start"
+                                            checked={value}
+                                            onIonChange={(e) => {
+                                                onChange(e.detail.checked);
+                                            }}>Erzeuge Gutschriften für UST-pflichtige Erzeuger</IonToggle>)
+                                        }
+                                    }
+                                />
+                            </IonItem>
                         </form>
                     }
 
