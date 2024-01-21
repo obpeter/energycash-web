@@ -9,6 +9,7 @@ import {useFormContext} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
+import {useEegArea} from "../../store/hook/Eeg.provider";
 
 interface MeterFormElementProps {
   rates: EegTariff[]
@@ -18,6 +19,8 @@ interface MeterFormElementProps {
 }
 
 const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterReadOnly, onChange}) => {
+
+  const area = useEegArea()
 
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
 
@@ -92,6 +95,12 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
                    onPaste={handleMeterPaste}
                    onChangePartial={_onChange}
         />
+        {area && area === 'BEG' && <>
+            <InputForm name={"gridOperatorId"} label="Netzbetreiber-ID" control={control} rules={{required: true}}
+                       type="text" onChangePartial={_onChange}/>
+            <InputForm name={"gridOperatorName"} label="Netzbetreiber-Name" control={control} rules={{required: true}}
+                       type="text" onChangePartial={_onChange}/>
+        </>}
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>
         {withWechselrichter && (

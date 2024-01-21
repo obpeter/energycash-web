@@ -9,6 +9,7 @@ import ToggleButtonComponent from "./ToggleButton.component";
 import SelectForm from "./form/SelectForm.component";
 import {EegTariff} from "../models/eeg.model";
 import DatePickerCoreElement from "./core/elements/DatePickerCore.element";
+import DatePickerFormElement from "./form/DatePickerForm.element";
 
 interface MemberFormComponentProps {
   participant: EegParticipant

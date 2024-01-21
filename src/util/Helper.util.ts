@@ -119,6 +119,24 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
   return undefined
 }
 
+export const calcCurrentPeriod = (period: SelectedPeriod) => {
+  const currentDate =  new Date(Date.now())
+  const currentPeroid = {type: period.type, year: currentDate.getFullYear(), segment: 0} as SelectedPeriod
+
+  switch (period.type) {
+    case "YM":
+      currentPeroid.segment = currentDate.getMonth() + 1
+      break;
+    case "YQ":
+      const m = currentDate.getMonth() + 1
+      currentPeroid.segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
+      break;
+    case "YH":
+      currentPeroid.segment = (currentDate.getMonth() + 1 < 7 ? 1 : 2)
+  }
+    return currentPeroid;
+}
+
 export function findPartial<O extends object, OT extends keyof object>(obj: O, key: string): Partial<O> {
   let result = {}
   Object.keys(obj).forEach(k => {

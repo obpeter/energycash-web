@@ -19,6 +19,8 @@ export interface Metering {
   zip: string,
   status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED" | "REVOKED" | "INVALID",
   registeredSince: Date,
+  gridOperatorId: string,
+  gridOperatorName: string,
   modifiedAt: number,
   modifiedBy: string,
   participantState: ParticipantState,

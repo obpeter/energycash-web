@@ -10,7 +10,7 @@ export interface Eeg {
   description: string;
   settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
   allocationMode: "DYNAMIC" | "STATIC"
-  area: "LOCAL" | "REGIONAL"
+  area: "LOCAL" | "REGIONAL" | "BEG" | "GEA"
   communityId: string;
   address: Address;
   contact: Contact;

@@ -56,10 +56,9 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const isPending = () => participant.status === 'PENDING';
   const isGenerator = (m: Metering) => m.direction === 'GENERATION';
   const isMeterPending = () => isPending() || meter.status === 'NEW' || meter.status === 'PENDING';
-
-  const isMeterInactive = () => meter.status === "REVOKED" || meter.status === "REJECTED"
-
-  const isMeterActive = () => meter.status === "ACTIVE"
+  const isMeterRejected = () => meter.status === "REVOKED" || meter.status === "REJECTED"
+  const isMeterActive = () => meter.status === "ACTIVE" || meter.status === "INACTIVE"
+  // const isMeterInactive = () => meter.status === "INACTIVE"
 
   const meterValue = () => {
     if (report && report.allocated) {
@@ -90,13 +89,23 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
     cardStyle = {...cardStyle, backgroundColor:"#e5ffdd"}
   }
 
+  const meterColorStyle = () => {
+    if (isMeterActive()) {
+      return {color: "#1E4640"}
+    } else if (isMeterPending()) {
+      return {color: "#DC631E"}
+    } else {
+      return {color: "#dc1e1e"}
+    }
+  }
+
   // /*history.push(`/participant/${participant.id}/meter/${meter.meteringPoint}`*/
   return (
     <IonCard style={cardStyle} onClick={(e) => onSelect && onSelect(e, participant.id, meter)}>
       <IonGrid fixed={true} style={{paddingTop: "12px"}}>
-        <IonRow style={isMeterActive() ? {color: "#1E4640"} : isMeterPending() ? {color: "#DC631E"} : {color: "#dc1e1e"}}>
+        <IonRow style={meterColorStyle()}>
           <IonCol size={"1"}>
-            <IonIcon icon={isMeterInactive() ? eegExclamation : isGenerator(meter) ? eegSolar : eegPlug} size="small"></IonIcon>
+            <IonIcon icon={isMeterRejected() ? eegExclamation : isGenerator(meter) ? eegSolar : eegPlug} size="small"></IonIcon>
           </IonCol>
           <IonCol size={isMeterPending() ? "11" : "7"}>
             {/*<IonLabel style={{textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{participant.participant.meters[0].meteringPoint}</IonLabel>*/}

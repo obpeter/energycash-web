@@ -1,10 +1,12 @@
-import React, {FC, forwardRef} from "react";
+import React, {FC, FormEvent, forwardRef, HTMLProps, useEffect, useState} from "react";
 import DatePicker from "react-datepicker";
-import {Control, Controller, FieldError, UseFormClearErrors} from "react-hook-form";
+import {Control, Controller, FieldError, UseFormClearErrors, useWatch} from "react-hook-form";
 import {InputChangeEventDetail, IonInput} from "@ionic/react";
 
 import "./DatePickerForm.element.scss"
 import {IonInputCustomEvent} from "@ionic/core/dist/types/components";
+import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/input-interface";
+import moment from "moment";
 
 interface DatePickerFormProps {
   control: Control<any, any>,
@@ -20,22 +22,45 @@ interface DatePickerFormProps {
 
 const DatePickerFormElement: FC<DatePickerFormProps> = ({name, control, rules, label, placeholder, error, onChangeDate}) => {
 
-  const onDateChanged = (onChange: (...event: any[]) => void) => (value: Date) => {
-    onChange(value)
-    if (onChangeDate) {
-      onChangeDate(name, value)
-    }
+  const value = useWatch({control, name: name, defaultValue: undefined})
+  const [showDate, setShowDate] = useState<Date>()
+
+  useEffect(() => {
+    const dateValue = typeof value === 'string' ? new Date(value) : value instanceof Date ? value : new Date(Date.now())
+    setShowDate(dateValue)
+  }, [value]);
+
+  const handleUpdate = (onChange: (...event: any[]) => void) => () => {
+    onChange(showDate)
+    onChangeDate && onChangeDate(name, showDate)
   }
 
-  const Component = forwardRef<HTMLIonInputElement, {onIonChange: (event: IonInputCustomEvent<InputChangeEventDetail>) => void}>(function CustomInput(p) {
+  // const Component = forwardRef<HTMLIonInputElement, { /*onIonChange: (event: IonInputCustomEvent<InputChangeEventDetail>) => void, onIonInput: (event: IonInputCustomEvent<InputInputEventDetail>) => void*/}>(function CustomInput(p, ref) {
+  const Component = forwardRef<HTMLIonInputElement, HTMLProps<HTMLIonInputElement>>(function CustomInput(p, ref) {
+    const handleInput1 = (event: IonInputCustomEvent<InputInputEventDetail>) => {
+      const date = event.detail.value
+      const valid = !!date && date.match(/^\w*\s\d{1,2},\s\d{4}$/)
+      if (valid && valid.length > 0) {
+        const dateObj = moment(date, "MMMM D, YYYY")
+        console.log("Date: ", dateObj.toDate())
+        setShowDate(dateObj.toDate())
+      }
+    }
+
     return (
         <IonInput
-          {...p}
+          value={p.value ? p.value.toString() : undefined}
+          onClick={p.onClick}
+          onIonChange={(e) => {
+            p.onChange && p.onChange(e as unknown as FormEvent<HTMLIonInputElement>)
+          }}
           style={{flexDirection: "row-reverse"}}
           label={label}
-          placeholder={placeholder}
+          placeholder={placeholder + " z.B. April 2, 2024"}
           fill="outline"
-          labelPlacement={"floating"}/>
+          labelPlacement={"floating"}
+          ref={ref}
+        />
     );
   });
 
@@ -51,12 +76,14 @@ const DatePickerFormElement: FC<DatePickerFormProps> = ({name, control, rules, l
           return (
             <DatePicker
               // selectsRange={false}
-              selected={dateValue}
+              selected={showDate}
+              adjustDateOnChange={true}
               name={name}
               onChange={(update) => {
-                if (update) onDateChanged(onChange)(update)
+                update && setShowDate(update)
               }}
-              customInput={<Component onIonChange={() => console.log("IonChange")}/>}
+              customInput={<Component />}
+              onCalendarClose={handleUpdate(onChange)}
               dateFormat="MMMM d, yyyy"
               ref={ref}
               portalId="root-portal"

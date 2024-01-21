@@ -41,7 +41,7 @@ const EegPage: FC = () => {
 
   useEffect(() => {
     // setTenantState(tenant);
-    setTenantsState(tenants.map(t => t.toUpperCase()))
+    setTenantsState(tenants.map(t => t.toUpperCase()).sort((a,b) => a.localeCompare(b)))
   }, [tenants])
 
   const onSwitchTenant = (e: SelectCustomEvent<string>) => {

@@ -71,7 +71,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const [participantAlert] = useIonAlert();
 
   const isMeterNew = () => selectedMeter?.status === 'NEW';
-  const isMeterActive = () => selectedMeter?.status === "ACTIVE"
+  const isMeterActive = () => selectedMeter?.status === "ACTIVE" || selectedMeter?.status === "INACTIVE"
   const isMeterPending = () => selectedMeter?.status === "PENDING"
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';

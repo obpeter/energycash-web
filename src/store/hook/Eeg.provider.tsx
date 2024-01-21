@@ -9,6 +9,7 @@ import {Eeg} from "../../models/eeg.model";
 import {eegService} from "../../service/eeg.service";
 import {SelectedPeriod} from "../../models/energy.model";
 import {setSelectedPeriod} from "../energy";
+import {current} from "@reduxjs/toolkit";
 ;
 
 
@@ -68,81 +69,65 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     }
   }, [tenants])
 
-  // useEffect(() => {
-  //   if (eeg && participants && participants.length > 0) {
-  //     eegService.fetchLastReportEntryDate(tenant).then(lastReportDate => {
-  //       if (lastReportDate && lastReportDate.length > 0) {
-  //         const [date, time] = lastReportDate.split(" ");
-  //         const [day, month, year] = date.split(".");
-  //         let period = "Y"
-  //         let segment = 0
-  //         switch (eeg.settlementInterval) {
-  //           case "MONTHLY":
-  //             period = "YM"
-  //             segment = parseInt(month, 10)
-  //             break;
-  //           case "BIANNUAL":
-  //             period = "YH"
-  //             segment = (parseInt(month, 10) < 7 ? 1 : 2)
-  //             break;
-  //           case "QUARTER":
-  //             const m = parseInt(month, 10)
-  //             period = "YQ"
-  //             segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
-  //             break
-  //         }
-  //         // dispatch(fetchEnergyReport({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period}))
-  //         // dispatch(fetchBillingRun({
-  //         //   tenant: tenant,
-  //         //   clearingPeriodType : period,
-  //         //   clearingPeriodIdentifier : createPeriodIdentifier(period, parseInt(year, 10), segment)
-  //         // }))
-  //
-  //         const participantsReport = participants.map(p => {
-  //           return {
-  //             participantId: p.id,
-  //             meters: p.meters.map(m => {
-  //               return {meterId: m.meteringPoint, meterDir: m.direction, from: new Date(m.registeredSince).getTime(), until: new Date().getTime()} as MeterReport})
-  //           } as ParticipantReport
-  //         })
-  //         dispatch(fetchEnergyReportV2({tenant: tenant, year: parseInt(year, 10), segment: segment, type: period, participants: participantsReport}))
-  //       }
-  //     })
-  //   }
-  // },[eeg, participants])
-
   useEffect(() => {
     if (eeg) {
-      eegService.fetchLastReportEntryDate(tenant).then(lastReportDate => {
-        if (lastReportDate && lastReportDate.length > 0) {
-          const [date, time] = lastReportDate.split(" ");
-          const [day, month, year] = date.split(".");
-          let period = "Y"
-          let segment = 0
-          switch (eeg.settlementInterval) {
-            case "MONTHLY":
-              period = "YM"
-              segment = parseInt(month, 10)
-              break;
-            case "BIANNUAL":
-              period = "YH"
-              segment = (parseInt(month, 10) < 7 ? 1 : 2)
-              break;
-            case "QUARTER":
-              const m = parseInt(month, 10)
-              period = "YQ"
-              segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
-              break
-          }
-          return {type: period, year: parseInt(year, 10), segment: segment} as SelectedPeriod
-        }
-        throw new Error("last report period not exists")
-        // return {type: "Y", year: new Date(Date.now()).getFullYear(), segment: 0} as SelectedPeriod
-      })
+      getCurrentPeroid(eeg)
         .then(p => dispatch(setSelectedPeriod(p)))
         .catch(e => console.log(e))
     }
   }, [eeg]);
+
+  const getCurrentPeroid = async (eeg: Eeg) => {
+    const currentDate =  new Date(Date.now())
+    let period = "Y"
+    let segment = 0
+    switch (eeg.settlementInterval) {
+      case "MONTHLY":
+        period = "YM"
+        segment = currentDate.getMonth() + 1
+        break;
+      case "BIANNUAL":
+        period = "YH"
+        segment = (currentDate.getMonth() + 1 < 7 ? 1 : 2)
+        break;
+      case "QUARTER":
+        const m = currentDate.getMonth() + 1
+        period = "YQ"
+        segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
+        break
+    }
+    return {type: period, year: currentDate.getFullYear(), segment: segment} as SelectedPeriod
+  }
+
+  const fetchCurrentPeroid = async (eeg: Eeg) => {
+    return eegService.fetchLastReportEntryDate(tenant).then(lastReportDate => {
+      if (lastReportDate && lastReportDate.length > 0) {
+        const [date, time] = lastReportDate.split(" ");
+        const [day, month, year] = date.split(".");
+        let period = "Y"
+        let segment = 0
+        switch (eeg.settlementInterval) {
+          case "MONTHLY":
+            period = "YM"
+            segment = parseInt(month, 10)
+            break;
+          case "BIANNUAL":
+            period = "YH"
+            segment = (parseInt(month, 10) < 7 ? 1 : 2)
+            break;
+          case "QUARTER":
+            const m = parseInt(month, 10)
+            period = "YQ"
+            segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
+            break
+        }
+        return {type: period, year: parseInt(year, 10), segment: segment} as SelectedPeriod
+      }
+      throw new Error("last report period not exists")
+      // return {type: "Y", year: new Date(Date.now()).getFullYear(), segment: 0} as SelectedPeriod
+    })
+
+  }
 
   const initApplication = useCallback( async () => {
     if (tenant && tenant.length > 0) {
@@ -222,4 +207,9 @@ export const useRefresh = () => {
 export const useOnlineState = () => {
   const context = useContext(EegContext)
   return context.eeg ? context.eeg.online : false
+}
+
+export const useEegArea = () => {
+  const {eeg} = useContext(EegContext)
+  return eeg?.area
 }

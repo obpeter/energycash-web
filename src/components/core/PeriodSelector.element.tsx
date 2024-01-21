@@ -2,7 +2,7 @@ import React, {FC, useMemo, useState} from "react";
 import {IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
 import {SelectedPeriod} from "../../models/energy.model";
 import {MONTHNAME} from "../../models/eeg.model";
-import {getPeriodSegment, yearMonth} from "../../util/Helper.util";
+import {calcCurrentPeriod, getPeriodSegment, yearMonth} from "../../util/Helper.util";
 
 import "./PeriodSelector.element.scss"
 
@@ -70,14 +70,19 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
       endMonth = endMonth || new Date().getMonth()
 
       const options = generatePeriodOptions(activePeriod.type, endMonth, endYear, beginMonth, beginYear)
+
+      const c = calcCurrentPeriod(activePeriod)
+      if (options.filter(o => o.segment === c.segment && o.year === c.year).length === 0) {
+        options.unshift(c)
+      }
       setPeroidOptions(options);
-      // setUsedPeriod(0);
 
       let selectedOption = 0
       const si = options.findIndex((p) => p.year === activePeriod.year && p.segment === activePeriod.segment)
       if (si >= 0) {
         selectedOption = si + 1
       }
+
       setUsedPeriod(selectedOption)
 
       return (
