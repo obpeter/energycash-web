@@ -2,7 +2,7 @@ import React, {FC, useMemo, useState} from "react";
 import {IonSelect, IonSelectOption, SelectCustomEvent} from "@ionic/react";
 import {SelectedPeriod} from "../../models/energy.model";
 import {MONTHNAME} from "../../models/eeg.model";
-import {calcCurrentPeriod, getPeriodSegment, yearMonth} from "../../util/Helper.util";
+import {calcCurrentPeriod, getPeriodSegment, periodDisplayString, yearMonth} from "../../util/Helper.util";
 
 import "./PeriodSelector.element.scss"
 
@@ -16,15 +16,6 @@ const PeriodSelectorElement: FC<PeriodSelectorElementProps> = ({periods, activeP
 
   const [periodOptions, setPeroidOptions] = useState<SelectedPeriod[]>([]);
   const [usedPeriod, setUsedPeriod] = useState(0)
-
-  const periodDisplayString = (period: SelectedPeriod) => {
-    switch (period.type) {
-      case 'YH': return `${MONTHNAME[(period.segment*6)-5].substring(0, 3)}-${MONTHNAME[period.segment*6].substring(0, 3)} ${period.year}`
-      case 'YQ': return `${MONTHNAME[(period.segment*3)-2].substring(0, 3)}-${MONTHNAME[period.segment*3].substring(0, 3)} ${period.year}`
-      case 'YM': return `${MONTHNAME[period.segment]} ${period.year}`
-      case 'Y' : return `${MONTHNAME[1].substring(0, 3)}-${MONTHNAME[12].substring(0, 3)} ${period.year}`
-    }
-  }
 
   const generatePeriodOptions = (period: 'YH' | "YQ" | 'YM' | 'Y', endMonth: number, endYear: number, beginMonth: number, beginYear: number) => {
     const options: SelectedPeriod[] = [];

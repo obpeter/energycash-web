@@ -19,7 +19,7 @@ type NumberInputFormProps<T extends FieldValues> = {
 }
 
 interface NumberInput {
-  initialValue: number
+  initialValue: number | undefined
   label: string
   name: string
   onChange: (...event: any[]) => void
@@ -31,12 +31,12 @@ interface NumberInput {
 
 const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, placeholder, decimalScale, onKeyDown = noop, onKeyUp = noop}) => {
 
-  const [value, setValue] = useState<string>(initialValue.toString().replace('.', ','));
+  const [value, setValue] = useState<string>(initialValue ? initialValue.toString().replace('.', ',') : "");
   const [cursor, setCursor] = useState<number | null>(null);
   const inputRef = useRef<HTMLIonInputElement>()
 
   useEffect(() => {
-    setValue(formatValue(initialValue.toString()))
+    initialValue && setValue(formatValue(initialValue.toString()))
   }, [initialValue]);
 
   // useEffect(() => {

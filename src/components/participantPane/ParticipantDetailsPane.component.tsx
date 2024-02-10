@@ -102,7 +102,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
     switch (componentKey) {
       case "memberForm":
         return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} rates={rates} formId={""}
-                                                          onSubmit={onUpdateParticipant} onSubmitPartial={onUpdateParticipantPartial}/> : <></>
+                                                          onSubmit={onUpdateParticipant} onSubmitPartial={onUpdateParticipantPartial} changeable={false}/> : <></>
       case "meterForm":
         return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>
       case "invoiceForm":

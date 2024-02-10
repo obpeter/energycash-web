@@ -57,7 +57,7 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
     return h.sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
   }
 
-  const historyItems = ["EC_REQ_ONL", "CM_REV_IMP", "CR_MSG"]
+  const historyItems = ["EC_REQ_ONL", "CM_REV_IMP", "CR_REQ_PT", "CR_MSG"]
 
   const getLabelName = (p: string) => {
     switch (p) {
@@ -122,6 +122,23 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
             </div>
           </div>
         )
+      case "CR_REQ_PT":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin:"10px", border: "1px solid #d3d3d34f"}} className="ion-padding" slot="content">
+            <div className="ion-padding" style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
+              <span style={{gridColumnStart: "1", borderBottom: "1px solid #dfdfdf"}}><strong>{"Abgewickelt am:"}</strong></span>
+              <span style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
+              <span style={{gridColumnStart: "3", borderBottom: "1px solid #dfdfdf"}}><strong>{"Info"}</strong></span>
+              {v.map((h, i) => (
+                <React.Fragment key={"line" + p + i}>
+                  <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
+                  <span style={{gridColumnStart: "2"}}>{h.processType}</span>
+                  <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )
 
     }
     return (<></>)
@@ -164,7 +181,7 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
       }
       case "CR_REQ_PT": {
         const history_cr_req_pt = msg.map((e) => {
-          return {
+          const m = {
             protocol: e["protocol"],
             date: new Date(e["date"]),
             message: e["message"],
@@ -172,6 +189,16 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
             meteringPoint: e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-",
             meteringPoints: e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : [],
           } as EdaHistory
+
+          switch (e.processType) {
+            case "ABLEHNUNG_PT":
+            case "ANTWORT_PT":
+              m.responseCode = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
+              break
+            case "ANFORDERUNG_PT":
+              m.responseCode = e["message"].timeline ? new Date(e["message"].timeline.from).toLocaleDateString() + " - " + new Date(e["message"].timeline.to).toLocaleDateString() : ""
+          }
+          return m
         })
         return sortHistories(history_cr_req_pt)
       }

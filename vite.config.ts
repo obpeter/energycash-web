@@ -23,6 +23,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/energystore/, ''),
       },
+      '/cash': {
+        target: 'http://localhost:9095',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cash/, ''),
+      },
     },
   },
   test: {

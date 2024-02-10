@@ -32,6 +32,15 @@ export interface Record {
   production: number  // Production total value of energy production
 }
 
+export interface RecordV2 {
+  consumed: number // Consumption total energy consumption - value for CONSUMER
+  distributed: number // Utilization energy used from the EEG  - value for CONSUMER
+  allocated: number  // Allocation calculated energy value that can be allocated to all participants - value for CONSUMER / GENERATOR
+  produced: number  // Production total value of energy production
+  qoVConsumer: number
+  qoVProducer: number
+}
+
 export interface IntermediateRecord {
   consumption: number[] // Consumption total energy consumption - value for CONSUMER
   utilization: number[] // Utilization energy used from the EEG  - value for CONSUMER
@@ -100,4 +109,13 @@ export interface EnergySeries {
 export interface MeterEnergySeries {
   period: SelectedPeriod,
   series: EnergySeries[],
+}
+
+export interface SummaryReportData {
+  consumed: number,
+  allocated: number,
+  distributed: number,
+  produced: number,
+  qoVConsumer: number,
+  qoVProducer: number,
 }

@@ -8,6 +8,8 @@ export interface Eeg {
   businessNr: string;
   settlement: string;
   description: string;
+  gridOperator: string;
+  operatorName: string;
   settlementInterval: 'MONTHLY' | "ANNUAL" | "BIANNUAL" | "QUARTER";
   allocationMode: "DYNAMIC" | "STATIC"
   area: "LOCAL" | "REGIONAL" | "BEG" | "GEA"
@@ -142,6 +144,8 @@ export interface EegTariff {
   centPerKWh?: number
   freeKWh?: string
   discount?: string
+  useMeteringPointFee: boolean
+  meteringPointFee?: number
 }
 
 export enum MONTHNAME {

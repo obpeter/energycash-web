@@ -29,6 +29,13 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
 
   const direction = watch('direction')
 
+  const isChangeable = () => {
+    if (meterReadOnly === undefined) {
+      return true
+    }
+    return !meterReadOnly
+  }
+
   useEffect(() => {
     // setSelectedDirection(0)
     setWithWechselrichter(false)
@@ -64,6 +71,13 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
     if (onChange) onChange([{name, value}], event)
   }
 
+  const getTarifHeaderString = () => {
+    return selectedDirection === 0 ?
+      ("Verbrauchertarife")
+      :
+      ("Erzeugertarife")
+  }
+
   return (
     <>
       <IonGrid>
@@ -73,13 +87,13 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
               buttons={[{label: 'Verbraucher', icon: eegPlug}, {label: 'Erzeuger', icon: eegSolar}]}
               onChange={onChangeDirection}
               value={selectedDirection}
-              changeable={meterReadOnly ? meterReadOnly : true}
+              changeable={isChangeable()}
             />
           </IonCol>
         </IonRow>
       </IonGrid>
       <IonList>
-        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={_onChange}/>
+        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={_onChange} interfaceOptions={{header: getTarifHeaderString()}}/>
         <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} type="text" readonly={meterReadOnly}
                    counter={true} maxlength={33}
                    rules={{

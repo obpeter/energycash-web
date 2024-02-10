@@ -213,3 +213,8 @@ export const useEegArea = () => {
   const {eeg} = useContext(EegContext)
   return eeg?.area
 }
+
+export const useGridOperator = () => {
+  const {eeg} = useContext(EegContext)
+  return {gridOperatorId: eeg?.gridOperator, gridOperatorName: eeg?.operatorName}
+}
