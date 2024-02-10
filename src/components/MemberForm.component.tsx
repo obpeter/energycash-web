@@ -9,6 +9,7 @@ import ToggleButtonComponent from "./ToggleButton.component";
 import SelectForm from "./form/SelectForm.component";
 import {EegTariff} from "../models/eeg.model";
 import DatePickerCoreElement from "./core/elements/DatePickerCore.element";
+import DatePickerFormElement from "./form/DatePickerForm.element";
 
 interface MemberFormComponentProps {
   participant: EegParticipant
@@ -16,14 +17,22 @@ interface MemberFormComponentProps {
   formId: string
   onSubmit: (data: EegParticipant) => void
   onSubmitPartial: (participantId: string, value: Record<string, any>) => void
+  changeable?: boolean
 }
 
-const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, onSubmitPartial}) => {
+const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, onSubmitPartial, changeable}) => {
 
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
 
   const { setValue, control,  reset, formState: {errors} } = useForm({
     defaultValues: participant, mode: "all"});
+
+  const isChangeable = () => {
+    if (changeable === undefined) {
+      return true
+    }
+    return changeable
+  }
 
   const onChangeBusinessType = (s: number) => {
     setSelectedBusinessType(s)
@@ -70,7 +79,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
               buttons={[{label: 'Privat', icon: people}, {label: 'Firma', icon: eegBusiness}]}
               onChange={onChangeBusinessType}
               value={selectedBusinessType}
-              changeable={true}
+              changeable={isChangeable()}
             />
           </IonCol>
         </IonRow>
@@ -96,7 +105,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
                          rules={{required: "Firmenname fehlt"}} type="text" error={errors.firstname} onChangePartial={onUpdateBaseData}/>
             )
           }
-          <SelectForm name={"tariffId"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={onUpdateBaseData}/>
+          <SelectForm name={"tariffId"} label="Mitglieds-Tarif" control={control} options={getRatesOption()} onChangePartial={onUpdateBaseData}/>
           <InputForm name={"billingAddress.street"} label="Straße" control={control} rules={{required: "Straße fehlt"}} type="text" error={errors.residentAddress?.street} onChangePartial={onUpdateBaseData}/>
           <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control} type="text" onChangePartial={onUpdateBaseData}/>
           <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control} type="text" onChangePartial={onUpdateBaseData}/>

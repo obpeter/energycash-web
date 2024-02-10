@@ -9,6 +9,7 @@ import {useFormContext} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
+import {useEegArea} from "../../store/hook/Eeg.provider";
 
 interface MeterFormElementProps {
   rates: EegTariff[]
@@ -19,12 +20,21 @@ interface MeterFormElementProps {
 
 const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterReadOnly, onChange}) => {
 
+  const area = useEegArea()
+
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
 
   const [selectedDirection, setSelectedDirection] = useState(0);
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
   const direction = watch('direction')
+
+  const isChangeable = () => {
+    if (meterReadOnly === undefined) {
+      return true
+    }
+    return !meterReadOnly
+  }
 
   useEffect(() => {
     // setSelectedDirection(0)
@@ -61,6 +71,13 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
     if (onChange) onChange([{name, value}], event)
   }
 
+  const getTarifHeaderString = () => {
+    return selectedDirection === 0 ?
+      ("Verbrauchertarife")
+      :
+      ("Erzeugertarife")
+  }
+
   return (
     <>
       <IonGrid>
@@ -70,13 +87,13 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
               buttons={[{label: 'Verbraucher', icon: eegPlug}, {label: 'Erzeuger', icon: eegSolar}]}
               onChange={onChangeDirection}
               value={selectedDirection}
-              changeable={meterReadOnly ? meterReadOnly : true}
+              changeable={isChangeable()}
             />
           </IonCol>
         </IonRow>
       </IonGrid>
       <IonList>
-        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={_onChange}/>
+        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={_onChange} interfaceOptions={{header: getTarifHeaderString()}}/>
         <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} type="text" readonly={meterReadOnly}
                    counter={true} maxlength={33}
                    rules={{
@@ -92,6 +109,12 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
                    onPaste={handleMeterPaste}
                    onChangePartial={_onChange}
         />
+        {area && area === 'BEG' && <>
+            <InputForm name={"gridOperatorId"} label="Netzbetreiber-ID" control={control} rules={{required: true}}
+                       type="text" onChangePartial={_onChange}/>
+            <InputForm name={"gridOperatorName"} label="Netzbetreiber-Name" control={control} rules={{required: true}}
+                       type="text" onChangePartial={_onChange}/>
+        </>}
         <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>
         {withWechselrichter && (

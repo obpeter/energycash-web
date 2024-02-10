@@ -28,6 +28,11 @@ export const ratesSelector = createSelector(
   selectAll
 )
 
+export const ratesMapSelector = createSelector(
+  ratesSelector,
+  (rateState) => rateState.reduce((out, r) => { return {...out, [r.id]: r}}, {} as Record<string, EegTariff>)
+)
+
 export const selectRateById = (id: string) =>
   createSelector(
     featureStateSelector,

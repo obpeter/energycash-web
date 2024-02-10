@@ -9,7 +9,7 @@ import {
   SelectedPeriod
 } from "../../models/energy.model";
 import {eegService} from "../../service/eeg.service";
-import {GetWeek} from "../../util/Helper.util";
+import {calcXAxisName, GetWeek} from "../../util/Helper.util";
 import {MONTHNAME} from "../../models/eeg.model";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
@@ -73,33 +73,6 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
 
   const onMeterPeriodSelectionChanged = (selectedPeriod: SelectedPeriod) => {
     updateSeries(selectedPeriod).then(r => setActiveEnergySeries(r))
-  }
-
-  const calcXAxisName = (i: number, period: SelectedPeriod) => {
-    let offset = 0
-    switch (period && period.type) {
-      case 'YH':
-        if (period.segment === 1 && i === 0) offset = 52
-        else if (period.segment === 2) offset = GetWeek(new Date(period.year, 6,1,0,0,1))
-        // return i > 0 && i <= 12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
-        return `${i+offset} KWo`
-      case 'YQ':
-        // return i > 0 && i <= 12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
-        if (period.segment === 1 && i === 0) {
-          offset = 52
-        } else if (period.segment === 2) {
-          offset = GetWeek(new Date(period.year, 3,1,0,0,1))
-        } else if (period.segment === 3) {
-          offset = GetWeek(new Date(period.year, 6,1,0,0,1))
-        } else if (period.segment === 4) {
-          offset = GetWeek(new Date(period.year, 9,1,0,0,1))
-        }
-        return `${i+offset} KWo`
-      case 'YM':
-        return `${i+1}`
-      case 'Y' :
-        return i >= 0 && i < 12 ? `${MONTHNAME[i+1].substring(0, 3)}` : `${i}`
-    }
   }
 
   return (

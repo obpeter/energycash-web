@@ -1,6 +1,7 @@
 import {EegParticipant} from "../models/members.model";
 import {ReportType, SelectedPeriod} from "../models/energy.model";
 import {CpPeriodType} from "../models/reports.model";
+import {MONTHNAME} from "../models/eeg.model";
 
 
 export const formatedName = (participant: EegParticipant) => {
@@ -74,6 +75,56 @@ export const calcSegment = (period: SelectedPeriod, cpPeriod?: CpPeriodType) => 
   return [year, month]
 }
 
+export const periodDisplayString = (period: SelectedPeriod) => {
+  switch (period.type) {
+    case 'YH': return `${MONTHNAME[(period.segment*6)-5].substring(0, 3)}-${MONTHNAME[period.segment*6].substring(0, 3)} ${period.year}`
+    case 'YQ': return `${MONTHNAME[(period.segment*3)-2].substring(0, 3)}-${MONTHNAME[period.segment*3].substring(0, 3)} ${period.year}`
+    case 'YM': return `${MONTHNAME[period.segment]} ${period.year}`
+    case 'Y' : return `${MONTHNAME[1].substring(0, 3)}-${MONTHNAME[12].substring(0, 3)} ${period.year}`
+  }
+}
+
+export const calcXAxisName = (i: number, period: SelectedPeriod) => {
+  let offset = 0
+  switch (period && period.type) {
+    case 'YH':
+      if (period.segment === 1 && i === 0) offset = 52
+      else if (period.segment === 2) offset = GetWeek(new Date(period.year, 6,1,0,0,1))
+      // return i > 0 && i <= 12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
+      return `${i+offset} KWo`
+    case 'YQ':
+      // return i > 0 && i <= 12 ? `${MONTHNAME[i].substring(0, 3)}` : `${i}`
+      if (period.segment === 1 && i === 0) {
+        offset = 52
+      } else if (period.segment === 2) {
+        offset = GetWeek(new Date(period.year, 3,1,0,0,1))
+      } else if (period.segment === 3) {
+        offset = GetWeek(new Date(period.year, 6,1,0,0,1))
+      } else if (period.segment === 4) {
+        offset = GetWeek(new Date(period.year, 9,1,0,0,1))
+      }
+      return `${i+offset} KWo`
+    case 'YM':
+      return `${i+1}.${period.segment}`
+    case 'Y' :
+      return i >= 0 && i < 12 ? `${MONTHNAME[i+1].substring(0, 3)}` : `${i}`
+  }
+}
+
+export const getPreviousPeriod = (period: SelectedPeriod) => {
+  const prePeriod = {...period, segment: period.segment - 1} as SelectedPeriod
+  if (prePeriod.segment < 1) {
+    prePeriod.year = period.year - 1
+    switch (period.type) {
+      case 'YH': prePeriod.segment = 2; break
+      case 'YQ': prePeriod.segment = 4; break
+      case 'YM': prePeriod.segment = 12; break
+      case 'Y' : prePeriod.segment = 0; break
+    }
+  }
+  return prePeriod
+}
+
 export const createNewPeriod = (period: SelectedPeriod | undefined, target: ReportType, currentSegmentIdx: number, cpPeriod?: CpPeriodType) => {
   if (period !== undefined) {
     switch (target) {
@@ -117,6 +168,24 @@ export const createNewPeriod = (period: SelectedPeriod | undefined, target: Repo
     }
   }
   return undefined
+}
+
+export const calcCurrentPeriod = (period: SelectedPeriod) => {
+  const currentDate =  new Date(Date.now())
+  const currentPeroid = {type: period.type, year: currentDate.getFullYear(), segment: 0} as SelectedPeriod
+
+  switch (period.type) {
+    case "YM":
+      currentPeroid.segment = currentDate.getMonth() + 1
+      break;
+    case "YQ":
+      const m = currentDate.getMonth() + 1
+      currentPeroid.segment = (m < 4 ? 1 : m < 7 ? 2 : m < 10 ? 3 : 4)
+      break;
+    case "YH":
+      currentPeroid.segment = (currentDate.getMonth() + 1 < 7 ? 1 : 2)
+  }
+    return currentPeroid;
 }
 
 export function findPartial<O extends object, OT extends keyof object>(obj: O, key: string): Partial<O> {
