@@ -8,7 +8,10 @@ import * as billing from './billing';
 import * as billingRun from './billingRun';
 import * as billingConfig from './billingConfig';
 
-import {combineReducers, configureStore} from "@reduxjs/toolkit";
+import {combineReducers, configureStore, createSelector} from "@reduxjs/toolkit";
+import {activeMetersSelector} from "./participant";
+import {meteringEnergyGroup11} from "./energy";
+import {Metering} from "../models/meteringpoint.model";
 
 /**
  * Reducer
@@ -55,3 +58,20 @@ export function setupStore(preloadedState?: any) {
 export type State = ReturnType<typeof reducer>;
 export type AppStore = ReturnType<typeof setupStore>
 export type AppDispatch = typeof store.dispatch;
+
+
+export const activeMeterEnergyArray = createSelector(
+  activeMetersSelector,
+  meteringEnergyGroup11,
+  (metering, report) => metering.map((m) => {
+    return { meter: m, utilization: report[m.meteringPoint] }
+  })
+)
+
+export const activeMeterEnergyGroup = createSelector(
+  activeMetersSelector,
+  meteringEnergyGroup11,
+  (metering, report) => metering.reduce((out, m) => {
+    return {...out, [m.meteringPoint]: {m: m, utilization: report[m.meteringPoint]}}
+  }, {} as Record<string, {m: Metering, utilization: number}>)
+)

@@ -18,6 +18,7 @@ import {add} from "ionicons/icons";
 import RateDetailPaneComponent from "../components/RateDetailPane.component";
 import {selectedTenant} from "../store/eeg";
 import {useRateType} from "../store/hook/Rate.provider";
+import { get } from "react-hook-form";
 
 const RatesPage: FC = () => {
 
@@ -49,7 +50,7 @@ const RatesPage: FC = () => {
   const onNew = () => {
     const newRate = {id: '', name: '', type: 'EEG', useVat: false, baseFee: "0",
         accountGrossAmount: "0", participantFee: 0, accountNetAmount: "0", billingPeriod: 'monthly', businessNr:"0",
-        centPerKWh: 0, discount: "0", freeKWH:"0", vatInPercent: "0"} as EegTariff
+        centPerKWh: 0, discount: "0", freeKWH:"0", vatInPercent: "0", useMeteringPointFee: false} as EegTariff
     onSelect(newRate)
   }
 
@@ -59,8 +60,30 @@ const RatesPage: FC = () => {
         dispatcher(saveNewRate({ rate, tenant }));
       }
     } else {
+      const doubleID = getDuplicateRate(rate);
+
+      if(doubleID === rate.id){
         dispatcher(updateRate({ rate, tenant }));
+      }
+      else if (checkValidName(rate)) {
+        dispatcher(updateRate({ rate, tenant }));
+      }
     }
+  }
+
+  const getDuplicateRate = (rate: EegTariff) => {
+    var found = false;
+    var foundRate = null;
+    rates.forEach((r) => {
+      if (r.name === rate.name) {
+        found = true;
+        foundRate = r;
+      }
+    });
+    if(found){
+      return foundRate!.id;
+    }
+    return null;
   }
   
   const checkValidName = (rate: EegTariff) => {

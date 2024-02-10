@@ -6,7 +6,7 @@ import MeterCardComponent from "./participantPane/MeterCard.component";
 import {useFieldArray, useFormContext} from "react-hook-form";
 import RegisterMeterPaneComponent from "./RegisterMeterPane.component";
 import {Metering} from "../models/meteringpoint.model";
-import {useOnlineState} from "../store/hook/Eeg.provider";
+import {useEegArea, useGridOperator, useOnlineState} from "../store/hook/Eeg.provider";
 
 interface ParticipantRegisterMeterPaneComponentProps {
   participant: EegParticipant;
@@ -16,13 +16,16 @@ interface ParticipantRegisterMeterPaneComponentProps {
 const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComponentProps> = ({participant}) => {
 
   const isOnline = useOnlineState()
+  const {gridOperatorId, gridOperatorName} = useGridOperator()
 
   const defaultMeter =  {
     status: isOnline ? "NEW" : "ACTIVE",
     participantId: "",
     meteringPoint: "",
     direction: "CONSUMPTION",
-    registeredSince: isOnline ? new Date() : new Date(2023, 0, 1, 0, 0, 0, 0)
+    registeredSince: isOnline ? new Date() : new Date(2023, 0, 1, 0, 0, 0, 0),
+    gridOperatorName: gridOperatorName,
+    gridOperatorId: gridOperatorId,
   } as Metering
 
   const [addMeterPaneActive, setAddMeterPaneActive] = useState(false)

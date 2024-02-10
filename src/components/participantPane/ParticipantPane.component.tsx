@@ -514,12 +514,44 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     }
   }
 
-  const handleInput = (ev: Event) => {
+  const handleSearchInput = (ev: Event) => {
     let query = '';
     const target = ev.target as HTMLIonSearchbarElement;
     if (target) query = target.value!.toLowerCase();
 
-    setResult(sortedParticipants.filter((d) => d.lastname.toLowerCase().indexOf(query) > -1 || d.firstname.toLowerCase().indexOf(query) > -1));
+    if (query && query.length > 0) {
+      const filterEntries = (d: EegParticipant) => {
+        return [d.lastname.toLowerCase().indexOf(query) > -1 || d.firstname.toLowerCase().indexOf(query) > -1, filterMetering(d)]
+      }
+      const filterMetering = (d: EegParticipant) => {
+        return d.meters.find(m => {
+
+          const eq = (m.equipmentName && m.equipmentName.length > 0) ? m.equipmentName.toLowerCase().indexOf(query) > -1 : false
+          console.log(eq)
+          return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq
+        }) !== undefined
+      }
+
+      const origin = JSON.parse(JSON.stringify(sortedParticipants)) as EegParticipant[]
+
+      const sp = origin.filter((d: EegParticipant) => {
+        const [matchParticipant, matchMeter] = filterEntries(d)
+        if (matchParticipant || matchMeter) {
+          if (matchMeter) {
+            d.meters = d.meters.filter(m => {
+              const eq = (m.equipmentName && m.equipmentName.length > 0) ? m.equipmentName.toLowerCase().indexOf(query) > -1 : false
+              return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq
+            })
+          }
+          return true
+        }
+        return false
+      })
+      setResult(sp)
+    } else {
+      setResult(sortedParticipants)
+    }
+    // setResult(sortedParticipants.filter((d) => filterEntries(d)));
   };
 
   const popoverRef = useRef<HTMLIonToolbarElement>(null)
@@ -616,20 +648,16 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
               </IonButton>
             </IonButtons>
           </IonToolbar>
-          {searchActive && (
-            <IonToolbar>
-              <IonSearchbar
-                style={{ "--box-shadow": "undefined" }}
-                debounce={500}
-                onIonInput={(ev) => handleInput(ev)}
-              ></IonSearchbar>
-            </IonToolbar>
-          )}
-          <ParticipantPeriodHeaderComponent
-            activePeriod={activePeriod}
-            selectAll={selectAll}
-            onUpdatePeriod={onUpdatePeriodSelection}
-          />
+          {searchActive &&
+              <IonToolbar>
+                <IonSearchbar
+                    style={{"--box-shadow": "undefined"}}
+                    debounce={500} onIonInput={(ev) => handleSearchInput(ev)}>
+                </IonSearchbar>
+              </IonToolbar>}
+          <ParticipantPeriodHeaderComponent activePeriod={activePeriod} selectAll={selectAll}
+                                            onUpdatePeriod={onUpdatePeriodSelection}/>
+
 
           {result.map((p, idx) => {
             if (p.meters.length > 0) {

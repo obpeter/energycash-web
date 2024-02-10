@@ -1,6 +1,7 @@
 import {IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
 import {Redirect, Route} from 'react-router-dom';
+
 import Menu from './components/Menu';
 
 /* Core CSS required for Ionic components to work properly */
@@ -33,7 +34,6 @@ import RatesPage from "./pages/Rates.page";
 import EegPage from "./pages/Eeg.page";
 import ParticipantRegisterPage from "./pages/ParticipantRegister.page";
 import RateProvider from "./store/hook/Rate.provider";
-// import DashbaordPage from "./pages/Dashbaord.page";
 import ProfilesPage from "./pages/Profiles.page";
 import ProcessesPage from "./pages/Processes.page";
 import NotificationPage from "./pages/Notification.page";

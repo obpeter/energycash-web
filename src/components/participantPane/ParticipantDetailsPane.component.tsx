@@ -71,7 +71,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const [participantAlert] = useIonAlert();
 
   const isMeterNew = () => selectedMeter?.status === 'NEW';
-  const isMeterActive = () => selectedMeter?.status === "ACTIVE"
+  const isMeterActive = () => selectedMeter?.status === "ACTIVE" || selectedMeter?.status === "INACTIVE"
   const isMeterPending = () => selectedMeter?.status === "PENDING"
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';
@@ -102,7 +102,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
     switch (componentKey) {
       case "memberForm":
         return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} rates={rates} formId={""}
-                                                          onSubmit={onUpdateParticipant} onSubmitPartial={onUpdateParticipantPartial}/> : <></>
+                                                          onSubmit={onUpdateParticipant} onSubmitPartial={onUpdateParticipantPartial} changeable={false}/> : <></>
       case "meterForm":
         return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>
       case "invoiceForm":

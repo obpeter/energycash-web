@@ -76,7 +76,7 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                  rules={{
                    required: "Hausnummer fehlt",
                    pattern: {
-                     value: /^[0-9A-Za-z\/-\\\s]*$/,
+                     value: /^[0-9A-Za-z\/\-\\\s]*$/,
                      message: "Ungültige Zeichen. Erlaubt sind 0-9, A-Z, a-z, \,/,-, ]"
                    }
                  }}

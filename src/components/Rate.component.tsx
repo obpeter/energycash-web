@@ -35,12 +35,13 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
       setValue("useVat", s)
     }
 
-    // const centPerKwh = watch("centPerKWh")
-    // useEffect(() => {
-    //   console.log("Cent", centPerKwh)
-    // }, [centPerKwh]);
+    const setMeteringPointFeeEnabled = (s: boolean) => {
+      setValue("useMeteringPointFee", s)
+      if (!s) setValue("meteringPointFee", undefined)
+    }
 
     const useVat = watch("useVat");
+    const useMeteringPointFee = watch("useMeteringPointFee")
 
     const handleRateType = (type: number) => {
       switch (type) {
@@ -76,6 +77,22 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
 
     const editable = mode === 'NEW';
 
+    const renderMeteringPointFee = () => {
+      switch (currentRateType) {
+        case "EZP":
+        case "VZP":
+          return (
+            <>
+              <CheckboxComponent label="Zählpunkt Gebühr einheben?" setChecked={(c) => setMeteringPointFeeEnabled(c)}
+                                 checked={useMeteringPointFee!}/>
+              {useMeteringPointFee &&
+                <NumberInputForm label="Zählpunkt Gebühr" control={control} name="meteringPointFee"/>}
+            </>
+        )
+      }
+      return (<></>)
+    }
+    
     const RateFormType = (rate: EegTariff) => {
       switch (currentRateType) {
         case "EEG":
@@ -92,19 +109,12 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
             <div>
               <InputFormComponent label="Pauschalbetrag in € (je Abrechnungsintervall, netto)" control={control} name={"baseFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.baseFee}/>
-              {/*<InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}*/}
-              {/*                    rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.centPerKWh}/>*/}
               <NumberInputForm label="Arbeitspreis in ct/kWh (netto)" control={control} name={"centPerKWh"}/>
-              {/*<Input label={"Pauschalbetrag"} labelPlacement={"floating"} {...register('baseFee',*/}
-              {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
-              {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh')} />*/}
             </div>
           )
         case "VZP":
           return (
             <div>
-              {/*<InputFormComponent label="Cent pro kWh" control={control} name={"centPerKWh"}*/}
-              {/*                    rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" inputmode={"numeric"} error={errors.centPerKWh}/>*/}
               <NumberInputForm
                 label="Arbeitspreis in ct/kWh (netto)"
                 control={control}
@@ -130,10 +140,6 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
                 type="text"
                 error={errors.discount}
               />
-              {/*<Input label={"Cent pro kWh"} labelPlacement={"floating"} {...register('centPerKWh',*/}
-              {/*  {pattern: {value: /[0-9\.]/, message: "Nur Zahlen erlaubt"}})} />*/}
-              {/*<Input label={"Inklusive kWh"} labelPlacement={"floating"} {...register('freeKWH')} />*/}
-              {/*<Input label={"Rabatt"} labelPlacement={"floating"} {...register('discount')} />*/}
             </div>
           );
       }
@@ -163,7 +169,7 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
                                  checked={useVat!}/>
               {useVat &&
                   <InputFormComponent label="Umsatzsteuer in %" control={control} name="vatInPercent"/>}
-              {/*<Input label={"Umsatzsteuer in %"} labelPlacement={"floating"} {...register('vatInPercent')} />}*/}
+              {renderMeteringPointFee()}
             </IonList>
             <IonList color="eeglight">
               <IonListHeader>Bestandteile</IonListHeader>

@@ -5,6 +5,7 @@ import {adapter, featureKey, ParticipantState} from "../states";
 import {Metering} from "../../../models/meteringpoint.model";
 import {SelectedPeriod} from "../../../models/energy.model";
 import {selectedPeriodSelector} from "../../energy";
+import participants from "../../../pages/Participants";
 
 const {selectAll, selectById, selectEntities} = adapter.getSelectors();
 
@@ -98,6 +99,10 @@ export const activeParticipantsSelector1 = createSelector(
     // return []
   }
 )
+
+export const activeMetersSelector = createSelector(
+  activeParticipantsSelector1,
+  (participants): Metering[] => participants.flatMap(p => p.meters))
 
 // export const participantSelector = createSelector(
 //   featureStateSelector,

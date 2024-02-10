@@ -10,9 +10,10 @@ import {
   ProducerReport
 } from "../../../models/energy.model";
 import {calc, splitDate} from "../../../util/Helper.util";
-import {MeteringEnergyGroupType} from "../../../models/meteringpoint.model";
+import {Metering, MeteringEnergyGroupType} from "../../../models/meteringpoint.model";
 import {buildSlice} from "@reduxjs/toolkit/dist/query/core/buildSlice";
 import {transformMeterReportToEnergySeries} from "../../../util/ReportHelper";
+import {activeMetersSelector} from "../../participant";
 
 const {selectAll, selectById, selectEntities} = metaAdapter.getSelectors();
 const {selectAll: selectAllParticipants, selectById: selectParticipantById} = participantReportAdapter.getSelectors();
