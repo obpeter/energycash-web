@@ -107,8 +107,9 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EZP":
           return (
             <div>
-              <InputFormComponent label="Pauschalbetrag in € (je Abrechnungsintervall, netto)" control={control} name={"baseFee"}
+            {/* <InputFormComponent label="Pauschalbetrag in € (je Abrechnungsintervall, netto)" control={control} name={"baseFee"}
                                   rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.baseFee}/>
+            */}
               <NumberInputForm label="Arbeitspreis in ct/kWh (netto)" control={control} name={"centPerKWh"}/>
             </div>
           )
