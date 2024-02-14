@@ -51,6 +51,7 @@ import {
   flash,
   mailOutline,
   person,
+  reloadCircleOutline,
   search
 } from "ionicons/icons";
 import {eegPlug, eegSolar} from "../../eegIcons";
@@ -559,43 +560,64 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
       <div className={"pane-body"}>
         {/*<DatepickerComponent range={dismiss} trigger="open-datepicker-dialog" />*/}
         <div className={"pane-content"}>
-          <IonToolbar color="eeglight" style={{"--min-height": "56px"}} ref={popoverRef}>
+          <IonToolbar
+            color="eeglight"
+            style={{ "--min-height": "56px" }}
+            ref={popoverRef}
+          >
             <IonButtons slot="end">
               <IonButton
                 // id="open-datepicker-dialog"
                 color="primary"
                 shape="round"
                 fill={"solid"}
-                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
+                style={{
+                  "--border-radius": "50%",
+                  width: "36px",
+                  height: "36px",
+                  marginRight: "16px",
+                }}
                 onClick={() => setSearchActive(!searchActive)}
               >
                 <IonIcon slot="icon-only" icon={search}></IonIcon>
               </IonButton>
-              {eeg && !eeg.online && <IonButton
-                color="primary"
-                shape="round"
-                fill={"solid"}
-                aria-label="Favorite"
-                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
-                onClick={(e: any) =>
-                  uploadPopover({
-                    event: e,
-                    size: "auto",
-                    side: "bottom",
-                    alignment: "start",
-                    cssClass: "upload-popover",
-                    onDidDismiss: (e: CustomEvent) => onImport(e.detail.data),
-                  })
-                }
-              >
-                <IonIcon slot="icon-only" icon={cloudUploadOutline}></IonIcon>
-              </IonButton>}
+              {eeg && !eeg.online && (
+                <IonButton
+                  color="primary"
+                  shape="round"
+                  fill={"solid"}
+                  aria-label="Favorite"
+                  style={{
+                    "--border-radius": "50%",
+                    width: "36px",
+                    height: "36px",
+                    marginRight: "16px",
+                  }}
+                  onClick={(e: any) =>
+                    uploadPopover({
+                      event: e,
+                      size: "auto",
+                      side: "bottom",
+                      alignment: "start",
+                      cssClass: "upload-popover",
+                      onDidDismiss: (e: CustomEvent) => onImport(e.detail.data),
+                    })
+                  }
+                >
+                  <IonIcon slot="icon-only" icon={cloudUploadOutline}></IonIcon>
+                </IonButton>
+              )}
               <IonButton
                 // id="open-datepicker-dialog"
                 color="primary"
                 shape="round"
                 fill={"solid"}
-                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
+                style={{
+                  "--border-radius": "50%",
+                  width: "36px",
+                  height: "36px",
+                  marginRight: "16px",
+                }}
                 onClick={(e: any) =>
                   reportPopover({
                     event: e,
@@ -613,13 +635,18 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                 color="primary"
                 shape="round"
                 fill={"solid"}
-                style={{"--border-radius": "50%", width:"36px", height: "36px", marginRight: "16px"}}
-                routerLink="/page/addParticipant" routerDirection="root"
+                style={{
+                  "--border-radius": "50%",
+                  width: "36px",
+                  height: "36px",
+                  marginRight: "16px",
+                }}
+                routerLink="/page/addParticipant"
+                routerDirection="root"
               >
                 <IonIcon slot="icon-only" icon={add}></IonIcon>
               </IonButton>
             </IonButtons>
-
           </IonToolbar>
           {searchActive &&
               <IonToolbar>
@@ -631,149 +658,252 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
           <ParticipantPeriodHeaderComponent activePeriod={activePeriod} selectAll={selectAll}
                                             onUpdatePeriod={onUpdatePeriodSelection}/>
 
+
           {result.map((p, idx) => {
             if (p.meters.length > 0) {
-            return (
-            <div key={idx} onClick={onSelectParticipant(p)}
-                 className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
-              <MemberComponent
-                participant={p}
-                onCheck={onCheckParticipant(p)}
-                isChecked={checkedParticipant && (checkedParticipant[p.id] || false)}
-                hideMeter={hideMeter}
-                hideMember={hideMember}
-                showAmount={showAmount}
-                showDetailsPage={showDetailsPage}
-                onShowAddMeterPage={onShowAddMeterPage}
-              >
-                {hideMeter || p.meters.map((m, i) => (
-                  <MeterCardComponent key={"meter"+i}
-                                      participant={p}
-                                      meter={m}
-                                      hideMeter={false}
-                                      showCash={showAmount}
-                                      onSelect={onSelectMeter}
-                                      isSelected={m.meteringPoint === selectedMeterId}/>
-                ))}
-              </MemberComponent>
-            </div>
-            )
-          } else {
-            return (
-              <div key={idx} onClick={onSelectParticipant(p)}
-                                    className={cn("participant", {"selected": p.id === selectedParticipant?.id})}>
-                <MemberComponent
-                  participant={p}
-                  onCheck={onCheckParticipant(p)}
-                  isChecked={checkedParticipant && (checkedParticipant[p.id] || false)}
-                  hideMeter={hideMeter}
-                  hideMember={hideMember}
-                  showAmount={showAmount}
-                  showDetailsPage={showDetailsPage}
-                  onShowAddMeterPage={onShowAddMeterPage}
-                />
-              </div>
-            )}
+              return (
+                <div
+                  key={idx}
+                  onClick={onSelectParticipant(p)}
+                  className={cn("participant", {
+                    selected: p.id === selectedParticipant?.id,
+                  })}
+                >
+                  <MemberComponent
+                    participant={p}
+                    onCheck={onCheckParticipant(p)}
+                    isChecked={
+                      checkedParticipant && (checkedParticipant[p.id] || false)
+                    }
+                    hideMeter={hideMeter}
+                    hideMember={hideMember}
+                    showAmount={showAmount}
+                    showDetailsPage={showDetailsPage}
+                    onShowAddMeterPage={onShowAddMeterPage}
+                  >
+                    {hideMeter ||
+                      p.meters.map((m, i) => (
+                        <MeterCardComponent
+                          key={"meter" + i}
+                          participant={p}
+                          meter={m}
+                          hideMeter={false}
+                          showCash={showAmount}
+                          onSelect={onSelectMeter}
+                          isSelected={m.meteringPoint === selectedMeterId}
+                        />
+                      ))}
+                  </MemberComponent>
+                </div>
+              );
+            } else {
+              return (
+                <div
+                  key={idx}
+                  onClick={onSelectParticipant(p)}
+                  className={cn("participant", {
+                    selected: p.id === selectedParticipant?.id,
+                  })}
+                >
+                  <MemberComponent
+                    participant={p}
+                    onCheck={onCheckParticipant(p)}
+                    isChecked={
+                      checkedParticipant && (checkedParticipant[p.id] || false)
+                    }
+                    hideMeter={hideMeter}
+                    hideMember={hideMember}
+                    showAmount={showAmount}
+                    showDetailsPage={showDetailsPage}
+                    onShowAddMeterPage={onShowAddMeterPage}
+                  />
+                </div>
+              );
+            }
           })}
         </div>
         <div className={"pane-footer"}>
-          {showAmount &&
+          {showAmount && (
             <div>
               <IonRow>
                 <IonCol>
                   <IonItem lines="none">
-                    <IonLabel slot="end">Gesamte EEG: {billingSum()} €</IonLabel>
+                    <IonLabel slot="end">
+                      Gesamte EEG: {billingSum()} €
+                    </IonLabel>
                   </IonItem>
                 </IonCol>
               </IonRow>
               <IonRow>
                 <IonCol size="12">
-                  { billingRunIsFetching || selectBillIsFetching &&
+                  {billingRunIsFetching ||
+                    (selectBillIsFetching && (
                       <IonSpinner name="dots"></IonSpinner>
-                  }
-                  { !billingRunIsFetching && !billingRun &&
-                      <>
-                        <DatePickerCoreElement initialValue={documentDatePreview} name={"documentDatePreview"} label="Rechnungsdatum"
-                                               placeholder={"Datum"} onChange={onUpdateDocumentDate} />
-                        <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onDoBilling(true, documentDatePreview)}>{`VORSCHAU ERSTELLEN`}</IonButton>
-                      </>                  }
-                  { !billingRunIsFetching && billingRunStatus === 'NEW' &&
-                      <>
-                        { "Vorschau (" + reformatDateTimeStamp(billingRun.runStatusDateTime) + ")"}
-                        <DatePickerCoreElement initialValue={documentDateBilling} name={"documentDateBilling"} label="Rechnungsdatum"
-                                               placeholder={"Datum"} onChange={onUpdateDocumentDate}/>
-                        <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onDoBilling(true, documentDateBilling)}>{`VORSCHAU AKTUALISIEREN`}</IonButton>
-                        <IonButton expand="block" disabled={activePeriod === undefined} onClick={() => onDoBilling(false, documentDateBilling)}>{`ABRECHNUNG DURCHFÜHREN (${billingInfo.length})`}</IonButton>
-                      </>
-                  }
-                  { !billingRunIsFetching && billingRunStatus === 'DONE' &&
+                    ))}
+                  {!billingRunIsFetching && !billingRun && (
+                    <>
+                      <DatePickerCoreElement
+                        initialValue={documentDatePreview}
+                        name={"documentDatePreview"}
+                        label="Rechnungsdatum"
+                        placeholder={"Datum"}
+                        onChange={onUpdateDocumentDate}
+                      />
+                      <IonButton
+                        expand="block"
+                        disabled={activePeriod === undefined}
+                        onClick={() => onDoBilling(true, documentDatePreview)}
+                      >{`VORSCHAU ERSTELLEN`}</IonButton>
+                    </>
+                  )}
+                  {!billingRunIsFetching && billingRunStatus === "NEW" && (
+                    <>
+                      {"Vorschau (" +
+                        reformatDateTimeStamp(billingRun.runStatusDateTime) +
+                        ")"}
+                      <DatePickerCoreElement
+                        initialValue={documentDateBilling}
+                        name={"documentDateBilling"}
+                        label="Rechnungsdatum"
+                        placeholder={"Datum"}
+                        onChange={onUpdateDocumentDate}
+                      />
+
+                      <IonButton 
+                        disabled={activePeriod === undefined}
+                        onClick={() => onDoBilling(true, documentDateBilling)}
+                      >{`Vorschau Akt.`}
+                      <IonIcon slot="end" icon={reloadCircleOutline}></IonIcon>
+                      </IonButton>
+                      <IonButton
+                        onClick={() => exportBillingArchive(billingRun.id)}
+                      >
+                        <IonIcon slot="end" icon={archiveOutline}></IonIcon>
+                        {"ZIP"}
+                      </IonButton>
+                      <IonButton 
+                        onClick={() => exportBillingExcel(billingRun.id)}
+                      >
+                        <IonIcon
+                          slot="end"
+                          icon={documentTextOutline}
+                        ></IonIcon>
+                        {"EXCEL"}
+                      </IonButton>
+                      <IonButton
+                        expand="block"
+                        disabled={activePeriod === undefined}
+                        onClick={() => onDoBilling(false, documentDateBilling)}
+                      >{`ABRECHNUNG DURCHFÜHREN (${billingInfo.length})`}</IonButton>
+                    </>
+                  )}
+                  {!billingRunIsFetching && billingRunStatus === "DONE" && (
                     <>
                       <div>
-                        { (billingRun.mailStatus === "SENT") ? "Versendet ("+reformatDateTimeStamp(billingRun.mailStatusDateTime)+")"
-                            : "Abgerechnet (" + reformatDateTimeStamp(billingRun.runStatusDateTime) + ")" }
+                        {billingRun.mailStatus === "SENT"
+                          ? "Versendet (" +
+                            reformatDateTimeStamp(
+                              billingRun.mailStatusDateTime
+                            ) +
+                            ")"
+                          : "Abgerechnet (" +
+                            reformatDateTimeStamp(
+                              billingRun.runStatusDateTime
+                            ) +
+                            ")"}
                       </div>
                       <div>
                         <IonButton id="confirm-send">
                           <IonIcon slot="end" icon={mailOutline}></IonIcon>
-                          {'SENDEN'}
+                          {"SENDEN"}
                         </IonButton>
                         <IonAlert
-                            header="SENDEN"
-                            subHeader="Mit Klick auf OK versenden Sie alle Abrechnungsdokumente per E-Mail."
-                            trigger="confirm-send"
-                            buttons={[
-                              {
-                                text: 'Abbrechen',
-                                role: 'cancel'
+                          header="SENDEN"
+                          subHeader="Mit Klick auf OK versenden Sie alle Abrechnungsdokumente per E-Mail."
+                          trigger="confirm-send"
+                          buttons={[
+                            {
+                              text: "Abbrechen",
+                              role: "cancel",
+                            },
+                            {
+                              text: "OK",
+                              role: "confirm",
+                              handler: () => {
+                                sendBilling(billingRun.id);
                               },
-                              {
-                                text: 'OK',
-                                role: 'confirm',
-                                handler: () => {
-                                  sendBilling(billingRun.id);
-                                },
-                              },
-                            ]}
+                            },
+                          ]}
                         ></IonAlert>
-                        <IonButton onClick={() => exportBillingArchive(billingRun.id)}>
+                        <IonButton
+                          onClick={() => exportBillingArchive(billingRun.id)}
+                        >
                           <IonIcon slot="end" icon={archiveOutline}></IonIcon>
-                          {'DOWNLOAD'}
+                          {"DOWNLOAD"}
                         </IonButton>
-                        <IonButton onClick={() => exportBillingExcel(billingRun.id)}>
-                          <IonIcon slot="end" icon={documentTextOutline}></IonIcon>
-                          {'EXCEL'}
+                        <IonButton
+                          onClick={() => exportBillingExcel(billingRun.id)}
+                        >
+                          <IonIcon
+                            slot="end"
+                            icon={documentTextOutline}
+                          ></IonIcon>
+                          {"EXCEL"}
                         </IonButton>
                       </div>
                     </>
-                  }
+                  )}
                 </IonCol>
               </IonRow>
             </div>
-          }
+          )}
           <div className={"button-bar"}>
-            <div style={{marginLeft: "20px"}}>
-              <SlideButtonComponent checked={showAmount} disabled={!billingEnabled}
-                                    setChecked={(c) => activateBilling(c)}></SlideButtonComponent>
+            <div style={{ marginLeft: "20px" }}>
+              <SlideButtonComponent
+                checked={showAmount}
+                disabled={!billingEnabled}
+                setChecked={(c) => activateBilling(c)}
+              ></SlideButtonComponent>
             </div>
-            <div style={{marginRight: "20px", display: "flex", flexDirection: "row"}}>
-              <div style={{marginRight: "10px"}}>
-                <ButtonGroup buttons={[
-                  {icon: <IonIcon slot="icon-only" icon={person}></IonIcon>},
-                  {icon: <IonIcon slot="icon-only" icon={flash}></IonIcon>}
-                ]} onChange={toggleMembersMeter}/>
+            <div
+              style={{
+                marginRight: "20px",
+                display: "flex",
+                flexDirection: "row",
+              }}
+            >
+              <div style={{ marginRight: "10px" }}>
+                <ButtonGroup
+                  buttons={[
+                    {
+                      icon: <IonIcon slot="icon-only" icon={person}></IonIcon>,
+                    },
+                    { icon: <IonIcon slot="icon-only" icon={flash}></IonIcon> },
+                  ]}
+                  onChange={toggleMembersMeter}
+                />
               </div>
               <div>
-                <ButtonGroup buttons={[
-                  {icon: <IonIcon slot="icon-only" icon={eegSolar}></IonIcon>},
-                  {icon: <IonIcon slot="icon-only" icon={eegPlug}></IonIcon>}
-                ]} onChange={toggleMetering}/>
+                <ButtonGroup
+                  buttons={[
+                    {
+                      icon: (
+                        <IonIcon slot="icon-only" icon={eegSolar}></IonIcon>
+                      ),
+                    },
+                    {
+                      icon: <IonIcon slot="icon-only" icon={eegPlug}></IonIcon>,
+                    },
+                  ]}
+                  onChange={toggleMetering}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default ParticipantPaneComponent;
