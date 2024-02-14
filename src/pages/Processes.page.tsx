@@ -34,7 +34,7 @@ const ProcessesPage: FC = () => {
     },
     {
       name: "Zählpunkt aktivieren",
-      description: "Dieser Prozess dient zur Aktivierung einers Zählpunktes. ",
+      description: "Dieser Prozess dient zur Aktivierung eines Zählpunktes. ",
       type: "EC_REQ_ONL"
     },
     {
