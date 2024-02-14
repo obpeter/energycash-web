@@ -546,6 +546,20 @@ class EegService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
+  async revokeMeteringPoint(tenant: string, participantId: string, meters: {meter: string, direction: string}[], from: number, reason?: string): Promise<any> {
+    const token = await this.authClient.getToken();
+
+    const body = {meteringPoints: meters, from: from, reason: reason}
+    return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/revokemeters`, {
+      method: 'POST',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }).then(this.handleErrors).then(res => res.json());
+  }
+
   async registerMeteringPoint(tenant: string, participantId: string, meter: string, direction: string): Promise<EegEnergyReport> {
     const token = await this.authClient.getToken();
     const body = {meteringPoint: meter, direction: direction}

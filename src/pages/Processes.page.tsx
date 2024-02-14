@@ -38,6 +38,11 @@ const ProcessesPage: FC = () => {
       type: "EC_REQ_ONL"
     },
     {
+      name: "Zählpunkt abmelden",
+      description: "Der Marktteilnehmer wird über die Aufhebung einer erteilten Datenfreigabe in Kenntnis gesetzt.",
+      type: "CM_REV_CUS"
+    },
+    {
       name: "Prozess History",
       description: "Übersicht der Prozesskommunikation mit den Marktpartner",
       type: "HISTORY"

@@ -8,6 +8,8 @@ import {selectedPeriodSelector} from "../../store/energy";
 import {getPreviousPeriod} from "../../util/Helper.util";
 import {energyService} from "../../service/energy.service";
 import {selectedTenant} from "../../store/eeg";
+import {IonContent, IonIcon, IonPopover} from "@ionic/react";
+import {helpCircle, helpCircleOutline} from "ionicons/icons";
 
 interface OverviewComponentProps {
   consumed: PieSeriesType
@@ -120,7 +122,15 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
         <div
           style={{display: "flex", flexFlow: "column", height: "100%", margin: "0 20px", flex: "1", flexBasis: "50%"}}>
           <div style={{display: "flex", flex: "1", padding: "5px 16px", gap: "10px", alignItems: "center"}}>
-            <div style={{flexBasis: "20%"}}>Produziert</div>
+            <div style={{flexBasis: "20%"}}>
+              <div style={{display: "flex", gap: "10px", alignItems: "center"}}>
+                <div>Produziert</div>
+                <IonIcon id="hover-help-producer" icon={helpCircleOutline} />
+                <IonPopover trigger="hover-help-producer" triggerAction="hover">
+                  <IonContent class="ion-padding">Production in der selektierten Periode. Der Balken visualisiert das Verhältnis von "Gesamtproduktion / Verteilung in der EEG"</IonContent>
+                </IonPopover>
+              </div>
+            </div>
             <div style={{display: "flex", flexFlow: "column", flex: "1"}}>
               <div style={{display: "flex", flex: "1", padding: "0px 16px", gap: "10px", alignItems: "center"}}>
                 <BarComponent color="rgba(43, 104, 96, 0.4)" percentage={getWidth(preProducedEnergy, preDistributedEnergy)}/>
@@ -133,10 +143,20 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
             </div>
           </div>
           <div style={{display: "flex", flex: "1", padding: "5px 16px", gap: "10px", alignItems: "center"}}>
-            <div style={{flexBasis: "20%"}}>Verteilt</div>
+            <div style={{flexBasis: "20%"}}>
+              <div style={{display: "flex", gap: "10px", alignItems: "center"}}>
+                <div>Verteilt</div>
+                <IonIcon id="hover-help-consumer" icon={helpCircleOutline}/>
+                <IonPopover trigger="hover-help-consumer" triggerAction="hover">
+                  <IonContent class="ion-padding">Verteilung in der EEG in der selektierten Periode. Der Balken visualisiert
+                    das Verhältnis von "Gesamtverbrauch / Verteilung in der EEG"</IonContent>
+                </IonPopover>
+              </div>
+            </div>
             <div style={{display: "flex", flexFlow: "column", flex: "1"}}>
               <div style={{display: "flex", flex: "1", padding: "0px 16px", gap: "10px", alignItems: "center"}}>
-                <BarComponent color="rgba(44, 245, 218, 0.3)" percentage={getWidth(preConsumedEnergy, preDistributedEnergy)}/>
+                <BarComponent color="rgba(44, 245, 218, 0.3)"
+                              percentage={getWidth(preConsumedEnergy, preDistributedEnergy)}/>
                 <div style={{flexBasis: "40%", fontSize: "10px"}}>{renderKWH(preDistributedEnergy)} *)</div>
               </div>
               <div style={{display: "flex", flex: "1", padding: "0px 16px", gap: "10px", alignItems: "center"}}>
@@ -146,11 +166,25 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
             </div>
           </div>
           <div style={{display: "flex", flex: "1", padding: "5px 16px", gap: "10px", alignItems: "center"}}>
-            <div style={{flexBasis: "20%"}}>EVU</div>
+            <div style={{flexBasis: "20%"}}>
+              <div style={{display: "flex", gap: "10px", alignItems: "center"}}>
+                <div>EVU</div>
+                <IonIcon id="hover-help-evu" icon={helpCircleOutline}/>
+                <IonPopover trigger="hover-help-evu" triggerAction="hover">
+                  <IonContent class="ion-padding">Nicht verbrauchte Energie, welche an die EVU weitergegeben wird.
+                    Der Balken visualisiert
+                    das Verhältnis von "Gesamtverbrauch / Gesamtverbrauch - Verteilung in der EEG "</IonContent>
+                </IonPopover>
+              </div>
+            </div>
             <div style={{display: "flex", flexFlow: "column", flex: "1"}}>
               <div style={{display: "flex", flex: "1", padding: "0px 16px", gap: "10px", alignItems: "center"}}>
-                <BarComponent color="#F20A5E" percentage={getWidth(producedEnergy, producedEnergy - distributedEnergy)}/>
-                <div style={{flexBasis: "40%", fontSize: "14px"}}>{renderKWH(Math.max(0, producedEnergy - distributedEnergy))}</div>
+                <BarComponent color="#F20A5E"
+                              percentage={getWidth(producedEnergy, producedEnergy - distributedEnergy)}/>
+                <div style={{
+                  flexBasis: "40%",
+                  fontSize: "14px"
+                }}>{renderKWH(Math.max(0, producedEnergy - distributedEnergy))}</div>
               </div>
             </div>
           </div>

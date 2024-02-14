@@ -181,7 +181,7 @@ export enum MONTHNAMESHORT {
 export interface EdaProcess {
   name: string
   description: string
-  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY'
+  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY' | 'CM_REV_CUS'
 }
 
 

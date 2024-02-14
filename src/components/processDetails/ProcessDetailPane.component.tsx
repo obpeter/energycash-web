@@ -13,6 +13,7 @@ import DateComponent from "../dialogs/date.component";
 import {IonButton, IonButtons, IonIcon} from "@ionic/react";
 import {calendar} from "ionicons/icons";
 import DatepickerComponent from "../dialogs/datepicker.component";
+import ProcessRevokeMeteringpointComponent from "./ProcessRevokeMeteringpoint.component";
 
 
 interface ProcessDetailPaneComponentProps {
@@ -38,6 +39,8 @@ const ProcessDetailPaneComponent: FC<ProcessDetailPaneComponentProps> = ({
           return <ProcessRegisterMeterComponent eeg={eeg} meters={meters} participants={participants} edaProcess={selectedProcess}/>
         case 'CR_REQ_PT':
           return <ProcessRequestValuesComponent eeg={eeg} meters={meters} participants={participants} edaProcess={selectedProcess}/>
+        case 'CM_REV_CUS':
+          return <ProcessRevokeMeteringpointComponent eeg={eeg} meters={meters} participants={participants} edaProcess={selectedProcess}/>
         case 'HISTORY':
           return <ProcessHistoryComponent eeg={eeg} edaProcess={selectedProcess}/>
       }
