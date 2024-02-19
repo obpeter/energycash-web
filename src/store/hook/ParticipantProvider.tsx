@@ -6,7 +6,7 @@ import {
   selectParticipant
 } from "../participant";
 import {EegTariff, RateTypeEnum} from "../../models/eeg.model";
-import {fetchEnergyReportV2, selectedPeriodSelector} from "../energy";
+import {clearEnergyState, fetchEnergyReportV2, selectedPeriodSelector} from "../energy";
 import {selectedTenant} from "../eeg";
 import {MeterReport, ParticipantReport, SelectedPeriod} from "../../models/energy.model";
 
@@ -152,6 +152,9 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
         } as ParticipantReport
       })
       dispatch(fetchEnergyReportV2({tenant: tenant, year: activePeriod.year, segment: activePeriod.segment, type: activePeriod.type, participants: participantsReport.filter(p => p.meters.length > 0)}))
+    } else if (participants && participants.length == 0) {
+      console.log("Clear EnergyState")
+      dispatch(clearEnergyState())
     }
   },[activePeriod, participants])
 

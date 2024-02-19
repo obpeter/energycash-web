@@ -23,3 +23,5 @@ export const fetchEnergyReportV2 = createAsyncThunk(
 )
 
 export const setSelectedPeriod = createAction<SelectedPeriod>(`${featureKey}/selectPeriod`);
+
+export const clearEnergyState = createAction(`${featureKey}/clearState`)

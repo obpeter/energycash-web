@@ -42,6 +42,9 @@ const IntraDayReportComponent: FC = () => {
     }
   }, [activePeriod]);
 
+  useEffect(() => {
+    setData(EMPTY_DATA)
+  }, [tenant]);
 
   const renderLegend = (props: any) => {
     const {payload} = props;

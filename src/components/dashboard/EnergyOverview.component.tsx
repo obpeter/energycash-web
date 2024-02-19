@@ -49,6 +49,10 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
         setPreConsumedEnergy(r.consumed)
         setPreDistributedEnergy(r.distributed)
         setPreProducedEnergy(r.produced)
+      }).catch(() => {
+        setPreConsumedEnergy(0)
+        setPreDistributedEnergy(0)
+        setPreProducedEnergy(0)
       })
     }
   }, [activePeriod, tenant]);

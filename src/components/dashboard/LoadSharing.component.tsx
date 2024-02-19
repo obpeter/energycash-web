@@ -22,7 +22,6 @@ const LoadSharingComponent: FC<LoadSharingComponentProps> = ({intermediateSeries
   const [data, setData] = useState<LoadSharingData[]>([] as LoadSharingData[])
 
   useEffect(() => {
-
     setData(report.map((r, i) => {
       return {
         name: calcXAxisName(i, activePeriod),
@@ -32,7 +31,6 @@ const LoadSharingComponent: FC<LoadSharingComponentProps> = ({intermediateSeries
       } as LoadSharingData
     }))
   }, [report]);
-
 
   const renderLegend = (props: any) => {
     const { payload } = props;
