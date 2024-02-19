@@ -1,6 +1,6 @@
-import React, {FC, useContext, useEffect, useRef, useState} from "react";
+import React, { FC, useContext, useEffect, useRef, useState } from "react";
 
-import {EegParticipant} from "../../models/members.model";
+import { EegParticipant } from "../../models/members.model";
 import {
   CheckboxCustomEvent,
   IonAlert,
@@ -17,30 +17,41 @@ import {
   useIonAlert,
   useIonLoading,
   useIonPopover,
-  useIonToast
+  useIonToast,
 } from "@ionic/react";
-import {CheckboxChangeEventDetail} from "@ionic/core";
-import {IonCheckboxCustomEvent} from "@ionic/core/dist/types/components";
-import {createPeriodIdentifier, SelectedPeriod} from "../../models/energy.model";
+import { CheckboxChangeEventDetail } from "@ionic/core";
+import { IonCheckboxCustomEvent } from "@ionic/core/dist/types/components";
+import {
+  createPeriodIdentifier,
+  SelectedPeriod,
+} from "../../models/energy.model";
 import ParticipantPeriodHeaderComponent from "./ParticipantPeriodHeader.component";
 import MemberComponent from "./Member.component";
-import {ClearingPreviewRequest, Metering, MeteringEnergyGroupType,} from "../../models/meteringpoint.model";
+import {
+  ClearingPreviewRequest,
+  Metering,
+  MeteringEnergyGroupType,
+} from "../../models/meteringpoint.model";
 import MeterCardComponent from "./MeterCard.component";
-import {ParticipantContext} from "../../store/hook/ParticipantProvider";
-import {MemberViewContext} from "../../store/hook/MemberViewProvider";
+import { ParticipantContext } from "../../store/hook/ParticipantProvider";
+import { MemberViewContext } from "../../store/hook/MemberViewProvider";
 
-import "./ParticipantPane.component.scss"
+import "./ParticipantPane.component.scss";
 import SlideButtonComponent from "../SlideButton.component";
-import {State, store, useAppDispatch, useAppSelector} from "../../store";
+import { State, store, useAppDispatch, useAppSelector } from "../../store";
 import {
   billingSelector,
   fetchEnergyBills,
   fetchParticipantAmounts,
   resetParticipantAmounts,
-  selectBillFetchingSelector
+  selectBillFetchingSelector,
 } from "../../store/billing";
-import {eegSelector, selectedTenant} from "../../store/eeg";
-import {meteringEnergyGroup11, selectMetaRecord, setSelectedPeriod} from "../../store/energy";
+import { eegSelector, selectedTenant } from "../../store/eeg";
+import {
+  meteringEnergyGroup11,
+  selectMetaRecord,
+  setSelectedPeriod,
+} from "../../store/energy";
 import ButtonGroup from "../ButtonGroup.component";
 import {
   add,
@@ -52,22 +63,25 @@ import {
   mailOutline,
   person,
   reloadCircleOutline,
-  search
+  search,
 } from "ionicons/icons";
-import {eegPlug, eegSolar} from "../../eegIcons";
+import { eegPlug, eegSolar } from "../../eegIcons";
 import {
   selectedMeterIdSelector,
   selectedParticipantSelector,
   selectMetering,
-  selectParticipant
+  selectParticipant,
 } from "../../store/participant";
 import cn from "classnames";
-import {isParticipantActivated, reformatDateTimeStamp} from "../../util/Helper.util";
+import {
+  isParticipantActivated,
+  reformatDateTimeStamp,
+} from "../../util/Helper.util";
 import DatepickerPopover from "../dialogs/datepicker.popover";
-import {ExcelReportRequest, InvestigatorCP} from "../../models/reports.model";
-import {eegService} from "../../service/eeg.service";
+import { ExcelReportRequest, InvestigatorCP } from "../../models/reports.model";
+import { eegService } from "../../service/eeg.service";
 import UploadPopup from "../dialogs/upload.popup";
-import {useRefresh} from "../../store/hook/Eeg.provider";
+import { useRefresh } from "../../store/hook/Eeg.provider";
 import {
   billingRunErrorSelector,
   billingRunIsFetchingSelector,
@@ -75,13 +89,16 @@ import {
   billingRunSendmail,
   billingRunStatusSelector,
   fetchBillingRun,
-  fetchBillingRunById
+  fetchBillingRunById,
 } from "../../store/billingRun";
 import DatePickerCoreElement from "../core/elements/DatePickerCore.element";
 import DatePicker from "react-datepicker";
 
-import {useSelector} from "react-redux";
-import {filterActiveMeter, filterActiveParticipantAndMeter} from "../../util/FilterHelper.unit";
+import { useSelector } from "react-redux";
+import {
+  filterActiveMeter,
+  filterActiveParticipantAndMeter,
+} from "../../util/FilterHelper.unit";
 import moment from "moment";
 
 interface ParticipantPaneProps {
@@ -91,13 +108,14 @@ interface ParticipantPaneProps {
   // onUpdatePeriod: (e: SelectCustomEvent<number>) => void;
 }
 
-const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
-                                                              // participants,
-                                                              // periods,
-                                                              // activePeriod,
-                                                              // onUpdatePeriod
-                                                            }) => {
-
+const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
+  {
+    // participants,
+    // periods,
+    // activePeriod,
+    // onUpdatePeriod
+  }
+) => {
   const dispatcher = useAppDispatch();
   const tenant = useAppSelector(selectedTenant);
   const energyMeterGroup = useAppSelector(meteringEnergyGroup11);
@@ -112,17 +130,17 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
   const selectBillIsFetching = useAppSelector(selectBillFetchingSelector);
   const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
 
-  let documentDatePreview : Date = new Date();
-  let documentDateBilling : Date = new Date();
+  let documentDatePreview: Date = new Date();
+  let documentDateBilling: Date = new Date();
 
   const [searchActive, setSearchActive] = useState(false);
-  const [result, setResult] = useState<EegParticipant[]>([])
+  const [result, setResult] = useState<EegParticipant[]>([]);
 
   const [loading, dismissLoading] = useIonLoading();
 
-  const {refresh} = useRefresh()
+  const { refresh } = useRefresh();
 
-  const [toaster] = useIonToast()
+  const [toaster] = useIonToast();
 
   const {
     participants,
@@ -142,34 +160,37 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     hideConsumers,
     hideProducers,
     showAmount,
-    hideMember
+    hideMember,
   } = useContext(MemberViewContext);
 
   const [presentAlert] = useIonAlert();
   const [sortedParticipants, setSortedParticipants] = useState(participants);
 
-  useEffect( () => {
+  useEffect(() => {
     if (showAmount && billingRun && billingRun.id) {
-      dispatcher(fetchParticipantAmounts({tenant: tenant, billingRunId: billingRun.id }))
+      dispatcher(
+        fetchParticipantAmounts({ tenant: tenant, billingRunId: billingRun.id })
+      );
     }
     if (showAmount && !billingRun) {
       dispatcher(resetParticipantAmounts());
     }
-  }, [billingRun, showAmount])
+  }, [billingRun, showAmount]);
 
   useEffect(() => {
     if (checkedParticipant) {
-      const nextBillingEnabled =
-        Object.entries(checkedParticipant).reduce((r, e) => (isParticipantActivated(participants, e[0]) && e[1]) || r, false)
+      const nextBillingEnabled = Object.entries(checkedParticipant).reduce(
+        (r, e) => (isParticipantActivated(participants, e[0]) && e[1]) || r,
+        false
+      );
       // console.log("Show Billing: ", nextBillingEnabled);
 
-      setBillingEnabled(nextBillingEnabled)
-      if (!nextBillingEnabled)
-        toggleShowAmount(false)
+      setBillingEnabled(nextBillingEnabled);
+      if (!nextBillingEnabled) toggleShowAmount(false);
     }
-  }, [checkedParticipant])
+  }, [checkedParticipant]);
 
-  useEffect( () => {
+  useEffect(() => {
     if (billingRunErrorMessage) {
       errorToast(billingRunErrorMessage);
     }
@@ -177,60 +198,70 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
 
   useEffect(() => {
     const sorted = participants.sort((a, b) => {
-      const meterAOK = a.meters.reduce((i, m) => (m.status === 'ACTIVE') && i, true)
-      const meterBOK = b.meters.reduce((i, m) => (m.status === 'ACTIVE') && i, true)
+      const meterAOK = a.meters.reduce(
+        (i, m) => m.status === "ACTIVE" && i,
+        true
+      );
+      const meterBOK = b.meters.reduce(
+        (i, m) => m.status === "ACTIVE" && i,
+        true
+      );
 
-      if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') {
-        return -1
+      if (a.status !== "ACTIVE" && b.status === "ACTIVE") {
+        return -1;
       }
 
-      if (b.status !== 'ACTIVE' && a.status === 'ACTIVE') {
-        return 1
+      if (b.status !== "ACTIVE" && a.status === "ACTIVE") {
+        return 1;
       }
 
-      if (b.status !== 'ACTIVE' || a.status !== 'ACTIVE') {
+      if (b.status !== "ACTIVE" || a.status !== "ACTIVE") {
         if (meterAOK === meterBOK) {
-          return 0
+          return 0;
         } else if (!meterAOK && meterBOK) {
-          return -1
+          return -1;
         }
-        return 1
+        return 1;
       }
 
       if (meterAOK && !meterBOK) {
-        return 1
+        return 1;
       } else if (!meterAOK && meterBOK) {
-        return -1
+        return -1;
       }
-      return 0
-    })
+      return 0;
+    });
     // setCheckedParticipant(sorted.map(() => false))
-    const filteredAndSorted = filterMeters(sorted)
+    const filteredAndSorted = filterMeters(sorted);
     setSortedParticipants(sorted);
     setResult(filteredAndSorted);
-  }, [participants])
+  }, [participants]);
 
   useEffect(() => {
-    const filteredAndSorted = filterMeters(sortedParticipants)
+    const filteredAndSorted = filterMeters(sortedParticipants);
     setResult(filteredAndSorted);
   }, [hideConsumers, hideProducers]);
 
   const filterMeters = (p: EegParticipant[]) => {
-    return p.map(ip => { return {...ip,
-      meters: ip.meters.filter(m => {
-        if (m.direction === 'GENERATION' && hideProducers)
-          return false;
-        if (m.direction === 'CONSUMPTION' && hideConsumers)
-          return false;
-        return true;
-      })} as EegParticipant}).filter(m => m.meters.length > 0 || !(hideProducers || hideConsumers))
-  }
+    return p
+      .map((ip) => {
+        return {
+          ...ip,
+          meters: ip.meters.filter((m) => {
+            if (m.direction === "GENERATION" && hideProducers) return false;
+            if (m.direction === "CONSUMPTION" && hideConsumers) return false;
+            return true;
+          }),
+        } as EegParticipant;
+      })
+      .filter((m) => m.meters.length > 0 || !(hideProducers || hideConsumers));
+  };
 
   const infoToast = (message: string) => {
     toaster({
       message: message,
       duration: 3500,
-      position: 'bottom',
+      position: "bottom",
     });
   };
 
@@ -238,75 +269,96 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     toaster({
       message: message,
       duration: 3500,
-      position: 'bottom',
-      color: "danger"
+      position: "bottom",
+      color: "danger",
     });
   };
 
-
-  const buildAllocationMapFromSelected = ():MeteringEnergyGroupType[] => {
-    const participantMap =
-      participants.reduce((r, p) => ({...r, [p.id]: p}), {} as Record<string, EegParticipant>)
+  const buildAllocationMapFromSelected = (): MeteringEnergyGroupType[] => {
+    const participantMap = participants.reduce(
+      (r, p) => ({ ...r, [p.id]: p }),
+      {} as Record<string, EegParticipant>
+    );
 
     // Object.entries(checkedParticipant).forEach(c => {if (!!participantMap[c[0]]) console.log("Checked Participant not in Map", c)} )
 
-    return Object.entries(checkedParticipant).filter(c => participantMap[c[0]])
-      .flatMap((r) => ([...participantMap[r[0]].meters.filter(m => m.tariff_id !== null)]))
-      .map(m => { return {meteringPoint: m.meteringPoint, allocationKWh: energyMeterGroup[m.meteringPoint]} as MeteringEnergyGroupType})
-  }
+    return Object.entries(checkedParticipant)
+      .filter((c) => participantMap[c[0]])
+      .flatMap((r) => [
+        ...participantMap[r[0]].meters.filter((m) => m.tariff_id !== null),
+      ])
+      .map((m) => {
+        return {
+          meteringPoint: m.meteringPoint,
+          allocationKWh: energyMeterGroup[m.meteringPoint],
+        } as MeteringEnergyGroupType;
+      });
+  };
 
-  const selectAll = (event: IonCheckboxCustomEvent<CheckboxChangeEventDetail>) => {
+  const selectAll = (
+    event: IonCheckboxCustomEvent<CheckboxChangeEventDetail>
+  ) => {
     participants.forEach((p) => {
-      if (p.status === 'ACTIVE') {
-        const tariffConfigured = p.meters.reduce((c, e) => c || (e.tariff_id !== undefined && e.tariff_id !==null), (p.tariffId !== undefined && p.tariffId != null))
+      if (p.status === "ACTIVE") {
+        const tariffConfigured = p.meters.reduce(
+          (c, e) => c || (e.tariff_id !== undefined && e.tariff_id !== null),
+          p.tariffId !== undefined && p.tariffId != null
+        );
         if (tariffConfigured) {
           setCheckedParticipant(p.id, event.detail.checked);
         }
       }
-    })
-  }
+    });
+  };
 
-  const onCheckParticipant = (p: EegParticipant) => (e: CheckboxCustomEvent) => {
-    if (p.status === 'ACTIVE') {
-      setCheckedParticipant(p.id, e.detail.checked)
-    }
-  }
+  const onCheckParticipant =
+    (p: EegParticipant) => (e: CheckboxCustomEvent) => {
+      if (p.status === "ACTIVE") {
+        setCheckedParticipant(p.id, e.detail.checked);
+      }
+    };
   const activateBilling = (c: boolean) => {
     if (c) {
       presentAlert({
         subHeader: "Abrechnungsmodus",
-        message: "Du hast den Abrechnungsmodus aktiviert. Selektiere den Zeitraum den du abrechnen möchtest und wähle “Abrechnung erstellen”. Es werden automatisch alle Mitglieder gewählt, da du Einzelabrechnungen nur machen kannst wenn ein Mitglied die EEG verlässt. Eine genaue Aufstellung der Posten siehst erhältst du durch betätigen der Summe des jeweiligen Mitglieds.",
+        message:
+          "Wenn Du „OK“ wählst, werden Rechnungsentwürfe erstellt, die beim jeweiligen Mitglied mit dem Zusatz „VORSCHAU“ abgelegt werden. Weiters kann eine Rechnungszusammenstellung als Excel-Datei und alle Rechnungen gesammelt als Zip-Datei erstellt und runtergeladen werden. Werden nun Änderungen bei den Stammdaten, Energiedaten oder Tarifdaten durchgeführt, so kann mit der Funktion „Vorschau aktualisieren“ beliebig oft Optimierung und Änderungen an den Rechnungen durchgeführt werden.",
         buttons: [
           {
-            text: 'Cancel',
-            role: 'cancel',
+            text: "Cancel",
+            role: "cancel",
           },
           {
-            text: 'OK',
-            role: 'confirm',
+            text: "OK",
+            role: "confirm",
           },
         ],
         onDidDismiss: (e: CustomEvent) => {
-          if (e.detail.role === 'confirm') {
+          if (e.detail.role === "confirm") {
             if (activePeriod) {
-              dispatcher(fetchBillingRun({
-                tenant: tenant,
-                clearingPeriodType: activePeriod.type,
-                clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type,
-                    activePeriod.year, activePeriod.segment)
-              }))
+              dispatcher(
+                fetchBillingRun({
+                  tenant: tenant,
+                  clearingPeriodType: activePeriod.type,
+                  clearingPeriodIdentifier: createPeriodIdentifier(
+                    activePeriod.type,
+                    activePeriod.year,
+                    activePeriod.segment
+                  ),
+                })
+              );
             }
             toggleShowAmount(true);
           } else {
             toggleShowAmount(false);
           }
         },
-      })
+      });
     } else {
       toggleShowAmount(false);
       setBillingEnabled(false);
     }
-  }
+  };
 
   const onUpdatePeriodSelection = (selectedPeriod: SelectedPeriod) => {
     // dispatcher(fetchEnergyReport({
@@ -316,7 +368,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     //   type: selectedPeriod.type,
     // }))
 
-    dispatcher(setSelectedPeriod(selectedPeriod))
+    dispatcher(setSelectedPeriod(selectedPeriod));
     // dispatcher(fetchEnergyReportV2({tenant: tenant,
     //   year: selectedPeriod.year,
     //   segment: selectedPeriod.segment,
@@ -329,172 +381,212 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     //     } as ParticipantReport
     //   })}))
 
-    dispatcher(fetchBillingRun({
-      tenant: tenant,
-      clearingPeriodType : selectedPeriod.type,
-      clearingPeriodIdentifier : createPeriodIdentifier(selectedPeriod.type,
-          selectedPeriod.year, selectedPeriod.segment)
-    }))
+    dispatcher(
+      fetchBillingRun({
+        tenant: tenant,
+        clearingPeriodType: selectedPeriod.type,
+        clearingPeriodIdentifier: createPeriodIdentifier(
+          selectedPeriod.type,
+          selectedPeriod.year,
+          selectedPeriod.segment
+        ),
+      })
+    );
 
     // setUsedPeriod(idx)
-  }
+  };
 
-  const onSelectParticipant = (p: EegParticipant) => (e: React.MouseEvent<Element, MouseEvent>) => {
-    dispatcher(selectParticipant(p.id))
-    if (p.meters.length > 0) {
-      dispatcher(selectMetering(p.meters[0].meteringPoint));
-    }
-    setShowAddMeterPane(false)
-  }
+  const onSelectParticipant =
+    (p: EegParticipant) => (e: React.MouseEvent<Element, MouseEvent>) => {
+      dispatcher(selectParticipant(p.id));
+      if (p.meters.length > 0) {
+        dispatcher(selectMetering(p.meters[0].meteringPoint));
+      }
+      setShowAddMeterPane(false);
+    };
 
-  const onShowAddMeterPage = (p: EegParticipant) => (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
-    dispatcher(selectParticipant(p.id))
-    if (p.meters.length > 0) {
-      dispatcher(selectMetering(p.meters[0].meteringPoint));
-    }
-    setShowAddMeterPane(true)
-    e?.preventDefault()
-    e?.stopPropagation()
-  }
+  const onShowAddMeterPage =
+    (p: EegParticipant) =>
+    (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
+      dispatcher(selectParticipant(p.id));
+      if (p.meters.length > 0) {
+        dispatcher(selectMetering(p.meters[0].meteringPoint));
+      }
+      setShowAddMeterPane(true);
+      e?.preventDefault();
+      e?.stopPropagation();
+    };
 
-  const onSelectMeter = (e: React.MouseEvent<HTMLIonCardElement, MouseEvent>, participantId: string, meter: Metering) => {
-    dispatcher(selectParticipant(participantId))
+  const onSelectMeter = (
+    e: React.MouseEvent<HTMLIonCardElement, MouseEvent>,
+    participantId: string,
+    meter: Metering
+  ) => {
+    dispatcher(selectParticipant(participantId));
     dispatcher(selectMetering(meter.meteringPoint));
     e.stopPropagation();
-    setShowAddMeterPane(false)
-  }
+    setShowAddMeterPane(false);
+  };
 
   const billingSum = () => {
     if (billingInfo) {
       // const sum = billingInfo.reduce((i, s) => i + s.amount + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
-      const sum = billingInfo.reduce((i, s) => i + s.participantFee + s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0), 0)
+      const sum = billingInfo.reduce(
+        (i, s) =>
+          i +
+          s.participantFee +
+          s.meteringPoints.reduce((mi, ms) => mi + ms.amount, 0),
+        0
+      );
       return (Math.round(sum * 100) / 100).toFixed(2);
     }
-    return 0
-  }
+    return 0;
+  };
 
-  const dismiss = (range: [Date|null, Date|null]) => {
-    const [startDate, endDate] = range
+  const dismiss = (range: [Date | null, Date | null]) => {
+    const [startDate, endDate] = range;
     if (startDate === null || endDate === null) {
-      return
+      return;
     }
-  }
+  };
 
   const [reportPopover, dismissReport] = useIonPopover(DatepickerPopover, {
     tenant: tenant,
     onDismiss: (type: number, startDate: Date, endDate: Date) => {
-      loading({message: "Daten exportieren ..."})
+      loading({ message: "Daten exportieren ..." });
       onExport(type, [startDate, endDate])
-        .then(b => {
-          dismissReport([startDate, endDate], "")
-          dismissLoading()
+        .then((b) => {
+          dismissReport([startDate, endDate], "");
+          dismissLoading();
         })
         .catch((e) => {
-          dismissReport(undefined)
-          dismissLoading()
-          errorToast("Export konnte nicht generiert werden." + e.toString())
-        })
-    }
+          dismissReport(undefined);
+          dismissLoading();
+          errorToast("Export konnte nicht generiert werden." + e.toString());
+        });
+    },
   });
 
   const [uploadPopover, dismissUpload] = useIonPopover(UploadPopup, {
     tenant,
-    onDismiss: (data: any, role: string) => dismissUpload(data, role)
+    onDismiss: (data: any, role: string) => dismissUpload(data, role),
   });
 
   const onExport = async (type: number, data: any) => {
     if (data && eeg) {
       if (type === 0) {
-        const meta = selectMetaRecord(store.getState())
-        const [start, end] = data
+        const meta = selectMetaRecord(store.getState());
+        const [start, end] = data;
         const exportdata = {
           start: start.getTime(),
           end: end.getTime(),
           communityId: eeg.communityId,
-          cps: filterActiveParticipantAndMeter(participants, start, end).reduce((r, p) =>
-            r.concat(p.meters.filter(m=> m.status==="ACTIVE" && filterActiveMeter(meta, m, moment(start), moment(end)) ).map(m => {
-              return {
-                meteringPoint: m.meteringPoint,
-                direction: m.direction,
-                name: p.firstname + " " + p.lastname
-              } as InvestigatorCP
-            })), [] as InvestigatorCP[])
-        } as ExcelReportRequest
-        return eegService.createReport(tenant, exportdata)
+          cps: filterActiveParticipantAndMeter(participants, start, end).reduce(
+            (r, p) =>
+              r.concat(
+                p.meters
+                  .filter(
+                    (m) =>
+                      m.status === "ACTIVE" &&
+                      filterActiveMeter(meta, m, moment(start), moment(end))
+                  )
+                  .map((m) => {
+                    return {
+                      meteringPoint: m.meteringPoint,
+                      direction: m.direction,
+                      name: p.firstname + " " + p.lastname,
+                    } as InvestigatorCP;
+                  })
+              ),
+            [] as InvestigatorCP[]
+          ),
+        } as ExcelReportRequest;
+        return eegService.createReport(tenant, exportdata);
       } else {
-        return eegService.exportMasterdata(tenant)
+        return eegService.exportMasterdata(tenant);
       }
     }
-  }
+  };
 
   const onImport = (data: any) => {
     if (data) {
-      const [file, sheetName, type] = data
+      const [file, sheetName, type] = data;
       if (file && file.length === 1 && sheetName) {
         switch (type) {
           case 0:
-            loading({message: "Energiedaten importieren ..."})
-            eegService.uploadEnergyFile(tenant, sheetName, file[0])
+            loading({ message: "Energiedaten importieren ..." });
+            eegService
+              .uploadEnergyFile(tenant, sheetName, file[0])
               .then(() => refresh())
               .then(() => dismissLoading())
               .then(() => infoToast("Energiedaten-Upload beendet."))
               .catch((e) => {
-                errorToast("Energiedatenfile nicht korrekt. [" + e.toString()+"]")
-                dismissLoading()
-              })
-            break
+                errorToast(
+                  "Energiedatenfile nicht korrekt. [" + e.toString() + "]"
+                );
+                dismissLoading();
+              });
+            break;
           case 1:
-            loading({message: "Stammdaten importieren ..."})
-            eegService.uploadMasterDataFile(tenant, sheetName, file[0])
+            loading({ message: "Stammdaten importieren ..." });
+            eegService
+              .uploadMasterDataFile(tenant, sheetName, file[0])
               .then(() => refresh())
               .then(() => dismissLoading())
               .then(() => infoToast("Stammdaten-Upload beendet."))
               .catch((e) => {
-                dismissLoading()
-                errorToast("Stammdaten sind nicht korrekt. " + e.toString())
-              })
+                dismissLoading();
+                errorToast("Stammdaten sind nicht korrekt. " + e.toString());
+              });
             break;
         }
       }
     }
-  }
+  };
 
-  const onDoBilling = (preview : boolean, documentDate : Date) => {
+  const onDoBilling = (preview: boolean, documentDate: Date) => {
     if (activePeriod) {
       documentDate?.setHours(12);
       const invoiceRequest = {
         allocations: buildAllocationMapFromSelected(),
         tenantId: tenant,
         preview: preview,
-        clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type, activePeriod.year, activePeriod.segment),
+        clearingPeriodIdentifier: createPeriodIdentifier(
+          activePeriod.type,
+          activePeriod.year,
+          activePeriod.segment
+        ),
         clearingPeriodType: activePeriod.type,
-        clearingDocumentDate: documentDate? documentDate.toISOString().substring(0,10) : documentDate} as ClearingPreviewRequest;
-      dispatcher(
-        fetchEnergyBills({tenant, invoiceRequest}))
-        .then(() => {
-            dispatcher(fetchBillingRun({
-              tenant: tenant,
-              clearingPeriodType: activePeriod.type,
-              clearingPeriodIdentifier: createPeriodIdentifier(activePeriod.type,
-                activePeriod.year, activePeriod.segment)
-            }))
-          }
+        clearingDocumentDate: documentDate
+          ? documentDate.toISOString().substring(0, 10)
+          : documentDate,
+      } as ClearingPreviewRequest;
+      dispatcher(fetchEnergyBills({ tenant, invoiceRequest })).then(() => {
+        dispatcher(
+          fetchBillingRun({
+            tenant: tenant,
+            clearingPeriodType: activePeriod.type,
+            clearingPeriodIdentifier: createPeriodIdentifier(
+              activePeriod.type,
+              activePeriod.year,
+              activePeriod.segment
+            ),
+          })
         );
+      });
     }
-  }
+  };
 
   const onUpdateDocumentDate = (name: string, value: any) => {
     if (name === "documentDatePreview") documentDatePreview = value;
     if (name === "documentDateBilling") documentDateBilling = value;
-  }
+  };
 
-  async function sendBilling (billingRunId : string) {
+  async function sendBilling(billingRunId: string) {
     if (billingRunId) {
-      dispatcher(
-        billingRunSendmail( {tenant, billingRunId}))
-        .then(() => {
-          dispatcher(fetchBillingRunById({tenant, billingRunId }));
-        })
+      dispatcher(billingRunSendmail({ tenant, billingRunId })).then(() => {
+        dispatcher(fetchBillingRunById({ tenant, billingRunId }));
+      });
     }
   }
 
@@ -502,7 +594,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     try {
       await eegService.exportBillingExcel(tenant, billingRunId);
     } catch (e) {
-      console.log(e as string)
+      console.log(e as string);
     }
   }
 
@@ -510,51 +602,64 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
     try {
       await eegService.exportBillingArchive(tenant, billingRunId);
     } catch (e) {
-      console.log(e as string)
+      console.log(e as string);
     }
   }
 
   const handleSearchInput = (ev: Event) => {
-    let query = '';
+    let query = "";
     const target = ev.target as HTMLIonSearchbarElement;
     if (target) query = target.value!.toLowerCase();
 
     if (query && query.length > 0) {
       const filterEntries = (d: EegParticipant) => {
-        return [d.lastname.toLowerCase().indexOf(query) > -1 || d.firstname.toLowerCase().indexOf(query) > -1, filterMetering(d)]
-      }
+        return [
+          d.lastname.toLowerCase().indexOf(query) > -1 ||
+            d.firstname.toLowerCase().indexOf(query) > -1,
+          filterMetering(d),
+        ];
+      };
       const filterMetering = (d: EegParticipant) => {
-        return d.meters.find(m => {
+        return (
+          d.meters.find((m) => {
+            const eq =
+              m.equipmentName && m.equipmentName.length > 0
+                ? m.equipmentName.toLowerCase().indexOf(query) > -1
+                : false;
+            console.log(eq);
+            return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq;
+          }) !== undefined
+        );
+      };
 
-          const eq = (m.equipmentName && m.equipmentName.length > 0) ? m.equipmentName.toLowerCase().indexOf(query) > -1 : false
-          console.log(eq)
-          return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq
-        }) !== undefined
-      }
-
-      const origin = JSON.parse(JSON.stringify(sortedParticipants)) as EegParticipant[]
+      const origin = JSON.parse(
+        JSON.stringify(sortedParticipants)
+      ) as EegParticipant[];
 
       const sp = origin.filter((d: EegParticipant) => {
-        const [matchParticipant, matchMeter] = filterEntries(d)
+        const [matchParticipant, matchMeter] = filterEntries(d);
         if (matchParticipant || matchMeter) {
           if (matchMeter) {
-            d.meters = d.meters.filter(m => {
-              const eq = (m.equipmentName && m.equipmentName.length > 0) ? m.equipmentName.toLowerCase().indexOf(query) > -1 : false
-              return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq
-            })
+            d.meters = d.meters.filter((m) => {
+              const eq =
+                m.equipmentName && m.equipmentName.length > 0
+                  ? m.equipmentName.toLowerCase().indexOf(query) > -1
+                  : false;
+              return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq;
+            });
           }
-          return true
+          return true;
         }
-        return false
-      })
-      setResult(sp)
+        return false;
+      });
+      setResult(sp);
     } else {
-      setResult(sortedParticipants)
+      setResult(sortedParticipants);
     }
     // setResult(sortedParticipants.filter((d) => filterEntries(d)));
   };
 
-  const popoverRef = useRef<HTMLIonToolbarElement>(null)
+  const popoverRef = useRef<HTMLIonToolbarElement>(null);
   return (
     <div className={"participant-pane"}>
       <div className={"pane-body"}>
@@ -648,16 +753,20 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
               </IonButton>
             </IonButtons>
           </IonToolbar>
-          {searchActive &&
-              <IonToolbar>
-                <IonSearchbar
-                    style={{"--box-shadow": "undefined"}}
-                    debounce={500} onIonInput={(ev) => handleSearchInput(ev)}>
-                </IonSearchbar>
-              </IonToolbar>}
-          <ParticipantPeriodHeaderComponent activePeriod={activePeriod} selectAll={selectAll}
-                                            onUpdatePeriod={onUpdatePeriodSelection}/>
-
+          {searchActive && (
+            <IonToolbar>
+              <IonSearchbar
+                style={{ "--box-shadow": "undefined" }}
+                debounce={500}
+                onIonInput={(ev) => handleSearchInput(ev)}
+              ></IonSearchbar>
+            </IonToolbar>
+          )}
+          <ParticipantPeriodHeaderComponent
+            activePeriod={activePeriod}
+            selectAll={selectAll}
+            onUpdatePeriod={onUpdatePeriodSelection}
+          />
 
           {result.map((p, idx) => {
             if (p.meters.length > 0) {
@@ -769,11 +878,15 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                         onChange={onUpdateDocumentDate}
                       />
 
-                      <IonButton 
+                      <IonButton
                         disabled={activePeriod === undefined}
                         onClick={() => onDoBilling(true, documentDateBilling)}
-                      >{`Vorschau Akt.`}
-                      <IonIcon slot="end" icon={reloadCircleOutline}></IonIcon>
+                      >
+                        {`Vorschau Akt.`}
+                        <IonIcon
+                          slot="end"
+                          icon={reloadCircleOutline}
+                        ></IonIcon>
                       </IonButton>
                       <IonButton
                         onClick={() => exportBillingArchive(billingRun.id)}
@@ -781,7 +894,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                         <IonIcon slot="end" icon={archiveOutline}></IonIcon>
                         {"ZIP"}
                       </IonButton>
-                      <IonButton 
+                      <IonButton
                         onClick={() => exportBillingExcel(billingRun.id)}
                       >
                         <IonIcon
@@ -793,7 +906,28 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
                       <IonButton
                         expand="block"
                         disabled={activePeriod === undefined}
-                        onClick={() => onDoBilling(false, documentDateBilling)}
+                        onClick={() =>
+                          presentAlert({
+                            subHeader: "Abrechnungslauf",
+                            message:
+                              "Wenn Du „OK“ wählst, werden die Rechnungen endgültig erstellt und die fortlaufenden Rechnungsnummern vergeben. Dieser Vorgang ist unumkehrbar und Änderungen an den Rechnungen sind danach nicht mehr möglich. Willst Du wirklich das angewählte Verrechnungsintervall jetzt abrechnen?",
+                            buttons: [
+                              {
+                                text: "Cancel",
+                                role: "cancel",
+                              },
+                              {
+                                text: "OK",
+                                role: "confirmInvoice",
+                              },
+                            ],
+                            onDidDismiss: (e: CustomEvent) => {
+                              if (e.detail.role === "confirmInvoice") {
+                                onDoBilling(false, documentDateBilling);
+                              } 
+                            },
+                          })
+                        }
                       >{`ABRECHNUNG DURCHFÜHREN (${billingInfo.length})`}</IonButton>
                     </>
                   )}
@@ -904,6 +1038,6 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = ({
       </div>
     </div>
   );
-}
+};
 
 export default ParticipantPaneComponent;
