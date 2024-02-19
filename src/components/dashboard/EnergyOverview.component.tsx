@@ -127,7 +127,7 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
                 <div>Produziert</div>
                 <IonIcon id="hover-help-producer" icon={helpCircleOutline} />
                 <IonPopover trigger="hover-help-producer" triggerAction="hover">
-                  <IonContent class="ion-padding">Production in der selektierten Periode. Der Balken visualisiert das Verhältnis von "Gesamtproduktion / Verteilung in der EEG"</IonContent>
+                  <IonContent class="ion-padding">Production in der selektierten Periode. Der Balken visualisiert das Verhältnis von "Verteilung in der EEG / Gesamtproduktion"</IonContent>
                 </IonPopover>
               </div>
             </div>
@@ -149,7 +149,7 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
                 <IonIcon id="hover-help-consumer" icon={helpCircleOutline}/>
                 <IonPopover trigger="hover-help-consumer" triggerAction="hover">
                   <IonContent class="ion-padding">Verteilung in der EEG in der selektierten Periode. Der Balken visualisiert
-                    das Verhältnis von "Gesamtverbrauch / Verteilung in der EEG"</IonContent>
+                    das Verhältnis von "Verteilung in der EEG / Gesamtverbrauch"</IonContent>
                 </IonPopover>
               </div>
             </div>
@@ -173,7 +173,7 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
                 <IonPopover trigger="hover-help-evu" triggerAction="hover">
                   <IonContent class="ion-padding">Nicht verbrauchte Energie, welche an die EVU weitergegeben wird.
                     Der Balken visualisiert
-                    das Verhältnis von "Gesamtverbrauch / Gesamtverbrauch - Verteilung in der EEG "</IonContent>
+                    das Verhältnis von "Gesamtverbrauch - Verteilung in der EEG / Gesamtverbrauch"</IonContent>
                 </IonPopover>
               </div>
             </div>

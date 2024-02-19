@@ -95,7 +95,7 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
   return (
     <>
       <div className="form-element">
-        <div style={{paddingBottom: "5px", color: "gray", fontSize: "12px"}}>
+        <div style={{paddingBottom: "5px", fontSize: "12px"}}>
           <IonLabel position={"floating"}>{label}</IonLabel>
         </div>
         <Controller
@@ -110,12 +110,13 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
                   styles={{
                     // Fixes the overlapping problem of the component
                     menu: provided => ({...provided, zIndex: 9999}),
-                    control: provided => ({...provided, minHeight: "42px", background: "transparent"})
+                    control: provided => ({...provided, minHeight: "42px", background: "transparent", borderColor:"#b3b3b3"})
                   }}
                   isClearable={isClearable}
                   theme={(theme) => ({
                     ...theme,
                     borderRadius: 4,
+                    borderColor: '#b3b3b3',
                     colors: {
                       ...theme.colors,
                       primary25: '#79DFB4',

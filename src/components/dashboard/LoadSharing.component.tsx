@@ -22,6 +22,7 @@ const LoadSharingComponent: FC<LoadSharingComponentProps> = ({intermediateSeries
   const [data, setData] = useState<LoadSharingData[]>([] as LoadSharingData[])
 
   useEffect(() => {
+
     setData(report.map((r, i) => {
       return {
         name: calcXAxisName(i, activePeriod),

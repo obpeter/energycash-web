@@ -38,7 +38,7 @@ const IntraDayReportComponent: FC = () => {
               distributed: r.distributed,
             } as LoadSharingData
           }))
-      )
+      ).catch(() => setData(EMPTY_DATA))
     }
   }, [activePeriod]);
 
