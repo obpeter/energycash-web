@@ -30,7 +30,7 @@ const EegPage: FC = () => {
 
   const {isAdmin} = useAccessGroups()
 
-  const {handleSubmit, control, formState: {isDirty, dirtyFields}} =
+  const {handleSubmit, control, formState: {errors, isDirty, dirtyFields}} =
     useForm({
       defaultValues: eeg,
       values: eeg,
@@ -50,35 +50,10 @@ const EegPage: FC = () => {
     dispatcher(selectTenant(tenant))
   }
 
-  const onSubmit = (data: Eeg) => {
-    if (Object.keys(dirtyFields).length > 0) {
-      if (dirtyFields.address) {
-        dispatcher(updateEegModel({
-          tenant, eeg: Object.keys(dirtyFields.address)
-            .reduce((obj, key) => ({...obj, [key]: (data.address as Address)[key as keyof Address]}), {})
-        }))
-      } else if (dirtyFields.contact) {
-        dispatcher(updateEegModel({
-          tenant, eeg: Object.keys(dirtyFields.contact)
-            .reduce((obj, key) => ({...obj, [key]: (data.contact as Contact)[key as keyof Contact]}), {})
-        }))
-      } else if (dirtyFields.accountInfo) {
-        dispatcher(updateEegModel({
-          tenant, eeg: Object.keys(dirtyFields.accountInfo)
-            .reduce((obj, key) => ({...obj, [key]: (data.accountInfo as AccountInfo)[key as keyof AccountInfo]}), {})
-        }))
-      } else if (dirtyFields.optionals) {
-        dispatcher(updateEegModel({
-          tenant, eeg: Object.keys(dirtyFields.optionals)
-            .reduce((obj, key) => ({...obj, [key]: (data.optionals as Optionals)[key as keyof Optionals]}), {})
-        }))
-      } else {
-        dispatcher(updateEegModel({
-          tenant, eeg: Object.keys(dirtyFields)
-            .reduce((obj, key) => ({...obj, [key]: (data as Eeg)[key as keyof Eeg]}), {})
-        }))
-      }
-    }
+  const onChangeField = (mapper: string) => (name: string, value: any) => {
+      dispatcher(updateEegModel({
+        tenant, eeg: {[mapper]: value}
+      }))
   }
 
   const onChangeValue = (property: string) => (e: IonSelectCustomEvent<SelectChangeEventDetail>) => {
@@ -117,7 +92,7 @@ const EegPage: FC = () => {
                     {key: "BIANNUAL", value: "Halbjährlich"},
                     {key: "ANNUAL", value: "Jährlich"},
                   ]} onIonChange={onChangeValue("settlementInterval")} disabled={true}></SelectForm>
-                  <IonItem lines="none">
+                  <IonItem lines="none" style={{marginRight: "16px"}}>
                     {/*<IonLabel slot="start">SEPA aktiv</IonLabel>*/}
                     <Controller
                       name={"accountInfo.sepa"}
@@ -128,7 +103,8 @@ const EegPage: FC = () => {
                           style={{width: "100%"}}
                           slot="start"
                           labelPlacement="start"
-                          checked={value}
+                          checked={false}
+                          disabled={true}
                           onIonChange={(e) => {
                             onChange(e.detail.checked);
                           }}>SEPA aktiv</IonToggle>)
@@ -140,7 +116,7 @@ const EegPage: FC = () => {
                 </IonCard>
               </div>
               <div className={"eeg-property-card"}>
-                <form onBlur={handleSubmit(onSubmit)}>
+                {/*<form onBlur={handleSubmit(onSubmit)}>*/}
                   <div className={"header"}>Allgemeines</div>
                   <IonCard color="eeglight">
 
@@ -158,43 +134,48 @@ const EegPage: FC = () => {
                       {key: "gesellschaft", value: "Gesellschaft"}]} placeholder="Rechtsform" disabled={!isAdmin()}/>
                     <InputFormComponent name={"description"} label="EEG Bezeichnung" control={control}
                                         rules={{maxLength : {
-                                          value: 40, message: 'Beschreibung ist auf 40 Zeichen beschränkt'
+                                          value: 100, message: 'Beschreibung ist auf 40 Zeichen beschränkt'
                                         }}}
                                         type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        error={errors.description}
+                                        onChangePartial={onChangeField("description")}/>
                     <InputFormComponent name={"businessNr"} label="Firmennummer" control={control} rules={{}}
                                         type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()} onChangePartial={onChangeField("businessNr")}/>
                     <InputFormComponent name={"vatNumber"} label="Umsatzsteuer ID" control={control} rules={{}}
                                         type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("vatNumber")}/>
                     <InputFormComponent name={"taxNumber"} label="Steuernummer" control={control} rules={{}} type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("taxNumber")}/>
                     <InputFormComponent name={"allocationMode"} label="Verteilung" control={control} rules={{}}
                                         type="text" readonly={true}/>
-                    {/*<SelectForm name={"allocationMode"} label="Verteilung" control={control} options={[*/}
-                    {/*  {key: "STATIC", value: "Statisch"},*/}
-                    {/*  {key: "DYNAMIC", value: "Dynamisch"}]} placeholder="Verteilung" readonly={true}/>*/}
                   </IonCard>
-                </form>
+                {/*</form>*/}
               </div>
             </div>
             <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
 
-              <form onBlur={handleSubmit(onSubmit)}>
+              {/*<form onBlur={handleSubmit(onSubmit)}>*/}
                 <div className={"eeg-property-card"}>
                   <div className={"header"}>Adresse</div>
                   <IonCard color="eeglight">
 
                     <InputFormComponent name={"address.street"} label="Straße" control={control} rules={{}} type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("street")}/>
                     <InputFormComponent name={"address.streetNumber"} label="Hausnummer" control={control} rules={{}}
-                                        type="text" readonly={!isAdmin()}/>
+                                        type="text" readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("streetNumber")}/>
                     <InputFormComponent name={"address.zip"} label="Postleitzahl" control={control} rules={{}}
                                         type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("zip")}/>
                     <InputFormComponent name={"address.city"} label="Ort" control={control} rules={{}} type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("city")}/>
                   </IonCard>
                 </div>
 
@@ -202,9 +183,12 @@ const EegPage: FC = () => {
                   <div className={"header"}>Kontakt</div>
                   <IonCard color="eeglight">
                     <InputFormComponent name={"contact.phone"} label="Telefon" control={control} type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("phone")}/>
                     <InputFormComponent name={"contact.email"} label="E-Mail" control={control}
-                                        rules={{regex: /[a-z\.]@[a-z]\.\w{3}/}} type="text" readonly={!isAdmin()}/>
+                                        rules={{regex: /[a-z\.]@[a-z]\.\w{3}/}} type="text" readonly={!isAdmin()}
+                                        error={errors.contact?.email}
+                                        onChangePartial={onChangeField("email")}/>
                   </IonCard>
                 </div>
 
@@ -212,11 +196,16 @@ const EegPage: FC = () => {
                   <div className={"header"}>Bankdaten</div>
                   <IonCard color="eeglight">
                     <InputFormComponent name={"accountInfo.iban"} label="IBAN" control={control} rules={{}} type="text"
-                                        readonly={!isAdmin()}/>
+                                        readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("iban")}/>
                     <InputFormComponent name={"accountInfo.owner"} label="Kontoinhaber" control={control}
-                                        rules={{regex: /[a-zA-Z\s]*/}} type="text" readonly={!isAdmin()}/>
+                                        rules={{regex: /[a-zA-Z\s]*/}} type="text" readonly={!isAdmin()}
+                                        error={errors.accountInfo?.owner}
+                                        onChangePartial={onChangeField("owner")}/>
                     <InputFormComponent name={"accountInfo.bankName"} label="Bank Name" control={control}
-                                        rules={{regex: /[a-zA-Z\s]*/}} type="text" readonly={!isAdmin()}/>
+                                        rules={{regex: /[a-zA-Z\s]*/}} type="text" readonly={!isAdmin()}
+                                        onChangePartial={onChangeField("bankName")}
+                                        error={errors.accountInfo?.bankName}/>
                   </IonCard>
                 </div>
 
@@ -224,10 +213,12 @@ const EegPage: FC = () => {
                   <div className={"header"}>Optional</div>
                   <IonCard color="eeglight">
                     <InputFormComponent name={"optionals.website"} label="Webseite" control={control}
-                                        rules={{regex: /[a-z\.]*\.\w{3}/}} type="text" readonly={!isAdmin()}/>
+                                        rules={{regex: /[a-z\.]*\.\w{3}/}} type="text" readonly={!isAdmin()}
+                                        error={errors.optionals?.website}
+                                        onChangePartial={onChangeField("website")}/>
                   </IonCard>
                 </div>
-              </form>
+              {/*</form>*/}
 
               <EegBillingConfigCardComponent/>
 

@@ -29,7 +29,7 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
   useEffect(() => {
     const [beginDate, endDate] = historyDate
     if (beginDate && endDate) {
-      eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime())
+      eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime()+(60*60*24*1000))
         .then(h => setEntries(h))
         .catch(console.log)
     }
