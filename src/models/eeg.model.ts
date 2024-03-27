@@ -135,6 +135,7 @@ export interface EegTariff {
   type: "EEG" | "EZP" | "VZP" | "AKONTO";
   billingPeriod?: string
   useVat?: boolean
+  vatSupplementaryText?: string
   vatInPercent?: string
   accountNetAmount?: string
   accountGrossAmount?: string
@@ -181,7 +182,7 @@ export enum MONTHNAMESHORT {
 export interface EdaProcess {
   name: string
   description: string
-  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY'
+  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY' | 'CM_REV_CUS' | 'EC_PRTFACT_CHANGE' | 'EC_PODLIST'
 }
 
 
@@ -189,27 +190,32 @@ export class Message {
   constructor(public properties: { [key: string]: any | any[]; }) {
   }
 
-  private getValue = (prop: string): string => this.properties ? this.properties[prop] ? this.properties[prop] : "-" : "-"
+  private getValue = (prop: string): any => this.properties ? this.properties[prop] ? this.properties[prop] : "-" : "-"
 
-  public get type() {
+  public get type(): string {
     return this.getValue("type")
   }
-  public get meteringPoint() {
+  public get meteringPoint(): string | string[] {
     // console.log("get MeteringPoint", this.properties["meteringPoint"])
     // console.log("get MeteringPoints", this.properties["meteringPoints"])
     if (this.properties) {
-      return this.properties["meteringPoint"] ? this.properties["meteringPoint"] : this.properties["meteringPoints"] ? this.properties["meteringPoints"].join() : "-"
+      return this.properties["meteringPoint"] ? this.properties["meteringPoint"] as string : this.properties["meteringPoints"] ? this.properties["meteringPoints"].join(", ") : "-"
     }
     return "-"
   }
-  public get responseCode() {
-    return this.getValue("responseCode")
+  public get responseCode(): string | string[] {
+    const value = this.getValue("responseCode")
+    if (value instanceof Array) {
+      return (value as string[]).join(", ")
+    }
+
+    return value as string
   }
 }
 
 export interface EegNotification {
   id: number;
-  date: string;
+  date: Date;
   type: 'ERROR' | 'MESSAGE' | 'NOTIFICATION';
   message: Message;
 }

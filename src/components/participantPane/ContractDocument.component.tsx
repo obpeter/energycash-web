@@ -11,14 +11,13 @@ import {
   useIonModal
 } from "@ionic/react";
 import {eegPdfDoc, eegStar} from "../../eegIcons";
-import {eegService} from "../../service/eeg.service";
 import {ContractInfo, EegParticipant} from "../../models/members.model";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import UploadContractFilesDialog from "../dialogs/UploadContractFiles.dialog";
 
 import "./ContractDocument.component.scss"
 import {trash} from "ionicons/icons";
-import {fileService} from "../../service/file.service";
+import {Api} from "../../service";
 
 interface ContractDocumentComponentProps {
   tenant: string;
@@ -30,7 +29,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
 
   useEffect(() => {
     if (tenant && participant) {
-      fileService.loadContractDocumentInfos(tenant, participant.id)
+      Api.fileService.loadContractDocumentInfos(tenant, participant.id)
         .then(docs => {
           return docs
         })
@@ -42,7 +41,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
 
   async function createReport(fileDownloadUrl: string, filename: string) {
     try {
-      fileService.downloadDocument(tenant, fileDownloadUrl).then(b => {
+      Api.fileService.downloadDocument(tenant, fileDownloadUrl).then(b => {
         const fileURL = URL.createObjectURL(b);
         // //Open the URL on new Window
         window.open(fileURL, '_blank');
@@ -76,7 +75,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
       onWillDismiss: (ev: CustomEvent<OverlayEventDetail>) => {
         if (ev.detail.role === 'confirm' && ev.detail.data) {
           const data:FormData = ev.detail.data
-          fileService.uploadContractDocuments(tenant, participant.id, data.getAll("docfiles")
+          Api.fileService.uploadContractDocuments(tenant, participant.id, data.getAll("docfiles")
             .map(e => e as File))
             .then((r) => {
               const fileInfo = {id: r.data.addFile.id,
@@ -109,7 +108,7 @@ const ContractDocumentComponent: FC<ContractDocumentComponentProps> = ({tenant, 
       ],
       onDidDismiss: (e: CustomEvent) => {
         if (e.detail.role === 'confirm') {
-          fileService.deleteContractDocuments(tenant, c.id).then(() => {
+          Api.fileService.deleteContractDocuments(tenant, c.id).then(() => {
             setContractDocs((d) => d.filter(e => e.id !== c.id))
           })
         }

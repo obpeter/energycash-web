@@ -11,12 +11,6 @@ const ProcessHeaderComponent: FC<ProcessHeaderComponentProps> = ({name, children
     <div className={"details-header"}>
       <div><h4>{name}</h4></div>
       {children}
-      {/*{selectedProcess?.type === 'HISTORY' &&*/}
-      {/*    <>*/}
-
-      {/*        <DateComponent range={setHistoryDate} initialDate={historyDate}/>*/}
-      {/*    </>*/}
-      {/*}*/}
     </div>
   )
 }

@@ -35,6 +35,7 @@ const ctxValue = (admin: boolean, owner: boolean, user: boolean) => { return {
   isAdmin: () => {return admin},
   isOwner: () => owner,
   isUser: () => user,
+  setTenant: (tenant: string) => {},
   refresh: async () => 1
 } as EegState }
 

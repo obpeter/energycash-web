@@ -7,9 +7,9 @@ import {Metering} from "../../models/meteringpoint.model";
 import {EdaProcess, Eeg} from "../../models/eeg.model";
 import {EegParticipant} from "../../models/members.model";
 import CorePageTemplate from "../core/CorePage.template";
-import {eegService} from "../../service/eeg.service";
 import ProcessHeaderComponent from "./ProcessHeader.component";
 import ProcessContentComponent from "./ProcessContent.component";
+import {Api} from "../../service";
 
 interface ProcessValues {
   communityId: string | undefined
@@ -61,7 +61,7 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
 
       const meter = meters.find((m) => m.meteringPoint === data.meteringPoint)
       if (meter) {
-        eegService.registerMeteringPoint(eeg.rcNumber.toUpperCase(), data.participantId, meter.meteringPoint, meter.direction)
+        Api.eegService.registerMeteringPoint(eeg.rcNumber.toUpperCase(), data.participantId, meter.meteringPoint, meter.direction)
           .finally(() => {
             reset()
           })

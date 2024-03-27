@@ -1,6 +1,5 @@
 import React, {FC, useContext, useEffect, useState} from "react";
 import {
-  IonButton,
   IonCard,
   IonCol,
   IonContent,
@@ -11,14 +10,11 @@ import {
   IonPage,
   IonRow
 } from "@ionic/react";
-import {useForm} from "react-hook-form";
-import InputForm from "../components/form/InputForm.component";
 import cn from "classnames";
 import {syncCircle} from "ionicons/icons";
-import ProcessDetailPaneComponent from "../components/processDetails/ProcessDetailPane.component";
 import {EegContext} from "../store/hook/Eeg.provider";
-import {KeycloakContext} from "../store/hook/AuthProvider";
 import CorePageTemplate from "../components/core/CorePage.template";
+import {OidcAuthContext} from "../store/hook/AuthProvider";
 
 
 interface ProfileEntry {
@@ -47,7 +43,7 @@ const ProfilesPage: FC = () => {
   const [profileState, setProfileState] = useState()
 
   const {eeg} = useContext(EegContext);
-  const {tenants, roles, claims} = useContext(KeycloakContext)
+  const {tenants, roles, claims} = useContext(OidcAuthContext)
 
   useEffect(() => {
     setSelectedProcess(processes[0])

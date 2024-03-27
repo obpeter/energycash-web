@@ -16,6 +16,7 @@ import {useAppSelector} from "../store";
 import "./Dashboard.page.scss"
 import DashboardLayoutComponent from "../components/dashboard/DashboardLayout.component";
 import {ParticipantContext} from "../store/hook/ParticipantProvider";
+import {selectedTenant} from "../store/eeg";
 
 export type PieSeriesType = {
   name: string;
@@ -112,6 +113,12 @@ const DashbaordPage: FC = () => {
       }
       setReportSeries(report)
       setReportSummary(reportSum)
+    } else {
+      setReportSeries([])
+      setReportSummary({} as ReportSeriesType)
+      setAllocatedSeries({value:0} as PieSeriesType)
+      setConsumedSeries({value:0} as PieSeriesType)
+      setProducedSeries({value:0} as PieSeriesType)
     }
   }, [intermediateSeriesV2]);
 

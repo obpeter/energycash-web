@@ -1,28 +1,70 @@
 import {
-  createAnimation, IonButton,
-  IonButtons,
+  createAnimation, IonAvatar, IonButton,
+  IonButtons, IonChip,
   IonContent, IonFooter, IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
   IonList,
   IonMenu,
-  IonMenuToggle, IonModal,
+  IonMenuToggle, IonModal, IonPopover,
   IonTitle,
-  IonToolbar,
+  IonToolbar, useIonPopover,
 } from '@ionic/react';
 
 import {useLocation} from 'react-router-dom';
 import {
-  informationCircle, newspaper,
-  people, person, wallet, walletSharp
+  informationCircle, logOutOutline, newspaper,
+  people, personCircle, refreshOutline, wallet, walletSharp
 } from 'ionicons/icons';
 import './Menu.css';
-import React, {useRef} from "react";
+import React, {FC, useEffect, useRef, useState} from "react";
 import {eegChartBubble, eegChatIcon, eegProcess} from "../eegIcons";
 import {useAppSelector} from "../store";
 import {eegSelector} from "../store/eeg";
 import {useAccessGroups} from "../store/hook/Eeg.provider";
+import {useUser} from "../store/hook/AuthProvider";
+import {AuthService} from "../service/auth.service";
+import {User} from "oidc-client-ts";
+import {useAuth} from "react-oidc-context";
+import {useLocale} from "../store/hook/useLocale";
+
+// const UserDetailPopover = (logout: () => Promise<void>, user: User) =>
+const UserDetailPopover:FC<{authSvc: AuthService | undefined}> = ({authSvc}) => {
+  const {t} = useLocale("common")
+  const [user, setUser] = useState<User|null>()
+  useEffect(() => {
+    if (authSvc) {
+      authSvc?.getUser().then(u => setUser(u))
+    }
+  }, [authSvc]);
+  return (
+    <IonContent className="ion-padding">
+      <IonItem>
+        <div style={{marginBottom: "8px", textAlign: "center", width: "100%"}}>
+      <IonToolbar style={{textAlign: "center"}}>
+        <IonAvatar style={{margin: "auto"}}>
+          <IonIcon icon={personCircle} size={"large"} style={{width: "2em", height: "2em"}}></IonIcon>
+        </IonAvatar>
+        <IonLabel style={{fontSize: "14px"}}>{user?.profile.email}</IonLabel>
+      </IonToolbar>
+        </div>
+      </IonItem>
+      <div style={{marginTop: "16px"}}>
+      <IonItem button onClick={() => authSvc?.redirectToUserAccount()} lines="full">
+        <IonIcon aria-hidden="true" icon={refreshOutline} slot="start" size="small"></IonIcon>
+        <IonLabel style={{fontSize: "16px"}}>{t("menu.changePassword")}</IonLabel>
+      </IonItem>
+      <IonItem button onClick={() => authSvc?.logout()} lines="full">
+        <IonIcon aria-hidden="true" icon={logOutOutline} slot="start" size="small"></IonIcon>
+        <IonLabel style={{fontSize: "16px"}}>{t("menu.logout")}</IonLabel>
+      </IonItem>
+      </div>
+    </IonContent>
+  )
+}
+
+
 
 interface AppPage {
   url: string;
@@ -32,32 +74,45 @@ interface AppPage {
   forOnline?: boolean;
 }
 
-const Menu: React.FC = () => {
+const Menu: FC = () => {
   const location = useLocation();
   const eeg = useAppSelector(eegSelector);
   const {isAdmin} = useAccessGroups()
+  const {t} = useLocale("common")
+  const authSvr = useUser()
+
+  // const [userDetail, dismissUserDetail] = useIonPopover(<UserDetailPopover authSvc={authSvr} />, {
+  //   onDismiss: (data: any, role: string) => dismissUserDetail(data, role),
+  // });
+
+  const popover = useRef<HTMLIonPopoverElement>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const openPopover = (e: any) => {
+    popover.current!.event = e;
+    setPopoverOpen(true);
+  };
 
   const appPages: AppPage[] = [
     {
-      title: 'Dashboard',
+      title: t("menu.dashboard"),
       url: '/page/dashboard',
       iosIcon: eegChatIcon,
       mdIcon: eegChatIcon
     },
     {
-      title: eeg ? eeg.name : "Meine EEG",
+      title: eeg ? eeg.name : t("menu.eeg_name"),
       url: '/page/eeg',
       iosIcon: newspaper,
       mdIcon: newspaper
     },
     {
-      title: 'Mitglieder',
+      title: t("menu.participants"),
       url: '/page/participants',
       iosIcon: people,
       mdIcon: people
     },
     {
-      title: 'Tarife',
+      title: t("menu.rates"),
       url: '/page/rates',
       iosIcon: wallet,
       mdIcon: walletSharp
@@ -72,7 +127,7 @@ const Menu: React.FC = () => {
 
   const adminPages: AppPage[] = [
     {
-      title: 'Prozesse',
+      title: t("menu.prcesses"),
       url: '/page/processes',
       iosIcon: eegProcess,
       mdIcon: eegProcess,
@@ -116,9 +171,19 @@ const Menu: React.FC = () => {
   return (
     <IonMenu contentId="main" type="overlay">
       <IonHeader>
-        <IonToolbar
-          color="primary"><IonTitle>EEG <span style={{color: "#79DFB4"}}>Faktura</span></IonTitle></IonToolbar>
+        <IonToolbar color="primary">
+          <IonTitle>EEG <span style={{color: "#79DFB4"}}>Faktura</span></IonTitle>
+          <IonChip slot="end" onClick={openPopover}>
+            <IonAvatar>
+              <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+            </IonAvatar>
+            <IonLabel style={{color: "white"}}>...</IonLabel>
+          </IonChip>
+        </IonToolbar>
       </IonHeader>
+      <IonPopover ref={popover} isOpen={popoverOpen} onDidDismiss={() => setPopoverOpen(false)} side="bottom" alignment="end" size="auto" style={{"--width": "300px"}}>
+        <UserDetailPopover authSvc={authSvr} />
+      </IonPopover>
       <IonContent>
         <IonItem button lines="full" routerLink={"/page/notifications"} routerDirection="none">
           <IonIcon aria-hidden="true" slot="start" ios={eegChartBubble} md={eegChartBubble}/>

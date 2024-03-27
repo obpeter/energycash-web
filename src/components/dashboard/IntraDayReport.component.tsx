@@ -1,6 +1,5 @@
 import {FC, useEffect, useState} from "react";
 import {Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import {energyService} from "../../service/energy.service";
 import {useAppSelector} from "../../store";
 import {selectedPeriodSelector} from "../../store/energy";
 import {selectedTenant} from "../../store/eeg";
@@ -9,6 +8,7 @@ import "./eeg-card.scss"
 import LoadSharingComponent from "./LoadSharing.component";
 import {periodDisplayString} from "../../util/Helper.util";
 import {IonSpinner} from "@ionic/react";
+import {Api} from "../../service";
 
 type LoadSharingData = {
   name: string
@@ -29,7 +29,7 @@ const IntraDayReportComponent: FC = () => {
 
   useEffect(() => {
     if (activePeriod) {
-      energyService.fetchIntraDayReportV2(tenant, activePeriod).then((d) =>
+      Api.energyService.fetchIntraDayReportV2(tenant, activePeriod).then((d) =>
           d !== null && setData(d.map((r, i) => {
             return {
               name: `${i.toString().padStart(2, '0')}:00`,
@@ -38,10 +38,13 @@ const IntraDayReportComponent: FC = () => {
               distributed: r.distributed,
             } as LoadSharingData
           }))
-      )
+      ).catch(() => setData(EMPTY_DATA))
     }
   }, [activePeriod]);
 
+  useEffect(() => {
+    setData(EMPTY_DATA)
+  }, [tenant]);
 
   const renderLegend = (props: any) => {
     const {payload} = props;

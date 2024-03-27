@@ -26,6 +26,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
     registeredSince: isOnline ? new Date() : new Date(2023, 0, 1, 0, 0, 0, 0),
     gridOperatorName: gridOperatorName,
     gridOperatorId: gridOperatorId,
+    partFact: 100,
   } as Metering
 
   const [addMeterPaneActive, setAddMeterPaneActive] = useState(false)

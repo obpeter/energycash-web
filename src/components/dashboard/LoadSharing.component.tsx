@@ -32,7 +32,6 @@ const LoadSharingComponent: FC<LoadSharingComponentProps> = ({intermediateSeries
     }))
   }, [report]);
 
-
   const renderLegend = (props: any) => {
     const { payload } = props;
     return (

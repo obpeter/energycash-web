@@ -1,50 +1,61 @@
 import React, {FC, useCallback, useEffect, useState} from "react";
 import CorePageTemplate from "../core/CorePage.template";
 import {EdaHistories, EdaProcess, Eeg} from "../../models/eeg.model";
-import {Metering} from "../../models/meteringpoint.model";
-import {EegParticipant} from "../../models/members.model";
 import {IonAccordion, IonAccordionGroup, IonContent, IonIcon, IonItem, IonLabel, IonSearchbar} from "@ionic/react";
-import {eegService} from "../../service/eeg.service";
-import {arrowDownOutline, chevronForwardOutline} from "ionicons/icons";
+import {chevronForwardOutline} from "ionicons/icons";
 import ProcessHeaderComponent from "./ProcessHeader.component";
 import ProcessContentComponent from "./ProcessContent.component";
 import DateComponent from "../dialogs/date.component";
-import {useAppSelector} from "../../store";
-import {selectedTenant} from "../../store/eeg";
 import {EdaHistory, EdaResponseCode} from "../../models/process.model";
+import {Api} from "../../service";
+import {GroupBy} from "../../util/Helper.util";
 
 interface ProcessHistoryComponentProps {
   eeg: Eeg
   edaProcess: EdaProcess
+  today: Date
 }
 
-const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProcess}) => {
+const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProcess, today}) => {
 
   const [entries, setEntries] = useState<EdaHistories>({})
   const [processFilter, setProcessFilter] = useState<Record<string, string | undefined>>({})
   const [selectedItem, setSelectedItem] = useState(0)
-  const today = new Date()
-  const [historyDate, setHistoryDate] = useState<[Date|null, Date|null]>([new Date(today.getTime() - (86400000*14)), today])
+  // const today = new Date()
+  const [historyDate, setHistoryDate] = useState<[Date | null, Date | null]>([new Date(today.getTime() - (86400000 * 14)), today])
 
-  useEffect(() => {
+  const fetchHistory = useCallback(() => {
     const [beginDate, endDate] = historyDate
-    if(beginDate && endDate) {
-      eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime())
+    if (beginDate && endDate) {
+      Api.eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime() + (60 * 60 * 24 * 1000))
         .then(h => setEntries(h))
         .catch(console.log)
     }
-  }, [historyDate]);
+  }, [historyDate])
+
+  useEffect(() => {
+    fetchHistory()
+  }, [fetchHistory]);
+
+  const getEntriesForProcessId = (process: string): Record<string, EdaHistory[]> => {
+    switch (process) {
+      case "CM_REV_IMP":
+        return {...entries[process], ...entries["CM_REV_SP"]}
+      default:
+        return entries[process]
+    }
+  }
 
   const getEntriesForProcess = useCallback((process: string): Record<string, EdaHistory[]> => {
-    if(entries) {
-      const processEntries = entries[process]
+    if (entries) {
+      const processEntries = getEntriesForProcessId(process)
       if (processEntries) {
-        return Object.entries(processEntries).reduce((g:Record<string, EdaHistory[]>, [k, v]) => {
+        return Object.entries(processEntries).reduce((g: Record<string, EdaHistory[]>, [k, v]) => {
           extractMessage(process, v).forEach(h => {
             (h.meteringPoints && h.meteringPoints.length > 0) ? h.meteringPoints.forEach(m => {
               g[m] = [...(g[m] || []), h]
-              g[m].sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
-            }) : (g['-'] = [...(g['-'] || []), h] || g['-'].sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+              g[m].sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
+            }) : (g['-'] = [...(g['-'] || []), h] || g['-'].sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
           })
           return g
         }, {})
@@ -54,186 +65,193 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
   }, [entries])
 
   const sortHistories = (h: EdaHistory[]) => {
-    return h.sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
+    return h.sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
   }
 
   const historyItems = ["EC_REQ_ONL", "CM_REV_IMP", "CR_REQ_PT", "CR_MSG"]
 
   const getLabelName = (p: string) => {
     switch (p) {
-      case "CM_REV_IMP": return "Datenfreigabe-Aufhebung"
-      case "CR_REQ_PT": return "Anfordern von Energiedaten"
-      case "CR_MSG": return "Versenden der Energiedaten"
-      case "EC_REQ_ONL": return "Anmeldung Teilnahme Online"
+      case "CM_REV_IMP":
+        return "Datenfreigabe-Aufhebung"
+      case "CR_REQ_PT":
+        return "Anfordern von Energiedaten"
+      case "CR_MSG":
+        return "Versenden der Energiedaten"
+      case "EC_REQ_ONL":
+        return "Anmeldung Teilnahme Online"
     }
   }
 
-  const renderAccordionBody = (p: string, v: EdaHistory[]) => {
-    switch(p) {
-      case "CM_REV_IMP":
-        return (
-          <div style={{boxShadow: "2px 1px 1px lightgray", margin:"10px", border: "1px solid #d3d3d34f"}} className="ion-padding" slot="content">
-            <div className="ion-padding" style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
-              <span style={{gridColumnStart: "1", borderBottom: "1px solid #dfdfdf"}}><strong>{"Abgewickelt am:"}</strong></span>
-              <span style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
-              <span style={{gridColumnStart: "3", borderBottom: "1px solid #dfdfdf"}}><strong>{"Zustimmung endet am:"}</strong></span>
-              {v.map((h, i) => (
-                <React.Fragment key={"line" + p + i}>
-                  <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
-                  <span style={{gridColumnStart: "2"}}>{h.processType}</span>
-                  <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        )
-      case "CR_MSG":
-        return (
-          <div style={{boxShadow: "2px 1px 1px lightgray", margin:"10px", border: "1px solid #d3d3d34f"}} className="ion-padding" slot="content">
-            <div className="ion-padding" style={{display: "grid", gridTemplateColumns: "0.5fr auto 0.1fr auto auto", rowGap: "10px"}}>
-              <span style={{gridColumnStart: "1", borderBottom: "1px solid #dfdfdf"}}><strong>{"Abgewickelt am:"}</strong></span>
-              <span style={{gridColumnStart: "2", gridColumnEnd: "span 2" ,borderBottom: "1px solid #dfdfdf"}}><strong>{"Energiedaten von:"}</strong></span>
-              <span style={{gridColumnStart: "4", borderBottom: "1px solid #dfdfdf"}}><strong>{"Energiedaten bis:"}</strong></span>
-              {v.map((h, i) => (
-              <React.Fragment key={"line" + p + i}>
-                <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
-                <span style={{gridColumnStart: "2"}}>{(h.meteringFrom ? h.meteringFrom.toDateString() : "-")}</span>
-                <span style={{gridColumnStart: "3"}}><IonIcon icon={chevronForwardOutline} size="small"/> </span>
-                <span style={{gridColumnStart: "4"}}>{(h.meteringTo ? h.meteringTo.toDateString() : "-")}</span>
-              </React.Fragment>
-              ))}
-            </div>
-          </div>
-        )
-      case "EC_REQ_ONL":
-        return (
-          <div style={{boxShadow: "2px 1px 1px lightgray", margin:"10px", border: "1px solid #d3d3d34f"}} className="ion-padding" slot="content">
-            <div className="ion-padding" style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
-              <span style={{gridColumnStart: "1", borderBottom: "1px solid #dfdfdf"}}><strong>{"Abgewickelt am:"}</strong></span>
-              <span style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
-              <span style={{gridColumnStart: "3", borderBottom: "1px solid #dfdfdf"}}><strong>{"Status"}</strong></span>
-              {v.map((h, i) => (
-              <React.Fragment key={"line" + p + i}>
+  const renderTableWithConversationId = (headers: string[], e: EdaHistory[]) => {
+    return(
+      <div className="ion-padding"
+           style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
+              <span style={{
+                gridColumnStart: "1",
+                borderBottom: "1px solid #dfdfdf"
+              }}><strong>{headers[0]}</strong></span>
+        <span
+          style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{headers[1]}</strong></span>
+        <span style={{
+          gridColumnStart: "3",
+          borderBottom: "1px solid #dfdfdf"
+        }}><strong>{headers[2]}</strong></span>
+        {Object.entries(GroupBy(e, i => i.conversationId)).map(([id, hl], i) => (
+          <React.Fragment key={"line" + id + i}>
+                  <span
+                    style={{gridColumnStart: "1", gridColumnEnd: "4", fontSize: "12px"}}>Conversation-Id: {id}</span>
+            {hl.map((h, ii) => (
+              <React.Fragment key={"line_item" + ii}>
                 <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
                 <span style={{gridColumnStart: "2"}}>{h.processType}</span>
                 <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
               </React.Fragment>
             ))}
-            </div>
+            <span
+              style={{
+                gridColumnStart: "1",
+                gridColumnEnd: "4",
+                fontSize: "12px",
+                borderTop: "1px solid #9c9c9c"
+              }}></span>
+          </React.Fragment>
+        ))}
+      </div>
+    )
+  }
+
+  const renderAccordionBody = (p: string, v: EdaHistory[]) => {
+    switch (p) {
+      case "CM_REV_IMP":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Zustimmung endet am:"], v)}
+          </div>
+        )
+      case "EC_REQ_ONL":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Status"], v)}
           </div>
         )
       case "CR_REQ_PT":
         return (
-          <div style={{boxShadow: "2px 1px 1px lightgray", margin:"10px", border: "1px solid #d3d3d34f"}} className="ion-padding" slot="content">
-            <div className="ion-padding" style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
-              <span style={{gridColumnStart: "1", borderBottom: "1px solid #dfdfdf"}}><strong>{"Abgewickelt am:"}</strong></span>
-              <span style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
-              <span style={{gridColumnStart: "3", borderBottom: "1px solid #dfdfdf"}}><strong>{"Info"}</strong></span>
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Info"], v)}
+          </div>
+        )
+      case "CR_MSG":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            <div className="ion-padding"
+                 style={{display: "grid", gridTemplateColumns: "0.5fr auto 0.1fr auto auto", rowGap: "10px"}}>
+              <span style={{
+                gridColumnStart: "1",
+                borderBottom: "1px solid #dfdfdf"
+              }}><strong>{"Abgewickelt am:"}</strong></span>
+              <span style={{
+                gridColumnStart: "2",
+                gridColumnEnd: "span 2",
+                borderBottom: "1px solid #dfdfdf"
+              }}><strong>{"Energiedaten von:"}</strong></span>
+              <span
+                style={{gridColumnStart: "4", borderBottom: "1px solid #dfdfdf"}}><strong>{"Energiedaten bis:"}</strong></span>
               {v.map((h, i) => (
                 <React.Fragment key={"line" + p + i}>
                   <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
-                  <span style={{gridColumnStart: "2"}}>{h.processType}</span>
-                  <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
+                  <span style={{gridColumnStart: "2"}}>{(h.meteringFrom ? h.meteringFrom.toDateString() : "-")}</span>
+                  <span style={{gridColumnStart: "3"}}><IonIcon icon={chevronForwardOutline} size="small"/> </span>
+                  <span style={{gridColumnStart: "4"}}>{(h.meteringTo ? h.meteringTo.toDateString() : "-")}</span>
                 </React.Fragment>
               ))}
             </div>
           </div>
         )
-
     }
     return (<></>)
   }
 
-  const extractMessage = (process: string, msg: Record<string, any>[]): EdaHistory[] => {
-
-    switch(process) {
+  const extractMessage = (process: string, msg: EdaHistory[]): EdaHistory[] => {
+    switch (process) {
       case "CM_REV_IMP": {
         const history_cm = msg.map((e) => {
-          return {
-            protocol: e["protocol"],
-            date: new Date(e["date"]),
-            message: e["message"],
-            processType: e["processType"],
-            meteringPoint: e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-"),
-            meteringPoints: e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint),
-            responseCode: e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.consentEnd ? new Date(r.consentEnd).toLocaleDateString() : z, "-")
-          } as EdaHistory
+          e.date = new Date(e.date)
+          e.responseCode = e.message.consentEnd ? new Date(e["message"].consentEnd).toDateString() : "-"
+
+          switch (e.processType) {
+            case "ANTWORT_CCMS":
+              e.meteringPoint = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
+              break;
+            case "ABLEHNUNG_CCMS":
+              e.meteringPoint = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
+              e.responseCode = e["message"].responseCode ? EdaResponseCode.getMessage(e["message"].responseCode[0]) : "-"
+              break;
+            case "AUFHEBUNG_CCMS":
+              e.meteringPoint = e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-"
+              e.meteringPoints = e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : []
+              break;
+            default:
+              e.responseCode = "-"
+          }
+          return e
         })
         return sortHistories(history_cm)
       }
       case "CR_MSG": {
         const filter = processFilter[process] || ''
         const history = sortHistories(msg.map((e) => {
-          return {
-            protocol: e["protocol"],
-            date: new Date(e["date"]),
-            message: e["message"],
-            meteringPoint: e["message"].meter ? e["message"].meter : "-",
-            meteringPoints: e["message"].meter ? [e["message"].meter] : [],
-            meteringFrom: new Date(e["message"].from),
-            processType: e["processType"],
-            meteringTo: new Date(e["message"].to),
-          } as EdaHistory
+          e.date = new Date(e.date)
+          e.meteringPoint = e.message.meter ? e.message.meter : "-"
+          e.meteringPoints = e.message.meter ? [e.message.meter] : []
+          e.meteringFrom = new Date(e.message.from)
+          e.meteringTo = new Date(e.message.to)
+          return e
         }))
-
         // const _history = filter.length > 0 ? history.filter(h => h.meteringPoint?.toLowerCase().indexOf(filter) !== -1) : history
         return history
       }
       case "CR_REQ_PT": {
         const history_cr_req_pt = msg.map((e) => {
-          const m = {
-            protocol: e["protocol"],
-            date: new Date(e["date"]),
-            message: e["message"],
-            processType: e["processType"],
-            meteringPoint: e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-",
-            meteringPoints: e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : [],
-          } as EdaHistory
-
+          e.date = new Date(e.date)
+          e.meteringPoint = e.message.meter?.meteringPoint ? e.message.meter.meteringPoint : "-"
+          e.meteringPoints = e.message.meter?.meteringPoint ? [e.message.meter.meteringPoint] : []
           switch (e.processType) {
             case "ABLEHNUNG_PT":
             case "ANTWORT_PT":
-              m.responseCode = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
+              e.responseCode = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
               break
             case "ANFORDERUNG_PT":
-              m.responseCode = e["message"].timeline ? new Date(e["message"].timeline.from).toLocaleDateString() + " - " + new Date(e["message"].timeline.to).toLocaleDateString() : ""
+              e.responseCode = e.message.timeline ? new Date(e.message.timeline.from).toDateString() + " - " + new Date(e.message.timeline.to).toDateString() : ""
           }
-          return m
+          return e
         })
         return sortHistories(history_cr_req_pt)
       }
       case "EC_REQ_ONL": {
         const history_cr_req_pt = msg.map((e) => {
+          e.date = new Date(e.date)
           switch (e.processType) {
             case "ABSCHLUSS_ECON":
-              return {
-                protocol: e["protocol"],
-                date: new Date(e["date"]),
-                message: e["message"],
-                processType: e["processType"],
-                meteringPoint: e["message"]["meterList"] ? e["message"]["meterList"].length > 0 ?
-                  e["message"]["meterList"][0].meteringPoint ? "-" : "-" : "-" : "-",
-                meteringPoints: e["message"]["meterList"] ? e["message"]["meterList"].map((m:any) => m.meteringPoint) : [],
-              } as EdaHistory
+              e.meteringPoint = e.message.meterList ? e.message.meterList.length > 0 ?
+                e.message.meterList[0].meteringPoint ? "-" : "-" : "-" : "-"
+              e.meteringPoints = e.message.meterList ? e.message.meterList.map((m: any) => m.meteringPoint) : []
+              return e
             case "ANFORDERUNG_ECON":
-              return {
-                protocol: e["protocol"],
-                date: new Date(e["date"]),
-                message: e["message"],
-                processType: e["processType"],
-                meteringPoint: e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-",
-                meteringPoints: e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : [],
-              } as EdaHistory
+              e.meteringPoint = e.message.meter?.meteringPoint ? e.message.meter.meteringPoint : "-"
+              e.meteringPoints = e.message.meter?.meteringPoint ? [e.message.meter.meteringPoint] : []
+              return e
             default:
-              return {
-                protocol: e["protocol"],
-                date: new Date(e["date"]),
-                message: e["message"],
-                processType: e["processType"],
-                meteringPoint: e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-"),
-                meteringPoints: e["message"]["responseData"].map((r: Record<string, any>) => r.meteringPoint),
-                responseCode: e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
-              } as EdaHistory
+              e.meteringPoint = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e.message.responseData.map((r: Record<string, any>) => r.meteringPoint)
+              e.responseCode = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
+              return e
           }
         })
         return sortHistories(history_cr_req_pt)
@@ -247,8 +265,10 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
     const target = ev.target as HTMLIonSearchbarElement;
     if (target) query = target.value!.toLowerCase();
 
-    if (selectedItem > 0 ) {
-      setProcessFilter((p) => { return {...p, [historyItems[selectedItem-1]]: query}})
+    if (selectedItem > 0) {
+      setProcessFilter((p) => {
+        return {...p, [historyItems[selectedItem - 1]]: query}
+      })
     }
   };
 
@@ -258,123 +278,40 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
         <DateComponent range={setHistoryDate} initialDate={historyDate}/>
       </ProcessHeaderComponent>
       <ProcessContentComponent>
-      <CorePageTemplate>
-        {/*style={{position: "absolute", top: "0", bottom: "0", left: "0", right: "0"}}*/}
-        <div style={{margin: "16px"}}>
+        <CorePageTemplate>
+          {/*style={{position: "absolute", top: "0", bottom: "0", left: "0", right: "0"}}*/}
+          <div style={{margin: "16px"}}>
 
-          {historyItems.map((p, i) => (
-        <div key={p + i}>
-          <IonItem button onClick={() => selectedItem !== i + 1 ? setSelectedItem(i+1) : setSelectedItem(0)}>
-            <IonLabel>{getLabelName(p)}</IonLabel>
-          </IonItem>
-          {selectedItem === (i+1) &&
-              <div style={{margin: "10px 24px"}}>
-                  <div>
-                      <IonSearchbar debounce={500} onIonInput={(ev) => handleInput(ev)}></IonSearchbar>
-                  </div>
-                  <IonAccordionGroup>
-                {Object.entries(getEntriesForProcess(p))
-                  .filter(([k, v]) => (processFilter[p] || '').length > 0 ? k.toLowerCase().indexOf(processFilter[p]!) !== -1 : true)
-                  .map(([k, v], i) => (
-            <IonAccordion key={i} value={"cm_rev_imp_"+i}>
-              <IonItem slot="header" color="light">
-                <IonLabel>{k}</IonLabel>
-              </IonItem>
-              {renderAccordionBody(p, v)}
-              {/*<div style={{boxShadow: "2px 1px 1px lightgray", margin:"10px"}} className="ion-padding" slot="content">*/}
-              {/*  {v.map((e, i) => (*/}
-              {/*  <div key={"line" + p + i} className="ion-padding">*/}
-              {/*    {getProtocolLine(p, e)}*/}
-              {/*  </div>*/}
-              {/*    ))}*/}
-              {/*</div>*/}
-            </IonAccordion>
-                ))}
-                  </IonAccordionGroup>
+            {historyItems.map((p, i) => (
+              <div key={p + i}>
+                <IonItem button onClick={() => selectedItem !== i + 1 ? setSelectedItem(i + 1) : setSelectedItem(0)}>
+                  <IonLabel>{getLabelName(p)}</IonLabel>
+                </IonItem>
+                {selectedItem === (i + 1) &&
+                    <div style={{margin: "10px 24px"}}>
+                        <div>
+                            <IonSearchbar debounce={500} onIonInput={(ev) => handleInput(ev)}></IonSearchbar>
+                        </div>
+                        <IonAccordionGroup>
+                          {Object.entries(getEntriesForProcess(p))
+                            .filter(([k, v]) => (processFilter[p] || '').length > 0 ? k.toLowerCase().indexOf(processFilter[p]!) !== -1 : true)
+                            .map(([k, v], i) => (
+                              <IonAccordion key={i} value={"cm_rev_imp_" + i}>
+                                <IonItem slot="header" color="light">
+                                  <IonLabel>{k}</IonLabel>
+                                </IonItem>
+                                {renderAccordionBody(p, v)}
+                              </IonAccordion>
+                            ))}
+                        </IonAccordionGroup>
+                    </div>
+                }
               </div>
-          }
-        </div>
             ))}
-          {/*<div>*/}
-          {/*  <IonItem button onClick={() => selectedItem !== 2 ? setSelectedItem(2) : setSelectedItem(0)}>*/}
-          {/*    <IonLabel>Versenden der Energiedaten</IonLabel>*/}
-          {/*  </IonItem>*/}
-          {/*  {selectedItem === 2 &&*/}
-          {/*      <div>*/}
-          {/*          <IonAccordionGroup>*/}
-          {/*            {getEntriesForProcess("CR_MSG").map(([k, v], i) => (*/}
-          {/*              <IonAccordion key={i} value={"cr_msg_"+i}>*/}
-          {/*                <IonItem slot="header" color="light">*/}
-          {/*                  <IonLabel>{k}</IonLabel>*/}
-          {/*                </IonItem>*/}
-          {/*                <div className="ion-padding" slot="content">*/}
-          {/*                  {v.map((e, i) => (*/}
-          {/*                    <div key={i} className="ion-padding">*/}
-          {/*                      <div style={{fontSize:"14px"}}>*/}
-          {/*                      <span>{e.date.toDateString()}</span><span>{": "}</span>*/}
-          {/*                      <span>{(e.meteringFrom ? e.meteringFrom.toDateString() : "-") + " <-> "}</span>*/}
-          {/*                      <span>{(e.meteringTo ? e.meteringTo.toDateString() : "-")}</span>*/}
-          {/*                      </div>*/}
-          {/*                    </div>*/}
-          {/*                  ))}*/}
-          {/*                </div>*/}
-          {/*              </IonAccordion>*/}
-          {/*            ))}*/}
-          {/*          </IonAccordionGroup>*/}
-          {/*      </div>*/}
-          {/*  }*/}
-          {/*</div>*/}
-        {/*<div>*/}
-        {/*  <IonItem button onClick={() => setSelectedItem(2)}>*/}
-        {/*    <IonLabel>Entry 2</IonLabel>*/}
-        {/*  </IonItem>*/}
-        {/*  { selectedItem === 2 &&*/}
-        {/*      <div>*/}
-        {/*  <IonAccordionGroup>*/}
-        {/*    <IonAccordion value="first">*/}
-        {/*      <IonItem slot="header" color="light">*/}
-        {/*        <IonLabel>First Accordion</IonLabel>*/}
-        {/*      </IonItem>*/}
-        {/*      <div className="ion-padding" slot="content">*/}
-        {/*        <div className="ion-padding">*/}
-        {/*          First Content*/}
-        {/*        </div>*/}
-        {/*        <div className="ion-padding">*/}
-        {/*          First Content*/}
-        {/*        </div>*/}
-        {/*        <div className="ion-padding">*/}
-        {/*          First Content*/}
-        {/*        </div>*/}
-        {/*        <div className="ion-padding">*/}
-        {/*          First Content*/}
-        {/*        </div>*/}
-        {/*      </div>*/}
-        {/*    </IonAccordion>*/}
-        {/*    <IonAccordion value="second">*/}
-        {/*      <IonItem slot="header" color="light">*/}
-        {/*        <IonLabel>Second Accordion</IonLabel>*/}
-        {/*      </IonItem>*/}
-        {/*      <div className="ion-padding" slot="content">*/}
-        {/*        Second Content*/}
-        {/*      </div>*/}
-        {/*    </IonAccordion>*/}
-        {/*    <IonAccordion value="third">*/}
-        {/*      <IonItem slot="header" color="light">*/}
-        {/*        <IonLabel>Third Accordion</IonLabel>*/}
-        {/*      </IonItem>*/}
-        {/*      <div className="ion-padding" slot="content">*/}
-        {/*        Third Content*/}
-        {/*      </div>*/}
-        {/*    </IonAccordion>*/}
-        {/*  </IonAccordionGroup>*/}
-        {/*      </div>*/}
-        {/*  }*/}
-        {/*</div>*/}
-        </div>
-      </CorePageTemplate>
+          </div>
+        </CorePageTemplate>
       </ProcessContentComponent>
     </>
   )
 }
-
 export default ProcessHistoryComponent

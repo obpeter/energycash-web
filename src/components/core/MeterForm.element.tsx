@@ -10,6 +10,7 @@ import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
 import {useEegArea} from "../../store/hook/Eeg.provider";
+import {useLocale} from "../../store/hook/useLocale";
 
 interface MeterFormElementProps {
   rates: EegTariff[]
@@ -20,6 +21,7 @@ interface MeterFormElementProps {
 
 const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterReadOnly, onChange}) => {
 
+  const {t} = useLocale("common")
   const area = useEegArea()
 
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
@@ -27,13 +29,13 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
   const [selectedDirection, setSelectedDirection] = useState(0);
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
-  const direction = watch('direction')
+  const [direction, status] = watch(['direction', 'status'])
 
   const isChangeable = () => {
     if (meterReadOnly === undefined) {
       return true
     }
-    return !meterReadOnly
+    return !meterReadOnly || status === 'INVALID'
   }
 
   useEffect(() => {
@@ -55,7 +57,9 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
 
   const onChangeDirection = (s: number) => {
     // setSelectedDirection(s)
-    setValue(`direction`, s === 0 ? "CONSUMPTION" : "GENERATION");
+    const value = s === 0 ? "CONSUMPTION" : "GENERATION"
+    setValue(`direction`, value);
+    _onChange && _onChange("direction", value)
   }
 
   const handleMeterPaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
@@ -84,7 +88,7 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
         <IonRow>
           <IonCol size="auto">
             <ToggleButtonComponent
-              buttons={[{label: 'Verbraucher', icon: eegPlug}, {label: 'Erzeuger', icon: eegSolar}]}
+              buttons={[{label: t("consumer"), icon: eegPlug}, {label: t("producer"), icon: eegSolar}]}
               onChange={onChangeDirection}
               value={selectedDirection}
               changeable={isChangeable()}
@@ -93,11 +97,11 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
         </IonRow>
       </IonGrid>
       <IonList>
-        <SelectForm name={"tariff_id"} label="Tarif" control={control} options={getRatesOption()} onChangePartial={_onChange} interfaceOptions={{header: getTarifHeaderString()}}/>
-        <InputForm name={"meteringPoint"} label="Zählpunkt" control={control} type="text" readonly={meterReadOnly}
+        <SelectForm name={"tariff_id"} label={t("tariff")} control={control} options={getRatesOption()} onChangePartial={_onChange} interfaceOptions={{header: getTarifHeaderString()}}/>
+        <InputForm name={"meteringPoint"} label={t("metering")} control={control} type="text" readonly={meterReadOnly} protectedControl={meterReadOnly}
                    counter={true} maxlength={33}
                    rules={{
-                     required: "Zählpunktnummer fehlt",
+                     required: t("metering_missing_msg"),
                      minLength: {value: 33, message: "MIN-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern"},
                      maxLength: {value: 33, message: "MAX-Zählpunktnummer beginnt mit AT gefolgt von 31 Nummern"},
                      pattern: {
@@ -109,22 +113,24 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
                    onPaste={handleMeterPaste}
                    onChangePartial={_onChange}
         />
+        <InputForm name={"partFact"} label={t("process.partFact.label")} control={control} rules={{required: true}}
+                   type="number" onChangePartial={_onChange} protectedControl={true}/>
         {area && area === 'BEG' && <>
-            <InputForm name={"gridOperatorId"} label="Netzbetreiber-ID" control={control} rules={{required: true}}
-                       type="text" onChangePartial={_onChange}/>
-            <InputForm name={"gridOperatorName"} label="Netzbetreiber-Name" control={control} rules={{required: true}}
-                       type="text" onChangePartial={_onChange}/>
+            <InputForm name={"gridOperatorId"} label={t("gridOperator_id")} control={control} rules={{required: true}}
+                       type="text" onChangePartial={_onChange} protectedControl={!isChangeable()}/>
+            <InputForm name={"gridOperatorName"} label={t("gridOperator_name")} control={control} rules={{required: true}}
+                       type="text" onChangePartial={_onChange} protectedControl={!isChangeable()}/>
         </>}
-        <CheckboxComponent label="Wechselrichter anlegen" setChecked={setWithWechselrichter}
+        <CheckboxComponent label={t("inverterCheckbox_label")} setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>
         {withWechselrichter && (
-          <InputForm name={"inverterId"} label="Wechselrichternummer" control={control} rules={{required: false}}
+          <InputForm name={"inverterId"} label={t("inverternr_label")} control={control} rules={{required: false}}
                      type="text" onChangePartial={_onChange}/>
         )}
-        <InputForm name={"transformer"} label="Transformator" control={control} rules={{required: false}} type="text" onChangePartial={_onChange}/>
-        <InputForm name={"equipmentNumber"} label="Anlagen-Nr." control={control} rules={{required: false}}
+        <InputForm name={"transformer"} label={t("transformer_label")} control={control} rules={{required: false}} type="text" onChangePartial={_onChange}/>
+        <InputForm name={"equipmentNumber"} label={t("equipmentNumber_label")} control={control} rules={{required: false}}
                    type="text" onChangePartial={_onChange}/>
-        <InputForm name={"equipmentName"} label="Anlagename" control={control} rules={{required: false}} type="text" onChangePartial={_onChange}/>
+        <InputForm name={"equipmentName"} label={t("equipmentName_label")} control={control} rules={{required: false}} type="text" onChangePartial={_onChange}/>
       </IonList>
     </>
   )

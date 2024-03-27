@@ -1,6 +1,6 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {metaAdapter, initialState, reportAdapter, participantReportAdapter} from "../states";
-import {fetchEnergyReport, fetchEnergyReportV2, setSelectedPeriod} from "../actions";
+import {clearEnergyState, fetchEnergyReport, fetchEnergyReportV2, setSelectedPeriod} from "../actions";
 import {SelectedPeriod} from "../../../models/energy.model";
 
 const reportIdToPeriod = (id: string):SelectedPeriod => {
@@ -28,5 +28,8 @@ export const reducer = createReducer(initialState, builder =>
       state.totalProduction = report.totalProduction
       participantReportAdapter.setAll(state.participantReports, report.participantReports)
       metaAdapter.setAll(state.meta, report.meta)
+    })
+    .addCase(clearEnergyState, (state, action) => {
+      participantReportAdapter.removeAll(state.participantReports)
     })
 );

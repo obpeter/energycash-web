@@ -27,7 +27,7 @@ export const filterActiveMeter = <T extends Record<string, EnergyMeta>>(meta: T,
         return true
       }
     } catch(e) {
-      console.log("Filter Meter: ", m, e, meta[m.meteringPoint])
+      console.error("Filter Meter: ", m, e, meta[m.meteringPoint])
     }
   }
   return false

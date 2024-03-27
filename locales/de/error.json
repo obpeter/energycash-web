@@ -1,0 +1,6 @@
+{
+  "E_2055_participant_update" : "Die gewünschte Eigenschaft konnte nicht erneuert werden.",
+  "E_1000_eeg_load": "Fehler beim laden der EEG Basisdaten!",
+  "E_1001_eeg_load": "Die EEG wurde noch nicht angelegt!",
+  "E_1021_tariff_create": "Tarif konnte nicht generiert werden."
+}

@@ -1,11 +1,13 @@
-import {AuthClient} from "../store/hook/AuthProvider";
+import {AuthService} from "./auth.service";
+import {determineErrTxt, ErrorResponse, IErrorResponse} from "./error.text";
 
 export const API_API_SERVER = import.meta.env.VITE_API_SERVER_URL;
 export const FILESTORE_API_SERVER = import.meta.env.VITE_FILESTORE_SERVER_URL;
 export const ENERGY_API_SERVER = import.meta.env.VITE_ENERGY_SERVER_URL;
 
 export interface ErrorMessage {
-  status: string
+  code: number
+  message: string
 }
 
 export class HttpError extends Error {
@@ -15,20 +17,57 @@ export class HttpError extends Error {
 }
 
 class EegBaseService {
-  authClient: AuthClient;
 
-  public constructor(authClient: AuthClient) {
-    this.authClient = authClient;
+  public constructor(private authService: AuthService) {
   }
 
+  protected async getUser() {
+    return this.authService.getToken().catch(e => {
+      this.authService.refresh()
+    })
+  }
+
+  lock = this.createLoc<string>()
+  protected async lookupToken() {
+    return this.lock(async () => {
+      try {
+        const token = await this.getUser()
+        if (token) {
+          return token
+        }
+      } catch {
+        console.log("Not Authenticated")
+      }
+      throw new Error()
+    })
+  }
   protected getSecureHeaders(token: string, tenant: string) {
     return {'Authorization': `Bearer ${token}`, "tenant": tenant}
   }
+  protected getSecureHeadersX(token: string, tenant: string) {
+    return {'Authorization': `Bearer ${token}`, "X-Tenant": tenant}
+  }
 
-  protected async handleErrors(response: Response) {
+
+  protected async handleErrors(response: Response):Promise<Response> {
+
+    const isErrorResponse = (err: any): err is IErrorResponse => {
+      return err.error !== undefined
+    }
+
     if (!response.ok) {
-      const errorBody = await response.json()
-      throw new HttpError(errorBody, response.statusText);
+      switch (response.status) {
+        case 401:
+          await this.authService.login()
+          break
+        default:
+          const errorBody = await response.json()
+          if (isErrorResponse(errorBody)) {
+            throw new Error(determineErrTxt(new ErrorResponse(errorBody.error)));
+          } else {
+            throw new Error(response.statusText)
+          }
+      }
     }
     return response;
   }
@@ -40,6 +79,73 @@ class EegBaseService {
     }
     return data
   }
+
+  protected async handleGQLResponse(response: Response) {
+    return response.json().then(d => {
+      if (d.errors)
+        throw Error(d.errors[0].message)
+      else
+        return d.data
+    })
+  }
+
+  protected async handleDownload (response : Response, defaultFilename : string) : Promise<boolean> {
+    return response.blob().then(file => {
+      //Build a URL from the file
+      const fileURL = URL.createObjectURL(file);
+
+      let filename = response.headers.get('Filename')
+      if (!filename) {
+        const disposition = response.headers.get('Content-Disposition');
+        const dispositionParts = disposition ? disposition.split(';') : null;
+        filename = dispositionParts ? dispositionParts[1].split('=')[1]: null;
+        filename = filename ? filename.replaceAll('"', '') : null;
+      }
+      if (!filename)
+        filename = defaultFilename
+
+      const link = document.createElement('a');
+      link.href = fileURL
+      link.setAttribute('download', filename)
+
+      // 3. Append to html page
+      document.body.appendChild(link);
+      // 4. Force download
+      link.click();
+      // 5. Clean up and remove the link
+      link.parentNode?.removeChild(link);
+
+      return true;
+    });
+  }
+
+  private createLoc<T>() {
+    const queue: any[] = [];
+    let active = false;
+    return (fn: any) => {
+      let deferredResolve: (value: (T | PromiseLike<T>)) => void;
+      let deferredReject: (value: (T | PromiseLike<T>)) => void;
+      const deferred = new Promise<T>((resolve, reject) => {
+        deferredResolve = resolve;
+        deferredReject = reject;
+      });
+      const exec = async () => {
+        await fn().then(deferredResolve, deferredReject);
+        if (queue.length > 0) {
+          queue.shift()();
+        } else {
+          active = false;
+        }
+      };
+      if (active) {
+        queue.push(exec);
+      } else {
+        active = true;
+        exec();
+      }
+      return deferred;
+    };
+  };
 }
 
 export default EegBaseService

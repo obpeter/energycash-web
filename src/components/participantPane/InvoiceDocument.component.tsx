@@ -1,9 +1,9 @@
 import React, {FC, useEffect, useState} from "react";
 import {IonIcon, IonItem, IonLabel, IonList, IonListHeader} from "@ionic/react";
-import {eegService} from "../../service/eeg.service";
 import {InvoiceDocumentResponse} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
 import {eegPdfDoc} from "../../eegIcons";
+import {Api} from "../../service";
 
 
 const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}> = ({tenant, participant}) => {
@@ -12,7 +12,7 @@ const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}
 
   useEffect(() => {
     if (tenant && participant) {
-      eegService.fetchBillingDocumentFiles(tenant)
+      Api.eegService.fetchBillingDocumentFiles(tenant)
         .then(docs => docs.filter(d => d.participantId === participant.id))
         .then(docs => setInvoiceDocs(docs))
     }
@@ -21,7 +21,7 @@ const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}
 
   async function downloadBillingDocument(fileDataId: string) {
     try {
-      eegService.downloadBillingDocument(tenant, fileDataId).then(b => {
+      Api.eegService.downloadBillingDocument(tenant, fileDataId).then(b => {
         const fileURL = URL.createObjectURL(b);
         // //Open the URL on new Window
         window.open(fileURL, '_blank');

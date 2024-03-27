@@ -6,6 +6,8 @@ import {people} from "ionicons/icons";
 import {eegBusiness} from "../eegIcons";
 import {EegParticipant} from "../models/members.model";
 import {useFormContext} from "react-hook-form";
+import {useMaskito} from "@maskito/react";
+import {IbanInputForm} from "./form/IbanInputForm";
 
 interface ParticipantRegisterCommonPaneComponentProps {
   participant: EegParticipant;
@@ -20,6 +22,22 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
   const [selectedBusinessType, setSelectedBusinessType] = useState(0)
   const {control, setValue, formState: {errors}} = useFormContext<EegParticipant>();
 
+  const ibanMask = useMaskito({
+    options: {
+      mask: [
+        'A', 'T',
+        ...Array(2).fill(/\d/),
+        ' ',
+        ...Array(4).fill(/\d/),
+        ' ',
+        ...Array(4).fill(/\d/),
+        ' ',
+        ...Array(4).fill(/\d/),
+        ' ',
+        ...Array(4).fill(/\d/),
+      ],
+    },
+  });
   const onChangeBusinessType = (s: number) => {
     setSelectedBusinessType(s)
     setValue("businessRole", s === 0 ? "EEG_PRIVATE" : "EEG_BUSINESS")
@@ -88,8 +106,7 @@ const ParticipantRegisterCommonPaneComponent: FC<ParticipantRegisterCommonPaneCo
         <div style={{flexGrow: "1", height: "100%", width: "50%"}}>
           <IonList>
             <IonListHeader>Bankdaten</IonListHeader>
-            <InputForm name={"accountInfo.iban"} label="IBAN" control={control} rules={{required: "IBAN fehlt"}}
-                       type="text" error={errors.accountInfo?.iban}/>
+            <IbanInputForm name={"accountInfo.iban"} control={control} error={errors.accountInfo?.iban}/>
             <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control}
                        rules={{required: "Kontoinhaber fehlt"}} type="text" error={errors.accountInfo?.owner}/>
           </IonList>

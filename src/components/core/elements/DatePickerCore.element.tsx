@@ -75,10 +75,81 @@ const DatePickerCoreElement: FC<DatePickerCoreProps> = ({name, initialValue, onC
     );
   });
 
+  const range = (start: number, end: number) => Array.from(
+    Array(Math.abs(end - start) + 1),
+    (_, i) => start + i
+  );
+
+  const getYear = (date: Date) => date.getFullYear()
+  const getMonth = (date: Date) => date.getMonth()
+
+  const years = range(2020, getYear(new Date()) + 1);
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   return (
     <div className="form-element">
       <DatePicker
         // selectsRange={false}
+        renderCustomHeader={({
+                               date,
+                               changeYear,
+                               changeMonth,
+                               decreaseMonth,
+                               increaseMonth,
+                               prevMonthButtonDisabled,
+                               nextMonthButtonDisabled,
+                             }) => (
+          <div
+            style={{
+              margin: 10,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <button  style={{color: "inherit", background: "transparent"}} onClick={decreaseMonth} disabled={prevMonthButtonDisabled}>
+              {"<"}
+            </button>
+            <select style={{background: "transparent", margin:"1px"}}
+              value={getYear(date)}
+              onChange={({ target: { value } }) => changeYear(Number(value))}
+            >
+              {years.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+
+            <select style={{background: "transparent", margin:"1px"}}
+              value={months[getMonth(date)]}
+              onChange={({ target: { value } }) =>
+                changeMonth(months.indexOf(value))
+              }
+            >
+              {months.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+
+            <button style={{color: "inherit", background: "transparent"}} onClick={increaseMonth} disabled={nextMonthButtonDisabled}>
+              {">"}
+            </button>
+          </div>
+        )}
         selected={currentDate}
         name={name}
         onChange={(update) => {

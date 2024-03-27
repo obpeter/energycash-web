@@ -10,6 +10,8 @@ import SelectForm from "./form/SelectForm.component";
 import {EegTariff} from "../models/eeg.model";
 import DatePickerCoreElement from "./core/elements/DatePickerCore.element";
 import DatePickerFormElement from "./form/DatePickerForm.element";
+import {IbanInputForm} from "./form/IbanInputForm";
+import {PhoneInputForm} from "./form/PhoneInputForm";
 
 interface MemberFormComponentProps {
   participant: EegParticipant
@@ -45,14 +47,6 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
       reset(participant)
     }
   }, [participant])
-
-  const handlePhonePaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
-    e.persist()
-    e.clipboardData.items[0].getAsString(text=>{
-      setValue("contact.phone", text.replace(/\+/gi, "00").replace(/\s/gi,""))
-    })
-    e.stopPropagation()
-  }
 
   const getRatesOption = () => {
     const r =  rates.filter(r => r.type === "EEG").map((r) => {
@@ -110,7 +104,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
           <InputForm name={"billingAddress.streetNumber"} label="Hausnummer" control={control} type="text" onChangePartial={onUpdateBaseData}/>
           <InputForm name={"billingAddress.zip"} label="Postleitzahl" control={control} type="text" onChangePartial={onUpdateBaseData}/>
           <InputForm name={"billingAddress.city"} label="Ort" control={control} type="text" onChangePartial={onUpdateBaseData}/>
-          <InputForm name={"contact.phone"} label="Telefon" control={control} onPaste={handlePhonePaste} type="text" onChangePartial={onUpdateBaseData}/>
+          <PhoneInputForm name={"contact.phone"} control={control} setValue={setValue} onChangePartial={onUpdateBaseData}/>
           <InputForm name={"contact.email"} label="E-Mail" control={control} rules={{
             required: "Email Adresse fehlt",
             pattern: {
@@ -122,17 +116,7 @@ const MemberFormComponent: FC<MemberFormComponentProps> = ({participant, rates, 
       {/*</form>*/}
         <IonList>
           <IonListHeader>Bankdaten</IonListHeader>
-          {/*<InputFieldCoreElement initialValue={participant.accountInfo.iban} onChange1={onUpdateBaseData} name="accountInfo.iban" label="IBAN" type="text"/>*/}
-          {/*<InputFieldCoreElement initialValue={participant.accountInfo.owner} onChange1={onUpdateBaseData} name="accountInfo.owner" label="Kontoinhaber" type="text"/>*/}
-          <InputForm name={"accountInfo.iban"} label="IBAN"
-                     rules={{
-                       required: 'IBAN ist obligatorisch',
-                       pattern: {
-                         value: /^[AT|DE]+[0-9.-]{18,20}$/i,
-                         message: 'IBAN ist nicht valide',
-                       },
-                     }}
-                     control={control} type="text" onChangePartial={onUpdateBaseData} error={errors.accountInfo?.iban}/>
+          <IbanInputForm name={"accountInfo.iban"} control={control} onChangePartial={onUpdateBaseData} error={errors.accountInfo?.iban}/>
           <InputForm name={"accountInfo.owner"} label="Kontoinhaber" control={control} type="text" onChangePartial={onUpdateBaseData}/>
         </IonList>
 

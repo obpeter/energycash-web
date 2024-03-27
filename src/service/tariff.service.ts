@@ -1,15 +1,13 @@
 import EegBaseService, {API_API_SERVER} from "./base.service";
-import {AuthClient} from "../store/hook/AuthProvider";
-import {Eeg} from "../models/eeg.model";
-import {authKeycloak} from "../keycloak";
+import {AuthService} from "./auth.service";
 
-class TariffService extends EegBaseService {
-  public constructor(authClient: AuthClient) {
-    super(authClient);
+export class TariffService extends EegBaseService {
+  public constructor(authService: AuthService) {
+    super(authService);
   }
 
   async archiveTariff(tenant: string, id: string): Promise<any> {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return fetch(`${API_API_SERVER}/eeg/tariff/${id}`, {
       method: 'DELETE',
       headers: {
@@ -20,4 +18,4 @@ class TariffService extends EegBaseService {
   }
 }
 
-export const tariffService = new TariffService(authKeycloak);
+// export const tariffService = new TariffService(authKeycloak);

@@ -29,6 +29,7 @@ export const eegSelector = createSelector(
   }
 )
 
+
 export const selectEegById = (id: string) =>
   createSelector(
     featureStateSelector,
@@ -40,4 +41,9 @@ export const selectEegById = (id: string) =>
 export const selectedTenant = createSelector(
   featureStateSelector,
   state => state.selectedTenant || ""
+)
+
+export const selectError = createSelector(
+  featureStateSelector,
+  state => {return {hasError: state.hasError, error: state.error}}
 )

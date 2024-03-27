@@ -123,7 +123,7 @@ const EegOverviewComponent: FC<EegOverviewComponentProps> = ({participants, rate
                   gap: "10px",
                   alignItems: "center",
                   fontSize: "14px"
-                }}>{producerCount} Einspeicer
+                }}>{producerCount} Einspeiser
                 </div>
               </div>
             </div>

@@ -219,3 +219,19 @@ export function GetWeek(date: Date) {
   let weekNumber = Math.floor(1 + 0.5 + (currentThursday.getTime() - firstThursday.getTime()) / 86400000 / 7);
   return weekNumber;
 }
+
+export function GroupBy<T, K extends keyof any>(list: T[], getKey: (item: T) => K) {
+  return list.reduce((previous, currentItem) => {
+    const group = getKey(currentItem);
+    if (!previous[group]) previous[group] = [];
+    previous[group].push(currentItem);
+    return previous;
+  }, {} as Record<K, T[]>);
+}
+
+export function JoinStrings(sep: string, missing?: string, ...items: string[]): string {
+  if (missing) {
+    return items.map(i => i && i.length > 0 ? i : missing).join(sep)
+  }
+  return items.filter(i => i.length > 0).join(sep)
+}

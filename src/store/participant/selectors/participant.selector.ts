@@ -85,14 +85,14 @@ export const activeParticipantsSelector1 = createSelector(
       const [start, end] = getPeriodDates(period)
       const n = participants.map(p => {
         return {
-          ...p, meters: p.meters.filter(m =>
+          ...p, meters: p.meters ? p.meters.filter(m =>
             (m.participantState
               ? (new Date(m.participantState.inactiveSince).getTime() >= end.getTime() && new Date(m.participantState.activeSince).getTime() <= end.getTime()) ||
               (new Date(m.participantState.inactiveSince).getTime() >= start.getTime() && new Date(m.participantState.inactiveSince).getTime() <= end.getTime())
               : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
-          )
+          ) : [/*{meteringPoint: "AT9900000000000000000000000000111", direction: "CONSUMPTION"} as Metering*/]
         } as EegParticipant
-      }).filter(p => p.meters.length > 0)
+      }) //.filter(p => p.meters.length > 0)
       return n
     }
     return [...participants]
