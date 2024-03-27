@@ -1,10 +1,10 @@
 import React, {FC, useEffect, useState} from "react";
 import {IonContent, IonHeader, IonItem, IonPage, IonToolbar} from "@ionic/react";
 import {EegNotification, Message} from "../models/eeg.model";
-import {eegService} from "../service/eeg.service";
 import {useAppSelector} from "../store";
 import {selectedTenant} from "../store/eeg";
 import NotificationLayoutComponent from "../components/notification/NotificationLayout.component";
+import {Api} from "../service";
 
 
 const NotificationPage: FC = () => {
@@ -12,7 +12,7 @@ const NotificationPage: FC = () => {
   const [notifictions, setNotifications] = useState<{type: string, date: Date, notification: EegNotification}[]>([])
 
   useEffect(() => {
-    eegService.getNotifications(tenant, 0).then(r => {
+    Api.eegService.getNotifications(tenant, 0).then(r => {
       setNotifications(r.map(x => {
         x.message = new Message(x.message)
         return {type: "EDA_PROCESS", date: x.date, notification: x}

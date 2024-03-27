@@ -153,7 +153,6 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
       })
       dispatch(fetchEnergyReportV2({tenant: tenant, year: activePeriod.year, segment: activePeriod.segment, type: activePeriod.type, participants: participantsReport.filter(p => p.meters.length > 0)}))
     } else if (participants && participants.length == 0) {
-      console.log("Clear EnergyState")
       dispatch(clearEnergyState())
     }
   },[activePeriod, participants])

@@ -1,4 +1,5 @@
 export interface EdaHistory {
+  conversationId: string
   date: Date
   protocol: string
   processType: string
@@ -8,6 +9,19 @@ export interface EdaHistory {
   meteringPoints?: string[]
   meteringFrom?: Date
   meteringTo?: Date
+}
+
+export class EdaHistoryEntry {
+  public constructor(
+  public Tenant: string,
+  public conversationId: string,
+  public date: Date,
+  public direction: string,
+  public issuer: string,
+  public message: Record<string, any>,
+  public processType: string,
+  public protocol: string) {}
+
 }
 
 export class EdaResponseCode {
@@ -35,6 +49,8 @@ export class EdaResponseCode {
         return "Keine Daten im angeforderten Zeitraum vorhanden"
       case 99:
         return "Meldung erhalten"
+      case 104:
+        return "Falsche Energierichtung"
       case 156:
         return "ZP bereits zugeordnet"
       case 157:

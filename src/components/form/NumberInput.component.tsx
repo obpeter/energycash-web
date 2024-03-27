@@ -6,7 +6,8 @@ import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/inp
 
 import "./form-element.css";
 
-function noop() {}
+function noop() {
+}
 
 type NumberInputFormProps<T extends FieldValues> = {
   control: Control<T>,
@@ -15,7 +16,7 @@ type NumberInputFormProps<T extends FieldValues> = {
   label: string,
   placeholder?: string,
   rules?: object,
-  error?:  FieldError,
+  error?: FieldError,
 }
 
 interface NumberInput {
@@ -27,9 +28,21 @@ interface NumberInput {
   placeholder?: string
   onKeyDown?: (e: KeyboardEvent<HTMLIonInputElement>) => void
   onKeyUp?: (e: KeyboardEvent<HTMLIonInputElement>) => void
+  maxlength?: number
+  maxValue?: number
 }
 
-const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, placeholder, decimalScale, onKeyDown = noop, onKeyUp = noop}) => {
+const NumberInput: FC<NumberInput> = ({
+                                        initialValue,
+                                        label,
+                                        name,
+                                        onChange,
+                                        placeholder,
+                                        maxValue,
+                                        decimalScale,
+                                        onKeyDown = noop,
+                                        onKeyUp = noop
+                                      }) => {
 
   const [value, setValue] = useState<string>(initialValue ? initialValue.toString().replace('.', ',') : "");
   const [cursor, setCursor] = useState<number | null>(null);
@@ -45,9 +58,9 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
   // }, [inputRef, cursor]);
 
 
-  const format = (value: string):number => value === '' ? 0 : parseFloat(value.replace(",", "."))
+  const format = (value: string): number => value === '' ? 0 : parseFloat(value.replace(",", "."))
 
-  const formatValue = (value: string):string => {
+  const formatValue = (value: string): string => {
     let numValue: number
     try {
       numValue = parseFloat(value)
@@ -67,8 +80,8 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
 
   const _onKeyDown = (e: KeyboardEvent<HTMLIonInputElement>) => {
     const el = e.target as HTMLInputElement;
-    const { key } = e;
-    const { selectionStart, selectionEnd, value = '' } = el;
+    const {key} = e;
+    const {selectionStart, selectionEnd, value = ''} = el;
 
     let expectedCaretPosition: number | null = null;
 
@@ -105,8 +118,25 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
     }
   }
 
+  const splitDecimal = (numStr: string, allowNegative: boolean = true) => {
+    const hasNegation = numStr[0] === '-';
+    const addNegation = hasNegation && allowNegative;
+    numStr = numStr.replace('-', '');
+
+    const parts = numStr.split('.');
+    const beforeDecimal = parts[0];
+    const afterDecimal = parts[1] || '';
+
+    return {
+      beforeDecimal,
+      afterDecimal,
+      hasNegation,
+      addNegation,
+    };
+  }
+
   const handleValueChange = (values: IonInputCustomEvent<InputInputEventDetail>) => {
-    if(values.detail.value || values.detail.value === '') {
+    if (values.detail.value || values.detail.value === '') {
       const target = values.detail.value.toString()
       if (!target || target.length === 0 || isNumeric(target)) {
         setValue(target || "");
@@ -148,12 +178,14 @@ const NumberInput:FC<NumberInput> = ({initialValue, label, name, onChange, place
               labelPlacement={"floating"}
               value={value}
               name={name}
-              ref={(e) => {if (e) inputRef.current = e }}
-              // ref={inputRef}
-      onIonChange={onChangeValue}
+              ref={(e) => {
+                if (e) inputRef.current = e
+              }}
+      // ref={inputRef}
+              onIonChange={onChangeValue}
               onIonInput={(e) => handleValueChange(e as IonInputCustomEvent<HTMLInputElement>)}
-              // onKeyDown={_onKeyDown}
-              // onKeyUp={_onKeyUp}
+      // onKeyDown={_onKeyDown}
+      // onKeyUp={_onKeyUp}
     >
     </IonInput>
   )
@@ -168,8 +200,10 @@ const NumberInputForm = <T extends FieldValues>(props: NumberInputFormProps<T>) 
         control={control}
         rules={rules}
         render={({field, fieldState, formState}) => {
-          const { onChange, value, name, ref } = field;
-          return (<NumberInput onChange={onChange} name={name} label={label} placeholder={placeholder} initialValue={value} decimalScale={2}/>)
+          const {onChange, value, name, ref} = field;
+          return (
+            <NumberInput onChange={onChange} name={name} label={label} placeholder={placeholder} initialValue={value}
+                         decimalScale={2}/>)
         }}
       />
       {/*</IonItem>*/}

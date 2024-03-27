@@ -8,6 +8,7 @@ import {Metering} from "../models/meteringpoint.model";
 import MeterFormElement from "./core/MeterForm.element";
 import EegPaneTemplate from "./core/EegPane.template";
 import MeterAddressFormElement from "./core/forms/MeterAddressForm/MeterAddressForm.element";
+import {useOnlineState} from "../store/hook/Eeg.provider";
 
 interface MeterFromComponentProps {
   meteringPoint: Metering
@@ -22,6 +23,8 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   const tenant = useAppSelector(selectedTenant);
   const metering = useAppSelector(selectedMeterSelector);
 
+  const isOnline = useOnlineState()
+
   // const [withWechselrichter, setWithWechselrichter] = useState(false);
 
   // const {handleSubmit, control, watch, formState: {errors, isDirty, dirtyFields}, reset, clearErrors} = useForm<Metering>({mode: 'onBlur', defaultValues: {...meteringPoint}, values: metering});
@@ -34,7 +37,6 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   }, [metering])
 
   const onSubmit = (meter: Metering) => {
-    console.log("dirtyFields ", dirtyFields)
     if (Object.keys(dirtyFields).length > 0) {
       const participantId = participant?.id;
       if (participantId) {
@@ -45,7 +47,6 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   }
 
   const onChangeDate = (name: string, value: any) => {
-    console.log("handle change ", value)
     handleSubmit((data) => onSubmit(data))()
   }
 
@@ -61,7 +62,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
       <EegPaneTemplate>
         <FormProvider {...formMethods} >
           <MeterFormElement rates={rates} meterReadOnly={true} onChange={onChange}/>
-          <MeterAddressFormElement onChange={onChange}/>
+          <MeterAddressFormElement onChange={onChange} isOnline={isOnline}/>
         </FormProvider>
       </EegPaneTemplate>
     // </form>

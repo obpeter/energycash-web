@@ -8,13 +8,11 @@ import {
   ParticipantReport,
   SelectedPeriod
 } from "../../models/energy.model";
-import {eegService} from "../../service/eeg.service";
-import {calcXAxisName, GetWeek} from "../../util/Helper.util";
-import {MONTHNAME} from "../../models/eeg.model";
+import {calcXAxisName} from "../../util/Helper.util";
 import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
-import {useIonViewWillEnter} from "@ionic/react";
 import {transformMeterReportToEnergySeries} from "../../util/ReportHelper";
+import {Api} from "../../service";
 
 interface MeterChartComponentProps {
   tenant: string
@@ -38,7 +36,7 @@ const MeterChartComponent: FC<MeterChartComponentProps> = ({tenant, report, acti
 
   const updateSeries = async (selectedPeriod: SelectedPeriod) => {
     if (selectedParticipant && selectedMeter) {
-      return eegService.fetchReportV2(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type,
+      return Api.energyService.fetchReportV2(tenant, selectedPeriod.year, selectedPeriod.segment, selectedPeriod.type,
         [{
           participantId: selectedParticipant.id,
           meters: [

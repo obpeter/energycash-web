@@ -1,39 +1,20 @@
 import React, {FC, useEffect, useState} from 'react';
 
-import Select, {ControlProps, components, Options, InputProps, ContainerProps} from 'react-select';
+import Select, {ControlProps, components, Options, InputProps, ContainerProps, OnChangeValue} from 'react-select';
 import {Control, Controller, FieldError, useWatch} from "react-hook-form";
 import {SelectInterface} from "@ionic/core/dist/types/components/select/select-interface";
 import {IonSelectCustomEvent} from "@ionic/core/dist/types/components";
 import {IonContent, IonInput, IonItem, IonLabel, SelectChangeEventDetail} from "@ionic/react";
 
 import "./BasicSelect.component.scss"
+import {ActionMeta} from "react-select/dist/declarations/src/types";
 
-// interface ColourOption {
-//   readonly value: string;
-//   readonly label: string;
-//   readonly color: string;
-//   readonly isFixed?: boolean;
-//   readonly isDisabled?: boolean;
-// }
-//
-// export const colourOptions: readonly ColourOption[] = [
-//   {value: 'ocean', label: 'Ocean', color: '#00B8D9', isFixed: true},
-//   {value: 'blue', label: 'Blue', color: '#0052CC', isDisabled: true},
-//   {value: 'purple', label: 'Purple', color: '#5243AA'},
-//   {value: 'red', label: 'Red', color: '#FF5630', isFixed: true},
-//   {value: 'orange', label: 'Orange', color: '#FF8B00'},
-//   {value: 'yellow', label: 'Yellow', color: '#FFC400'},
-//   {value: 'green', label: 'Green', color: '#36B37E'},
-//   {value: 'forest', label: 'Forest', color: '#00875A'},
-//   {value: 'slate', label: 'Slate', color: '#253858'},
-//   {value: 'silver', label: 'Silver', color: '#666666'},
-// ];
-
-
-interface SelectOptions {
-  label: string,
-  value: string,
+export interface SelectOptions {
+  readonly label: string,
+  readonly value: string,
 }
+
+type IsMulti<TMultiple = boolean> = TMultiple extends true ? true : false
 
 interface BasicSelectFormProps {
   control: Control<any, any>,
@@ -49,48 +30,31 @@ interface BasicSelectFormProps {
   onIonBlur?: (event: IonSelectCustomEvent<void>) => void,
   onIonDismiss?: (event: IonSelectCustomEvent<void>) => void,
   onIonChange?: (event: IonSelectCustomEvent<SelectChangeEventDetail>) => void,
-  multiple?: boolean,
+  multiple?: IsMulti,
   onChangePartial?: (name: string, value: any, event?: any) => void,
   interfaceOptions?: any,
 }
 
-export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, label, options, error, rules}) => {
+export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, label, options, error, rules, multiple, ...rest}) => {
   const [isClearable, setIsClearable] = useState(true);
   const [isSearchable, setIsSearchable] = useState(true);
-  const [selectedValue, setSelectedValue] = useState<SelectOptions|null|undefined>(null)
-
-  // const Control = ({children, ...props}: ContainerProps<SelectOptions, false>) => {
-  //   console.log("Control Props: ", props, props.getValue())
-  //
-  //   const selectValue = (value: Options<SelectOptions>) => {
-  //     if (value.length == 1) {
-  //       return value[0].label
-  //     }
-  //     return ""
-  //   }
-  //
-  //   return (
-  //     <components.SelectContainer {...props} >
-  //       <IonInput
-  //         value={selectValue(props.getValue())}
-  //         label={label}
-  //         placeholder="Enter text"
-  //         fill="outline"
-  //         labelPlacement={"floating"}
-  //       >
-  //         {children}
-  //       </IonInput>
-  //     </components.SelectContainer>
-  //
-  //   );
-  // };
-
+  // const [selectedValue, setSelectedValue] = useState<IsMulti extends boolean ? SelectOptions[] | null : SelectOptions | null>(null)
+  const [selectedValue, setSelectedValue] = useState<OnChangeValue<SelectOptions, IsMulti>>(null)
   const controlValue = useWatch({control, name: name, defaultValue: undefined})
 
   useEffect(() => {
-    console.log("SV:", controlValue)
-    setSelectedValue(controlValue ? options.find((c) => c.value === controlValue) : null)
+    if (!controlValue) {
+      setSelectedValue(null)
+    }
   }, [controlValue]);
+
+  const onSelectionChanged = (change: (...event: any[]) => void) => (selectedOptions: OnChangeValue<SelectOptions, IsMulti>, actionMeta: ActionMeta<OnChangeValue<SelectOptions, IsMulti>>) => {
+    console.log(actionMeta)
+    if(selectedOptions) {
+      change(multiple ? (selectedOptions as SelectOptions[]).map(s => s.value) : (selectedOptions as SelectOptions).value);
+    }
+    setSelectedValue(selectedOptions)
+  }
 
   return (
     <>
@@ -103,7 +67,7 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
           control={control}
           rules={rules}
           render={({field}) => {
-            const {onChange} = field;
+            const {onChange, value} = field;
             return (
               <>
                 <Select
@@ -113,6 +77,7 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
                     control: provided => ({...provided, minHeight: "42px", background: "transparent", borderColor:"#b3b3b3"})
                   }}
                   isClearable={isClearable}
+                  isMulti={multiple}
                   theme={(theme) => ({
                     ...theme,
                     borderRadius: 4,
@@ -127,9 +92,7 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
                   isSearchable={isSearchable}
                   name={name}
                   options={options}
-                  onChange={(e) => {
-                    onChange(e?.value)
-                  }}
+                  onChange={onSelectionChanged(onChange)}
                   value={selectedValue}
                 />
               </>

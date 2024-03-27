@@ -26,7 +26,7 @@ import {
     uploadImageBillingConfig
 } from "../store/billingConfig/actions";
 import InputForm from "./form/InputForm.component";
-import {eegService} from "../service/eeg.service";
+import {Api} from "../service";
 
 const EegBillingConfigCardComponent: FC = () => {
 
@@ -106,7 +106,7 @@ const EegBillingConfigCardComponent: FC = () => {
 
     useEffect( () => {
         if (billingConfig && billingConfig.headerImageFileDataId) {
-            eegService.getImageBillingConfig(tenant, billingConfig, 'logo' )
+            Api.eegService.getImageBillingConfig(tenant, billingConfig, 'logo' )
                 .then(imageBlob => setLogoImageSrc(URL.createObjectURL(imageBlob)));
         }
     }, [billingConfig])

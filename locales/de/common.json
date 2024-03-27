@@ -1,0 +1,70 @@
+{
+  "communityId": "Gemeinschafts ID",
+  "gridOperator_id": "Netzbetreiber ID",
+  "gridOperator_name": "Netzbetreiber Name",
+  "participant": "Mitglied",
+  "metering": "Zählpunkt",
+  "metering_missing_msg": "Zählpunktnummer fehlt",
+  "tariff": "Tarif",
+  "tariffLabel": "Tarifbezeichnung",
+  "tariffParts": "Bestandteile",
+  "inverterCheckbox_label": "Wechselrichter anlegen",
+  "inverternr_label": "Wechselrichternummer",
+  "transformer_label": "Transformator",
+  "equipmentNumber_label": "Anlagen-Nr.",
+  "equipmentName_label": "Anlagename",
+  "participantFee": "Mitgliedbeitrag in € (je Abrechnungsintervall, netto)",
+  "vatSupplementaryText": "Zusatztext für Umsatzsteuer",
+  "discount": "Rabatt in %",
+  "baseFee": "Pauschalbetrag in € (je Abrechnungsintervall, netto)",
+  "centPerKWh": "Arbeitspreis in ct/kWh (netto)",
+  "freeKWh": "Kostenlose Energie in kWh (je Abrechnungsintervall)",
+  "useMeteringPointFee": "Zählpunkt Gebühr einheben?",
+  "meteringPointFee" : "Zählpunktgebühr in €",
+  "meteringPointFee_card" : "Zählpunktgebühr",
+  "useVat": "Umsatzsteuer anführen",
+  "vatInPercent" : "Umsatzsteuer in %",
+  "consumer": "Verbraucher",
+  "producer": "Erzeuger",
+  "process" : {
+    "requestValue": {
+      "selectEntire": "Zählpunkte für Gesamte EEG nachfordern"
+    },
+    "partFact": {
+      "label": "Teilnehmer Faktor in %",
+      "title": "Teilnehmer Faktor ändern",
+      "desc": "Mit diesem Prozess kann der Teilnahmefaktor von aktiven Zählpunkten geändert werden. Zulässig ist eine Änderung pro Tag und je Energiegemeinschaft und Zählpunkt. Diese Änderung liegt in der Verantwortung der Energiegemeinschaft."
+    },
+    "podList": {
+      "title": "Teilnehmerliste anfordern",
+      "desc": "Anfordern der Teilnehmer einer EEG."
+    }
+  },
+  "menu": {
+    "changePassword": "Passwort ändern",
+    "logout": "Abmelden",
+    "dashboard": "Dashboard",
+    "eeg_name": "Meine EEG",
+    "participants": "Mitglieder",
+    "prcesses": "Prozesse",
+    "rates": "Tarife"
+  },
+  "meter": {
+    "status_code_56": "Zählpunkt nicht gefunden",
+    "status_code_104": "Falsche Energierichtung",
+    "status_code_156": "ZP bereits zugeordnet",
+    "status_code_158": "ZP ist nicht teilnahmeberechtigt",
+    "status_code_159": "Zu Prozessdatum ZP inaktiv bzw. noch kein Gerät eingebaut",
+    "status_code_174": "Angefragte Daten nicht lieferbar",
+    "status_code_181": "Gemeinschafts-ID nicht vorhanden",
+    "status_code_184": "Kunde hat optiert",
+    "status_code_185": "Zählpunkt befindet sich nicht im Bereich der Energiegemeinschaft",
+    "status_text_NEW": "Antwort des Netzbetreibers noch ausstehend.",
+    "status_text_PENDING": "Zustimmung des Mitglieds noch ausstehend.",
+    "status_text_APPROVED": "Abschluss Meldung von Netzbetreiber noch ausstehend.",
+  "status_text_REJECTED": "ählpunkt wurde vom Netzbetreiber abgewiesen.",
+    "status_text_REVOKED": "Zählpunkt wurde vom Netzbetreiber aufgehoben.",
+    "status_text_INVALID": "Zählpunkt wurde vom Netzbetreiber nicht angenommen."
+
+  }
+}

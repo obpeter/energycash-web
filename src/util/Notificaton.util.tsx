@@ -36,6 +36,8 @@ export function buildNotificationText(type: string, notification: object): React
           return <p>Für die Zählpunkte <strong>{n.message.meteringPoint}</strong> wurde die DATENFREIGABE aufgehoben. ({n.message.responseCode})</p>
         case 'ANTWORT_CCMS':
           return <p>Für die Zählpunkte <strong>{n.message.meteringPoint}</strong> wurde die Anfrage auf <strong>AUFHEBUNG der DATENFREIGABE</strong> bestätigt.</p>
+        case 'ABLEHNUNG_CCMS':
+          return <p>Für die Zählpunkte <strong>{n.message.meteringPoint}</strong> wurde die Anfrage auf <strong>AUFHEBUNG der DATENFREIGABE</strong> abgelehnt.</p>
       }
   }
 

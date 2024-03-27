@@ -1,15 +1,14 @@
 import {createAction, createAsyncThunk} from "@reduxjs/toolkit";
 import {featureKey} from "../states/rate.state";
-import {eegService} from "../../../service/eeg.service";
 import {EegTariff} from "../../../models/eeg.model";
-import {tariffService} from "../../../service/tariff.service";
 import {HttpError} from "../../../service/base.service";
+import {Api} from "../../../service";
 
 export const fetchRatesModel = createAsyncThunk(
   `${featureKey}/fetch`,
-  async (arg: { token: string, tenant: string }) => {
+  async (arg: { token?: string, tenant: string }) => {
     const { token, tenant } = arg;
-    const result = await eegService.fetchRates(token, tenant);
+    const result = await Api.eegService.fetchRates(tenant, token);
     return { rates: result };
   }
 )
@@ -18,7 +17,7 @@ export const saveNewRate = createAsyncThunk(
   `${featureKey}/save`,
   async (arg: { rate: EegTariff, tenant: string }) => {
     const {rate, tenant} = arg
-    const result = await eegService.addRate(tenant, rate);
+    const result = await Api.eegService.addRate(tenant, rate);
     return result;
   }
 )
@@ -28,7 +27,7 @@ export const updateRate = createAsyncThunk(
   async (arg: {rate: EegTariff, tenant: string}) => {
     
       const {rate, tenant} = arg
-      const result = await eegService.addRate(tenant, rate);
+      const result = await Api.eegService.addRate(tenant, rate);
       return result;
   }
 )
@@ -38,7 +37,7 @@ export const archiveRate = createAsyncThunk(
   async (arg: {rate: EegTariff, tenant: string}, { rejectWithValue }) => {
     const {rate, tenant} = arg
     try {
-      await tariffService.archiveTariff(tenant, rate.id);
+      await Api.tariffService.archiveTariff(tenant, rate.id);
       return rate.id
     } catch (e) {
       if (e instanceof HttpError) {

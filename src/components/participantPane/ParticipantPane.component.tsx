@@ -79,7 +79,6 @@ import {
 } from "../../util/Helper.util";
 import DatepickerPopover from "../dialogs/datepicker.popover";
 import { ExcelReportRequest, InvestigatorCP } from "../../models/reports.model";
-import { eegService } from "../../service/eeg.service";
 import UploadPopup from "../dialogs/upload.popup";
 import { useRefresh } from "../../store/hook/Eeg.provider";
 import {
@@ -100,6 +99,7 @@ import {
   filterActiveParticipantAndMeter,
 } from "../../util/FilterHelper.unit";
 import moment from "moment";
+import {Api} from "../../service";
 
 interface ParticipantPaneProps {
   // participants: EegParticipant[];
@@ -238,11 +238,11 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
   }, [participants]);
 
   useEffect(() => {
-    const filteredAndSorted = filterMeters(sortedParticipants);
+    const filteredAndSorted = filterMeters(sortedParticipants, false);
     setResult(filteredAndSorted);
   }, [hideConsumers, hideProducers]);
 
-  const filterMeters = (p: EegParticipant[]) => {
+  const filterMeters = (p: EegParticipant[], showEmptyMembers: boolean = true) => {
     return p
       .map((ip) => {
         return {
@@ -254,7 +254,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
           }),
         } as EegParticipant;
       })
-      .filter((m) => m.meters.length > 0 || !(hideProducers || hideConsumers));
+      .filter((m) => (m.meters.length > 0 || showEmptyMembers) || !(hideProducers || hideConsumers));
   };
 
   const infoToast = (message: string) => {
@@ -405,9 +405,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
       setShowAddMeterPane(false);
     };
 
-  const onShowAddMeterPage =
-    (p: EegParticipant) =>
-    (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
+  const onShowAddMeterPage = (p: EegParticipant) => (e: React.MouseEvent<HTMLIonButtonElement, MouseEvent>) => {
       dispatcher(selectParticipant(p.id));
       if (p.meters.length > 0) {
         dispatcher(selectMetering(p.meters[0].meteringPoint));
@@ -501,9 +499,9 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
             [] as InvestigatorCP[]
           ),
         } as ExcelReportRequest;
-        return eegService.createReport(tenant, exportdata);
+        return Api.energyService.createReport(tenant, exportdata);
       } else {
-        return eegService.exportMasterdata(tenant);
+        return Api.eegService.exportMasterdata(tenant);
       }
     }
   };
@@ -515,7 +513,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
         switch (type) {
           case 0:
             loading({ message: "Energiedaten importieren ..." });
-            eegService
+            Api.energyService
               .uploadEnergyFile(tenant, sheetName, file[0])
               .then(() => refresh())
               .then(() => dismissLoading())
@@ -529,7 +527,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
             break;
           case 1:
             loading({ message: "Stammdaten importieren ..." });
-            eegService
+            Api.eegService
               .uploadMasterDataFile(tenant, sheetName, file[0])
               .then(() => refresh())
               .then(() => dismissLoading())
@@ -592,7 +590,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
 
   async function exportBillingExcel(billingRunId: string) {
     try {
-      await eegService.exportBillingExcel(tenant, billingRunId);
+      await Api.eegService.exportBillingExcel(tenant, billingRunId);
     } catch (e) {
       console.log(e as string);
     }
@@ -600,7 +598,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
 
   async function exportBillingArchive(billingRunId: string) {
     try {
-      await eegService.exportBillingArchive(tenant, billingRunId);
+      await Api.eegService.exportBillingArchive(tenant, billingRunId);
     } catch (e) {
       console.log(e as string);
     }

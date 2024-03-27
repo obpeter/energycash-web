@@ -3,9 +3,12 @@ export interface ParticipantState {
   inactiveSince: Date
 }
 
+export type MeteringStatusType = "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED" | "REVOKED" | "INVALID"
+export type MeterDirectionType = "GENERATION" | "CONSUMPTION"
+
 export interface Metering {
   meteringPoint: string;
-  direction: "GENERATION" | "CONSUMPTION";
+  direction: MeterDirectionType;
   ownValue: number;
   totalValue: number;
   participantId: string;
@@ -17,13 +20,15 @@ export interface Metering {
   streetNumber: string;
   city: string;
   zip: string,
-  status: "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED" | "REVOKED" | "INVALID",
+  status: MeteringStatusType,
+  statusCode: number,
   registeredSince: Date,
   gridOperatorId: string,
   gridOperatorName: string,
   modifiedAt: number,
   modifiedBy: string,
   participantState: ParticipantState,
+  partFact: number,
 }
 
 //@TODO: Refactor diesen Type --> billing.model.ts (o.ä.)

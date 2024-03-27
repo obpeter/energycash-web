@@ -1,15 +1,15 @@
 import BaseService, {API_API_SERVER} from "./base.service";
-import {AuthClient} from "../store/hook/AuthProvider";
 import {authKeycloak} from "../keycloak";
 import {EegParticipant} from "../models/members.model";
+import {AuthService} from "./auth.service";
 
-class ParticipantService extends BaseService {
-  public constructor(authClient: AuthClient) {
-    super(authClient);
+export class ParticipantService extends BaseService {
+  public constructor(authService: AuthService) {
+    super(authService);
   }
 
   async archiveParticipant(tenant: string, id: string): Promise<any> {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return fetch(`${API_API_SERVER}/participant/${id}`, {
       method: 'DELETE',
       headers: {
@@ -20,7 +20,7 @@ class ParticipantService extends BaseService {
   }
 
   async updateParticipantPartial(tenant: string, id: string, value: { path: string, value: any }): Promise<EegParticipant> {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return fetch(`${API_API_SERVER}/participant/v2/${id}`, {
       method: 'PUT',
       headers: {
@@ -34,4 +34,4 @@ class ParticipantService extends BaseService {
   }
 }
 
-export const participantService = new ParticipantService(authKeycloak);
+// export const participantService = new ParticipantService(authKeycloak);

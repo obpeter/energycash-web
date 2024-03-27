@@ -1,16 +1,15 @@
 import React, {createContext, FC, ReactNode, useCallback, useContext, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../index";
-import {eegSelector, fetchEegModel, selectedTenant, selectTenant} from "../eeg";
-import {useKeycloak, useRoles, useTenants} from "./AuthProvider";
+import {clearErrorState, eegSelector, fetchEegModel, selectError, selectTenant} from "../eeg";
+import {useRoles, useTenants} from "./AuthProvider";
 import {fetchRatesModel} from "../rate";
-import {fetchParticipantModel, participantsSelector1} from "../participant";
-import {useIonViewDidEnter, useIonViewWillEnter} from "@ionic/react";
+import {fetchParticipantModel} from "../participant";
+import {useIonToast} from "@ionic/react";
 import {Eeg} from "../../models/eeg.model";
-import {eegService} from "../../service/eeg.service";
 import {SelectedPeriod} from "../../models/energy.model";
 import {setSelectedPeriod} from "../energy";
-import {current} from "@reduxjs/toolkit";
-;
+import {Api} from "../../service";
+import {useSelector} from "react-redux";
 
 
 export interface EegState {
@@ -18,6 +17,7 @@ export interface EegState {
   isAdmin: () => boolean
   isOwner: () => boolean
   isUser: () => boolean
+  setTenant: (tenant: string) => void
   refresh: () => void
 }
 
@@ -26,6 +26,7 @@ const initialState: EegState = {
   isAdmin: () => false,
   isOwner: () => false,
   isUser: () => false,
+  setTenant: (tenant: string) => {},
   refresh: () => {},
 }
 
@@ -35,36 +36,52 @@ export const EegContext = createContext(initialState)
 export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const dispatch = useAppDispatch();
-  const {keycloak} = useKeycloak();
+  const hasError = useSelector(selectError)
   const tenants = useTenants();
   const roles = useRoles();
-
-  const tenant = useAppSelector(selectedTenant)
+  const [toaster] = useIonToast()
 
   const eeg = useAppSelector(eegSelector);
-  // const participants = useAppSelector(participantsSelector1)
+  const [activeTenent, setActiveTenant] = useState<string>()
 
-  const [initTenant, setInitTenant] = useState(tenant)
+  const errorToast = (message: string | undefined) => {
+    toaster({
+      message: message,
+      duration: 13500,
+      position: "bottom",
+      color: "danger",
+      buttons: [{text: "OK"}],
+      onDidDismiss: (e) => dispatch(clearErrorState())
+    });
+  };
 
-  useEffect( () => {
-    if (tenant) {
-      initOne()
-    }
-    console.log("Update EEG Data")
-  }, [])
+  const activateTenant = (tenant: string) => {
+    dispatch(selectTenant(tenant))
+    setActiveTenant(tenant)
+    localStorage.setItem("tenant", tenant.toUpperCase())
+  }
 
   useEffect(() => {
-    if (tenant && tenant !== initTenant) {
-      setInitTenant(tenant)
+    if (hasError && hasError.hasError) {
+      errorToast(hasError.error?.message)
+    }
+  }, [hasError]);
+
+  useEffect(() => {
+    if (activeTenent) {
       initApplication()
     }
-  }, [tenant])
+  }, [activeTenent])
 
   useEffect(() => {
     const storedTenant = localStorage.getItem("tenant")
     if (storedTenant) {
-      if (!tenant) {
-        dispatch(selectTenant(storedTenant))
+      activateTenant(storedTenant)
+    } else {
+      if (tenants.length > 0) {
+        activateTenant(tenants[0])
+      } else {
+        console.error("Can not find an active tenant")
       }
     }
   }, [tenants])
@@ -100,7 +117,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   }
 
   const fetchCurrentPeroid = async (eeg: Eeg) => {
-    return eegService.fetchLastReportEntryDate(tenant).then(lastReportDate => {
+    return Api.energyService.fetchLastReportEntryDate(activeTenent!).then(lastReportDate => {
       if (lastReportDate && lastReportDate.length > 0) {
         const [date, time] = lastReportDate.split(" ");
         const [day, month, year] = date.split(".");
@@ -130,12 +147,13 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
   }
 
   const initApplication = useCallback( async () => {
-    if (tenant && tenant.length > 0) {
-      keycloak.getToken().then((token) => {
+    console.log("INIT APP: ", activeTenent)
+    if (activeTenent && activeTenent.length > 0) {
+      // keycloak.getToken().then((token) => {
         Promise.all([
-          dispatch(fetchEegModel({token: token, tenant: tenant!})),
-          dispatch(fetchRatesModel({token: token, tenant: tenant!})),
-          dispatch(fetchParticipantModel({token: token, tenant: tenant!})),
+          dispatch(fetchEegModel({tenant: activeTenent})),
+          dispatch(fetchRatesModel({tenant: activeTenent})),
+          dispatch(fetchParticipantModel({tenant: activeTenent})),
           // eegService.fetchLastReportEntryDate(initTenant, token).then(lastReportDate => {
           //   if (lastReportDate && lastReportDate.length > 0) {
           //     const [date, time] = lastReportDate.split(" ");
@@ -145,45 +163,40 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
           //   }
           // }),
         ])
-      })
+      // })
     }
-  }, [tenant])
+  }, [activeTenent])
 
-  const initOne = async () => {
-    // let initTenant = tenant
-
-    if (!initTenant) {
-      const storedTenant = localStorage.getItem("tenant")
-      if (storedTenant) {
-        dispatch(selectTenant(storedTenant))
-        setInitTenant(storedTenant)
-      }
-    }
-    await initApplication()
-  }
+  // const initOne = async () => {
+  //   // let initTenant = tenant
+  //
+  //   if (!initTenant) {
+  //     const storedTenant = localStorage.getItem("tenant")
+  //     if (storedTenant) {
+  //       dispatch(selectTenant(storedTenant))
+  //       setInitTenant(storedTenant)
+  //     }
+  //   }
+  //   await initApplication()
+  // }
 
   // useEffect(() => {
   //   console.log("Dispatch / tenant changed")
   //
   // }, [dispatch, tenant])
 
-  useIonViewDidEnter(() => {
-    console.log("Ion Did Enter View")
-    // if (!tenant) {
-    //   const tenant = localStorage.getItem("tenant")
-    //   dispatch(selectTenant(tenant!))
-    // }
-  })
-
-  useIonViewWillEnter(() => {
-    console.log("View will Enter")
-  })
+  const _setTenant = (tenant: string) => {
+    setActiveTenant(tenant)
+    localStorage.setItem("tenant", tenant.toUpperCase())
+    dispatch(selectTenant(tenant))
+  }
 
   const value = {
     eeg: eeg,
     isAdmin: () => roles.findIndex(r => r === "/EEG_ADMIN") >= 0,
     isOwner: () => roles.findIndex(r => r === "/EEG_OWNER") >= 0,
     isUser: () => roles.findIndex(r => r === "/EEG_USER") >= 0,
+    setTenant: (tenant: string) => activateTenant(tenant),
     refresh: async () => await initApplication()
   } as EegState
 
@@ -217,4 +230,9 @@ export const useEegArea = () => {
 export const useGridOperator = () => {
   const {eeg} = useContext(EegContext)
   return {gridOperatorId: eeg?.gridOperator, gridOperatorName: eeg?.operatorName}
+}
+
+export const useTenantSwitch = () => {
+  const {setTenant} = useContext(EegContext)
+  return setTenant
 }

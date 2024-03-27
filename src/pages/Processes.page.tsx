@@ -18,6 +18,7 @@ import {useAppSelector} from "../store";
 import {EegContext} from "../store/hook/Eeg.provider";
 import {activeParticipantsSelector1, meterSelector} from "../store/participant";
 import {selectedPeriodSelector} from "../store/energy";
+import {useLocale} from "../store/hook/useLocale";
 
 const ProcessesPage: FC = () => {
 
@@ -25,6 +26,7 @@ const ProcessesPage: FC = () => {
   const participants = useAppSelector(activeParticipantsSelector1)
   const meters = useAppSelector(meterSelector)
   const {eeg} = useContext(EegContext)
+  const {t} = useLocale("common")
 
   const processes: EdaProcess[] = [
     {
@@ -41,6 +43,16 @@ const ProcessesPage: FC = () => {
       name: "Zählpunkt abmelden",
       description: "Der Marktteilnehmer wird über die Aufhebung einer erteilten Datenfreigabe in Kenntnis gesetzt.",
       type: "CM_REV_CUS"
+    },
+    {
+      name: t("process.partFact.title"),
+      description: t("process.partFact.desc"),
+      type: "EC_PRTFACT_CHANGE"
+    },
+    {
+      name: t("process.podList.title"),
+      description: t("process.podList.desc"),
+      type: "EC_PODLIST"
     },
     {
       name: "Prozess History",

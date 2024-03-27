@@ -38,10 +38,10 @@ import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-compo
 import InvoiceDocumentComponent from "./InvoiceDocument.component";
 import ContractDocumentComponent from "./ContractDocument.component";
 import {ratesSelector} from "../../store/rate";
-import {fileService} from "../../service/file.service";
 import {meteringInterReportSelectorV2, meteringReportSelectorV2, selectedPeriodSelector} from "../../store/energy";
 import MeterChartComponent from "./MeterChart.component";
-import {participantService} from "../../service/participant.service";
+import {Api} from "../../service";
+import {useLocale} from "../../store/hook/useLocale";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 
@@ -53,6 +53,7 @@ type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoic
 
 const ParticipantDetailsPaneComponent: FC = () => {
 
+  const {t} = useLocale('common')
   const dispatcher = useAppDispatch();
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeter = useAppSelector(selectedMeterSelector);
@@ -76,6 +77,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';
 
+  const meterInvalidCodes = [56, 104, 156, 158, 159, 174, 181, 184, 185]
   // useEffect(() => {
   //   if (selectedMeterId && selectedParticipant) {
   //     const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
@@ -92,9 +94,13 @@ const ParticipantDetailsPaneComponent: FC = () => {
   }
 
   const onUpdateParticipantPartial = (participantId: string, value: Record<string, any>) => {
-    dispatcher(updateParticipantPartial({tenant: tenant, participantId: participantId, value: {path: Object.keys(value)[0], value: Object.values(value)[0]}})).unwrap()
+    dispatcher(updateParticipantPartial({
+      tenant: tenant,
+      participantId: participantId,
+      value: {path: Object.keys(value)[0], value: Object.values(value)[0]}
+    })).unwrap()
       .then(() => console.log("Participant Updated"))
-      .catch((e) => console.log("Error by updating participant: ", e))
+      .catch((e) => console.error("Error by updating participant: ", e))
   }
 
   const dynamicComponent = (componentKey: DynamicComponentKey) => {
@@ -102,7 +108,9 @@ const ParticipantDetailsPaneComponent: FC = () => {
     switch (componentKey) {
       case "memberForm":
         return selectedParticipant ? <MemberFormComponent participant={selectedParticipant} rates={rates} formId={""}
-                                                          onSubmit={onUpdateParticipant} onSubmitPartial={onUpdateParticipantPartial} changeable={false}/> : <></>
+                                                          onSubmit={onUpdateParticipant}
+                                                          onSubmitPartial={onUpdateParticipantPartial}
+                                                          changeable={false}/> : <></>
       case "meterForm":
         return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>
       case "invoiceForm":
@@ -130,7 +138,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
       if (data) {
         const files = data.getAll("docfiles").map(e => e as File)
         if (files.length > 0) {
-          return fileService.uploadContractDocuments(tenant, participantId, files)
+          return Api.fileService.uploadContractDocuments(tenant, participantId, files)
         }
       }
       return new Promise<any>((resolve) => resolve(true))
@@ -157,23 +165,31 @@ const ParticipantDetailsPaneComponent: FC = () => {
     // setIsActivationActive(undefined);
   }
 
+  // const meterStatusText = (meter: Metering) => {
+  //   switch (meter.status) {
+  //     case 'NEW':
+  //       return <div>Antwort des Netzbetreibers noch ausstehend</div>
+  //     case 'PENDING':
+  //       return "Zustimmung des Mitglieds noch ausstehend"
+  //     case 'APPROVED':
+  //       return "Abschluss Meldung von Netzbetreiber noch ausstehend"
+  //     case 'REJECTED':
+  //       return "Zählpunkt wurde vom Netzbetreiber abgewiesen"
+  //     case 'REVOKED':
+  //       return "Zählpunkt wurde vom Netzbetreiber aufgehoben"
+  //     case 'INVALID':
+  //       return "Zählpunkt wurde vom Netzbetreiber nicht angenommen"
+  //     default:
+  //       return ""
+  //   }
+  // }
   const meterStatusText = (meter: Metering) => {
-    switch (meter.status) {
-      case 'NEW':
-        return "Antwort des Netzbetreibers noch ausstehend"
-      case 'PENDING':
-        return "Zustimmung des Mitglieds noch ausstehend"
-      case 'APPROVED':
-        return "Abschluss Meldung von Netzbetreiber noch ausstehend"
-      case 'REJECTED':
-        return "Zählpunkt wurde vom Netzbetreiber abgewiesen"
-      case 'REVOKED':
-        return "Zählpunkt wurde vom Netzbetreiber aufgehoben"
-      case 'INVALID':
-        return "Zählpunkt wurde vom Netzbetreiber nicht angenommen"
-      default:
-        return ""
-    }
+    return (
+      <div>
+        <span>{t(`meter.status_text_${meter.status}`)}</span>
+        {hasStatusCode(meter) && <span> <strong>{t(`meter.status_code_${meter.statusCode}`)}</strong></span>}
+      </div>
+    )
   }
 
   if (!selectedParticipant) {
@@ -217,36 +233,48 @@ const ParticipantDetailsPaneComponent: FC = () => {
     })
   }
 
+  const hasStatusCode = (meter: Metering) => {
+    return (meter && meter.statusCode && meterInvalidCodes.includes(meter.statusCode)) ? true : false
+  }
+
   return (
     <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
       <div className={"details-header"}>
         <div><h4>{selectedParticipant.firstname} {selectedParticipant.lastname}</h4></div>
-        <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}} className={"participant-header"}
-                 onClick={() => archive()}>
-          <IonIcon icon={trashBin} slot="start" style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
-          <IonLabel>Benutzer archivieren</IonLabel>
-        </IonItem>
+        <div style={{minWidth: "240px"}}>
+          <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}}
+                   className={"participant-header"}
+                   onClick={() => archive()}>
+            <IonIcon icon={trashBin} slot="start"
+                     style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
+            <IonLabel>Benutzer archivieren</IonLabel>
+          </IonItem>
+        </div>
       </div>
       <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
         <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
           <div className={"details-box"}>
             {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (
               <div style={{color: "black"}}>
-                <AllowParticipantDialog trigger="open-participant-allow-dialog" participant={selectedParticipant}
+                <AllowParticipantDialog trigger="open-participant-allow-dialog"
+                                        participant={selectedParticipant}
                                         onDismiss={onWillDismiss}/>
                 <IonCard color="warning-light">
                   <IonItem lines="none" color="warning-light">
                     <IonIcon icon={eegStar} slot="start"/>
-                    <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG aufnehmen?</IonLabel>
+                    <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG
+                      aufnehmen?</IonLabel>
                   </IonItem>
                   <IonItem lines="none" color="warning-light">
-                    <IonButton id="open-participant-allow-dialog" slot="end" color="warning" size="default">Ja,
+                    <IonButton id="open-participant-allow-dialog" slot="end" color="warning"
+                               size="default">Ja,
                       Zulassen</IonButton>
                   </IonItem>
                 </IonCard>
               </div>) : (<></>)}
             <div>
-              <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "memberForm"})}
+              <IonItem button lines="full"
+                       className={cn("eeg-item-box", {"selected": activeMenu === "memberForm"})}
                        onClick={() => setActiveMenu("memberForm")}>
                 <IonIcon icon={person} slot="start"></IonIcon>
                 <IonLabel>
@@ -256,7 +284,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
               </IonItem>
             </div>
             <div>
-              <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}
+              <IonItem button lines="full"
+                       className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}
                        onClick={() => setActiveMenu("documentForm")}>
                 <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
                 <div>
@@ -266,7 +295,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
               </IonItem>
             </div>
             <div>
-              <IonItem button lines="full" className={cn("eeg-item-box", {"selected": activeMenu === "invoiceForm"})}
+              <IonItem button lines="full"
+                       className={cn("eeg-item-box", {"selected": activeMenu === "invoiceForm"})}
                        onClick={() => setActiveMenu("invoiceForm")}>
                 <IonIcon icon={logoEuro} slot="start"></IonIcon>
                 <IonLabel>
@@ -281,7 +311,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
                   <div
                     className={"detail-header"}>{`Mitglied ist ${selectedParticipant?.role === 'EEG_USER' ? 'kein' : ''} Administrator`}</div>
                 </div>
-                <IonToggle slot="end" checked={selectedParticipant?.role !== 'EEG_USER'} disabled={true}></IonToggle>
+                <IonToggle slot="end" checked={selectedParticipant?.role !== 'EEG_USER'}
+                           disabled={true}></IonToggle>
               </IonItem>
             </div>
           </div>
@@ -320,9 +351,13 @@ const ParticipantDetailsPaneComponent: FC = () => {
                       <div
                         className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
                     </div>
-                    <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"} disabled={true}></IonToggle>
+                    <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"}
+                               disabled={true}></IonToggle>
                   </IonItem>
-                  {isMeterActive() && report && activePeriod && <MeterChartComponent report={report} tenant={tenant} activePeriod={activePeriod} selectedMeter={selectedMeter} selectedParticipant={selectedParticipant}/>}
+                  {isMeterActive() && report && activePeriod &&
+                      <MeterChartComponent report={report} tenant={tenant} activePeriod={activePeriod}
+                                           selectedMeter={selectedMeter}
+                                           selectedParticipant={selectedParticipant}/>}
                 </div>) :
               <></>
             }

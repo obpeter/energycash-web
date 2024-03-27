@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useContext, useEffect, useState} from "react";
 import {
   IonButton,
   IonCard,
@@ -15,12 +15,24 @@ import SelectForm from "../components/form/SelectForm.component";
 
 import "./Eeg.page.scss"
 import {useTenants} from "../store/hook/AuthProvider";
-import {AccountInfo, Address, Contact, Eeg, Optionals} from "../models/eeg.model";
-import {eegService} from "../service/eeg.service";
 import {IonSelectCustomEvent} from "@ionic/core/dist/types/components";
-import {useAccessGroups} from "../store/hook/Eeg.provider";
-import {findPartial} from "../util/Helper.util";
+import {EegContext, useAccessGroups, useTenantSwitch} from "../store/hook/Eeg.provider";
 import EegBillingConfigCardComponent from "../components/EegBillingConfigCard.component";
+import {AccountInfo, Address, Contact, Eeg, Optionals} from "../models/eeg.model";
+import {IbanInputForm} from "../components/form/IbanInputForm";
+import {PhoneInputForm} from "../components/form/PhoneInputForm";
+
+const EMPTY_EEG_ENTITY = {
+  communityId: "", rcNumber: "", name: "",
+  legal: "", salesTax: "", taxNumber: "", vatNumber: "",
+  businessNr: "", settlement: "", description: "", gridOperator: "", operatorName: "",
+  settlementInterval: 'MONTHLY', allocationMode: "DYNAMIC", area: "LOCAL",
+  address: {city: "", type: "BILLING", street: "", streetNumber: "", zip: ""} as Address,
+  contact: {email: "", phone: ""} as Contact,
+  accountInfo: {bankName: "", iban: "", owner: "", sepa: false} as AccountInfo,
+  optionals: {website: ""} as Optionals,
+  online: false,
+} as Eeg
 
 const EegPage: FC = () => {
 
@@ -29,8 +41,9 @@ const EegPage: FC = () => {
   const dispatcher = useAppDispatch();
 
   const {isAdmin} = useAccessGroups()
+  const switchTenant = useTenantSwitch()
 
-  const {handleSubmit, control, formState: {errors, isDirty, dirtyFields}} =
+  const {handleSubmit, setValue, reset, control, formState: {errors, isDirty, dirtyFields}} =
     useForm({
       defaultValues: eeg,
       values: eeg,
@@ -44,10 +57,17 @@ const EegPage: FC = () => {
     setTenantsState(tenants.map(t => t.toUpperCase()).sort((a,b) => a.localeCompare(b)))
   }, [tenants])
 
+  useEffect(() => {
+    if (!eeg) {
+      reset(EMPTY_EEG_ENTITY, { keepDefaultValues: true })
+    } else {
+      reset(eeg)
+    }
+  }, [eeg]);
+
   const onSwitchTenant = (e: SelectCustomEvent<string>) => {
     const tenant = e.detail.value;
-    localStorage.setItem("tenant", tenant.toUpperCase())
-    dispatcher(selectTenant(tenant))
+    switchTenant(tenant)
   }
 
   const onChangeField = (mapper: string) => (name: string, value: any) => {
@@ -58,7 +78,6 @@ const EegPage: FC = () => {
 
   const onChangeValue = (property: string) => (e: IonSelectCustomEvent<SelectChangeEventDetail>) => {
     dispatcher(updateEegModel({tenant, eeg: {[property]: e.detail.value}}))
-    // eegService.updateEeg(tenant, {[e.target.name]: e.detail.value})
   }
 
   return (
@@ -182,8 +201,7 @@ const EegPage: FC = () => {
                 <div className={"eeg-property-card"}>
                   <div className={"header"}>Kontakt</div>
                   <IonCard color="eeglight">
-                    <InputFormComponent name={"contact.phone"} label="Telefon" control={control} type="text"
-                                        readonly={!isAdmin()}
+                    <PhoneInputForm name={"contact.phone"} control={control} readonly={!isAdmin()} setValue={setValue}
                                         onChangePartial={onChangeField("phone")}/>
                     <InputFormComponent name={"contact.email"} label="E-Mail" control={control}
                                         rules={{regex: /[a-z\.]@[a-z]\.\w{3}/}} type="text" readonly={!isAdmin()}
@@ -195,7 +213,7 @@ const EegPage: FC = () => {
                 <div className={"eeg-property-card"}>
                   <div className={"header"}>Bankdaten</div>
                   <IonCard color="eeglight">
-                    <InputFormComponent name={"accountInfo.iban"} label="IBAN" control={control} rules={{}} type="text"
+                    <IbanInputForm name={"accountInfo.iban"} control={control}
                                         readonly={!isAdmin()}
                                         onChangePartial={onChangeField("iban")}/>
                     <InputFormComponent name={"accountInfo.owner"} label="Kontoinhaber" control={control}

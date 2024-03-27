@@ -92,7 +92,7 @@ export const activeParticipantsSelector1 = createSelector(
               : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
           ) : [/*{meteringPoint: "AT9900000000000000000000000000111", direction: "CONSUMPTION"} as Metering*/]
         } as EegParticipant
-      }).filter(p => p.meters.length > 0)
+      }) //.filter(p => p.meters.length > 0)
       return n
     }
     return [...participants]

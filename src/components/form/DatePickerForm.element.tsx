@@ -42,7 +42,6 @@ const DatePickerFormElement: FC<DatePickerFormProps> = ({name, control, rules, l
       const valid = !!date && date.match(/^\w*\s\d{1,2},\s\d{4}$/)
       if (valid && valid.length > 0) {
         const dateObj = moment(date, "MMMM D, YYYY")
-        console.log("Date: ", dateObj.toDate())
         setShowDate(dateObj.toDate())
       }
     }

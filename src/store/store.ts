@@ -8,10 +8,13 @@ import * as billing from './billing';
 import * as billingRun from './billingRun';
 import * as billingConfig from './billingConfig';
 
-import {combineReducers, configureStore, createSelector} from "@reduxjs/toolkit";
-import {activeMetersSelector} from "./participant";
+import {combineReducers, configureStore, createSelector, Middleware} from "@reduxjs/toolkit";
+import {activeMetersSelector, updateParticipantPartial} from "./participant";
 import {meteringEnergyGroup11} from "./energy";
 import {Metering} from "../models/meteringpoint.model";
+import {ErrorState, setErrorState} from "./eeg";
+import i18next from '../util/I18n'
+import {saveNewRate} from "./rate";
 
 /**
  * Reducer
@@ -26,14 +29,24 @@ export const reducer = combineReducers({
   [billingConfig.featureKey]: billingConfig.reducer,
 });
 
-// /**
-//  * MIddleware
-//  */
-// const middleware = getDefaultMiddleware({
-//   thunk: true,
-//   immutableCheck: true,
-//   serializableCheck: true
-// });
+const errorMiddleware: Middleware = store => next => action => {
+  try {
+
+    const result = next(action)
+
+    if (updateParticipantPartial.rejected.match(action)) {
+      store.dispatch(setErrorState({message: i18next.t(`${action.error.message}_participant_update`, { ns: 'error' })} as ErrorState))
+    } else if(saveNewRate.rejected.match(action)) {
+      store.dispatch(setErrorState({message: i18next.t(`${action.error.message}_tariff_create`, { ns: 'error' })} as ErrorState))
+    }
+
+    return result
+
+  } catch (ex) {
+    console.error(ex)
+    throw ex
+  }
+}
 
 /**
  * Store
@@ -41,7 +54,9 @@ export const reducer = combineReducers({
 export const store = configureStore({
   reducer,
   // middleware,
-  devTools: true
+  devTools: true,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(errorMiddleware),
 });
 
 

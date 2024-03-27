@@ -135,6 +135,7 @@ export interface EegTariff {
   type: "EEG" | "EZP" | "VZP" | "AKONTO";
   billingPeriod?: string
   useVat?: boolean
+  vatSupplementaryText?: string
   vatInPercent?: string
   accountNetAmount?: string
   accountGrossAmount?: string
@@ -181,7 +182,7 @@ export enum MONTHNAMESHORT {
 export interface EdaProcess {
   name: string
   description: string
-  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY' | 'CM_REV_CUS'
+  type: 'CR_REQ_PT' | 'EC_REQ_ONL' | 'HISTORY' | 'CM_REV_CUS' | 'EC_PRTFACT_CHANGE' | 'EC_PODLIST'
 }
 
 

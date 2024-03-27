@@ -1,17 +1,16 @@
 import BaseService, {FILESTORE_API_SERVER} from "./base.service";
-import {AuthClient} from "../store/hook/AuthProvider";
 import {ContractInfo} from "../models/members.model";
 import {deleteContractFilesMutation, loadContractFilesQuery, uploadContractFilesMutation} from "./graphql-query";
-import {authKeycloak} from "../keycloak";
+import {AuthService} from "./auth.service";
 
-class FileService extends BaseService {
-  public constructor(authClient: AuthClient) {
-    super(authClient);
+export class FileService extends BaseService {
+  public constructor(authService: AuthService) {
+    super(authService);
   }
 
   // Filestore Services
   async loadContractDocumentInfos(tenant: string, participantId: string): Promise<ContractInfo[]> {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
       method: 'POST',
       headers: {
@@ -24,7 +23,7 @@ class FileService extends BaseService {
   }
 
   async uploadContractDocuments(tenant: string, participantId: string, files: File[]) {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
       method: 'POST',
       headers: {
@@ -38,7 +37,7 @@ class FileService extends BaseService {
   }
 
   async deleteContractDocuments(tenant: string, fileId: string) {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return await fetch(`${FILESTORE_API_SERVER}/graphql`, {
       method: 'POST',
       headers: {
@@ -52,7 +51,7 @@ class FileService extends BaseService {
   }
 
   async downloadDocument(tenant: string, fileId: string): Promise<Blob> {
-    const token = await this.authClient.getToken();
+    const token = await this.lookupToken()
     return await fetch(`${FILESTORE_API_SERVER}/filestore/${fileId}`, {
       method: 'GET',
       headers: {
@@ -63,4 +62,4 @@ class FileService extends BaseService {
 
 }
 
-export const fileService = new FileService(authKeycloak);
+// export const fileService = new FileService(authKeycloak);

@@ -1,41 +1,43 @@
 import React, {FC, useCallback, useEffect, useState} from "react";
 import CorePageTemplate from "../core/CorePage.template";
 import {EdaHistories, EdaProcess, Eeg} from "../../models/eeg.model";
-import {Metering} from "../../models/meteringpoint.model";
-import {EegParticipant} from "../../models/members.model";
 import {IonAccordion, IonAccordionGroup, IonContent, IonIcon, IonItem, IonLabel, IonSearchbar} from "@ionic/react";
-import {eegService} from "../../service/eeg.service";
-import {arrowDownOutline, chevronForwardOutline} from "ionicons/icons";
+import {chevronForwardOutline} from "ionicons/icons";
 import ProcessHeaderComponent from "./ProcessHeader.component";
 import ProcessContentComponent from "./ProcessContent.component";
 import DateComponent from "../dialogs/date.component";
-import {useAppSelector} from "../../store";
-import {selectedTenant} from "../../store/eeg";
 import {EdaHistory, EdaResponseCode} from "../../models/process.model";
+import {Api} from "../../service";
+import {GroupBy} from "../../util/Helper.util";
 
 interface ProcessHistoryComponentProps {
   eeg: Eeg
   edaProcess: EdaProcess
+  today: Date
 }
 
-const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProcess}) => {
+const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProcess, today}) => {
 
   const [entries, setEntries] = useState<EdaHistories>({})
   const [processFilter, setProcessFilter] = useState<Record<string, string | undefined>>({})
   const [selectedItem, setSelectedItem] = useState(0)
-  const today = new Date()
+  // const today = new Date()
   const [historyDate, setHistoryDate] = useState<[Date | null, Date | null]>([new Date(today.getTime() - (86400000 * 14)), today])
 
-  useEffect(() => {
+  const fetchHistory = useCallback(() => {
     const [beginDate, endDate] = historyDate
     if (beginDate && endDate) {
-      eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime()+(60*60*24*1000))
+      Api.eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime() + (60 * 60 * 24 * 1000))
         .then(h => setEntries(h))
         .catch(console.log)
     }
-  }, [historyDate]);
+  }, [historyDate])
 
-  const getEntriesForProcessId = (process: string):Record<string, EdaHistory[]> => {
+  useEffect(() => {
+    fetchHistory()
+  }, [fetchHistory]);
+
+  const getEntriesForProcessId = (process: string): Record<string, EdaHistory[]> => {
     switch (process) {
       case "CM_REV_IMP":
         return {...entries[process], ...entries["CM_REV_SP"]}
@@ -81,32 +83,65 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
     }
   }
 
+  const renderTableWithConversationId = (headers: string[], e: EdaHistory[]) => {
+    return(
+      <div className="ion-padding"
+           style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
+              <span style={{
+                gridColumnStart: "1",
+                borderBottom: "1px solid #dfdfdf"
+              }}><strong>{headers[0]}</strong></span>
+        <span
+          style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{headers[1]}</strong></span>
+        <span style={{
+          gridColumnStart: "3",
+          borderBottom: "1px solid #dfdfdf"
+        }}><strong>{headers[2]}</strong></span>
+        {Object.entries(GroupBy(e, i => i.conversationId)).map(([id, hl], i) => (
+          <React.Fragment key={"line" + id + i}>
+                  <span
+                    style={{gridColumnStart: "1", gridColumnEnd: "4", fontSize: "12px"}}>Conversation-Id: {id}</span>
+            {hl.map((h, ii) => (
+              <React.Fragment key={"line_item" + ii}>
+                <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
+                <span style={{gridColumnStart: "2"}}>{h.processType}</span>
+                <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
+              </React.Fragment>
+            ))}
+            <span
+              style={{
+                gridColumnStart: "1",
+                gridColumnEnd: "4",
+                fontSize: "12px",
+                borderTop: "1px solid #9c9c9c"
+              }}></span>
+          </React.Fragment>
+        ))}
+      </div>
+    )
+  }
+
   const renderAccordionBody = (p: string, v: EdaHistory[]) => {
     switch (p) {
       case "CM_REV_IMP":
         return (
           <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
                className="ion-padding" slot="content">
-            <div className="ion-padding"
-                 style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
-              <span style={{
-                gridColumnStart: "1",
-                borderBottom: "1px solid #dfdfdf"
-              }}><strong>{"Abgewickelt am:"}</strong></span>
-              <span
-                style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
-              <span style={{
-                gridColumnStart: "3",
-                borderBottom: "1px solid #dfdfdf"
-              }}><strong>{"Zustimmung endet am:"}</strong></span>
-              {v.map((h, i) => (
-                <React.Fragment key={"line" + p + i}>
-                  <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
-                  <span style={{gridColumnStart: "2"}}>{h.processType}</span>
-                  <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
-                </React.Fragment>
-              ))}
-            </div>
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Zustimmung endet am:"], v)}
+          </div>
+        )
+      case "EC_REQ_ONL":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Status"], v)}
+          </div>
+        )
+      case "CR_REQ_PT":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Info"], v)}
           </div>
         )
       case "CR_MSG":
@@ -137,164 +172,86 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
             </div>
           </div>
         )
-      case "EC_REQ_ONL":
-        return (
-          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
-               className="ion-padding" slot="content">
-            <div className="ion-padding"
-                 style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
-              <span style={{
-                gridColumnStart: "1",
-                borderBottom: "1px solid #dfdfdf"
-              }}><strong>{"Abgewickelt am:"}</strong></span>
-              <span
-                style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
-              <span style={{gridColumnStart: "3", borderBottom: "1px solid #dfdfdf"}}><strong>{"Status"}</strong></span>
-              {v.map((h, i) => (
-                <React.Fragment key={"line" + p + i}>
-                  <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
-                  <span style={{gridColumnStart: "2"}}>{h.processType}</span>
-                  <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        )
-      case "CR_REQ_PT":
-        return (
-          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
-               className="ion-padding" slot="content">
-            <div className="ion-padding"
-                 style={{display: "grid", gridTemplateColumns: "0.5fr 1fr 1fr", rowGap: "10px"}}>
-              <span style={{
-                gridColumnStart: "1",
-                borderBottom: "1px solid #dfdfdf"
-              }}><strong>{"Abgewickelt am:"}</strong></span>
-              <span
-                style={{gridColumnStart: "2", borderBottom: "1px solid #dfdfdf"}}><strong>{"Protokoll"}</strong></span>
-              <span style={{gridColumnStart: "3", borderBottom: "1px solid #dfdfdf"}}><strong>{"Info"}</strong></span>
-              {v.map((h, i) => (
-                <React.Fragment key={"line" + p + i}>
-                  <span style={{gridColumnStart: "1"}}>{h.date.toDateString()}</span>
-                  <span style={{gridColumnStart: "2"}}>{h.processType}</span>
-                  <span style={{gridColumnStart: "3"}}>{h.responseCode}</span>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        )
-
     }
     return (<></>)
   }
 
-  const extractMessage = (process: string, msg: Record<string, any>[]): EdaHistory[] => {
-
+  const extractMessage = (process: string, msg: EdaHistory[]): EdaHistory[] => {
     switch (process) {
       case "CM_REV_IMP": {
         const history_cm = msg.map((e) => {
-          const m=  {
-            protocol: e["protocol"],
-            date: new Date(e["date"]),
-            message: e["message"],
-            processType: e["processType"],
-            responseCode: e["message"].consentEnd ? new Date(e["message"].consentEnd).toLocaleDateString() : "-",
-          } as EdaHistory
+          e.date = new Date(e.date)
+          e.responseCode = e.message.consentEnd ? new Date(e["message"].consentEnd).toDateString() : "-"
 
           switch (e.processType) {
             case "ANTWORT_CCMS":
-              m.meteringPoint  = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
-              m.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
+              e.meteringPoint = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
               break;
             case "ABLEHNUNG_CCMS":
-              m.meteringPoint  = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
-              m.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
-              m.responseCode   = e["message"].responseCode ? EdaResponseCode.getMessage(e["message"].responseCode[0]) : "-"
+              e.meteringPoint = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
+              e.responseCode = e["message"].responseCode ? EdaResponseCode.getMessage(e["message"].responseCode[0]) : "-"
               break;
             case "AUFHEBUNG_CCMS":
-              m.meteringPoint = e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-"
-              m.meteringPoints = e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : []
+              e.meteringPoint = e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-"
+              e.meteringPoints = e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : []
               break;
             default:
-              m.responseCode = "-"
+              e.responseCode = "-"
           }
-          return m
+          return e
         })
         return sortHistories(history_cm)
       }
       case "CR_MSG": {
         const filter = processFilter[process] || ''
         const history = sortHistories(msg.map((e) => {
-          return {
-            protocol: e["protocol"],
-            date: new Date(e["date"]),
-            message: e["message"],
-            meteringPoint: e["message"].meter ? e["message"].meter : "-",
-            meteringPoints: e["message"].meter ? [e["message"].meter] : [],
-            meteringFrom: new Date(e["message"].from),
-            processType: e["processType"],
-            meteringTo: new Date(e["message"].to),
-          } as EdaHistory
+          e.date = new Date(e.date)
+          e.meteringPoint = e.message.meter ? e.message.meter : "-"
+          e.meteringPoints = e.message.meter ? [e.message.meter] : []
+          e.meteringFrom = new Date(e.message.from)
+          e.meteringTo = new Date(e.message.to)
+          return e
         }))
-
         // const _history = filter.length > 0 ? history.filter(h => h.meteringPoint?.toLowerCase().indexOf(filter) !== -1) : history
         return history
       }
       case "CR_REQ_PT": {
         const history_cr_req_pt = msg.map((e) => {
-          const m = {
-            protocol: e["protocol"],
-            date: new Date(e["date"]),
-            message: e["message"],
-            processType: e["processType"],
-            meteringPoint: e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-",
-            meteringPoints: e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : [],
-          } as EdaHistory
-
+          e.date = new Date(e.date)
+          e.meteringPoint = e.message.meter?.meteringPoint ? e.message.meter.meteringPoint : "-"
+          e.meteringPoints = e.message.meter?.meteringPoint ? [e.message.meter.meteringPoint] : []
           switch (e.processType) {
             case "ABLEHNUNG_PT":
             case "ANTWORT_PT":
-              m.responseCode = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
+              e.responseCode = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
               break
             case "ANFORDERUNG_PT":
-              m.responseCode = e["message"].timeline ? new Date(e["message"].timeline.from).toLocaleDateString() + " - " + new Date(e["message"].timeline.to).toLocaleDateString() : ""
+              e.responseCode = e.message.timeline ? new Date(e.message.timeline.from).toDateString() + " - " + new Date(e.message.timeline.to).toDateString() : ""
           }
-          return m
+          return e
         })
         return sortHistories(history_cr_req_pt)
       }
       case "EC_REQ_ONL": {
         const history_cr_req_pt = msg.map((e) => {
+          e.date = new Date(e.date)
           switch (e.processType) {
             case "ABSCHLUSS_ECON":
-              return {
-                protocol: e["protocol"],
-                date: new Date(e["date"]),
-                message: e["message"],
-                processType: e["processType"],
-                meteringPoint: e["message"]["meterList"] ? e["message"]["meterList"].length > 0 ?
-                  e["message"]["meterList"][0].meteringPoint ? "-" : "-" : "-" : "-",
-                meteringPoints: e["message"]["meterList"] ? e["message"]["meterList"].map((m: any) => m.meteringPoint) : [],
-              } as EdaHistory
+              e.meteringPoint = e.message.meterList ? e.message.meterList.length > 0 ?
+                e.message.meterList[0].meteringPoint ? "-" : "-" : "-" : "-"
+              e.meteringPoints = e.message.meterList ? e.message.meterList.map((m: any) => m.meteringPoint) : []
+              return e
             case "ANFORDERUNG_ECON":
-              return {
-                protocol: e["protocol"],
-                date: new Date(e["date"]),
-                message: e["message"],
-                processType: e["processType"],
-                meteringPoint: e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-",
-                meteringPoints: e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : [],
-              } as EdaHistory
+              e.meteringPoint = e.message.meter?.meteringPoint ? e.message.meter.meteringPoint : "-"
+              e.meteringPoints = e.message.meter?.meteringPoint ? [e.message.meter.meteringPoint] : []
+              return e
             default:
-              return {
-                protocol: e["protocol"],
-                date: new Date(e["date"]),
-                message: e["message"],
-                processType: e["processType"],
-                meteringPoint: e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-"),
-                meteringPoints: e["message"]["responseData"].map((r: Record<string, any>) => r.meteringPoint),
-                responseCode: e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
-              } as EdaHistory
+              e.meteringPoint = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e.message.responseData.map((r: Record<string, any>) => r.meteringPoint)
+              e.responseCode = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
+              return e
           }
         })
         return sortHistories(history_cr_req_pt)
@@ -357,5 +314,4 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
     </>
   )
 }
-
 export default ProcessHistoryComponent

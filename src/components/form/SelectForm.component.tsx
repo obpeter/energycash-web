@@ -25,6 +25,7 @@ interface SelectFormProps {
   multiple?: boolean,
   onChangePartial?: (name: string, value: any, event?: any) => void,
   interfaceOptions?: any,
+  disableEntire?: boolean,
 }
 
 interface SelectOptions {
@@ -36,7 +37,7 @@ const SelectForm: React.FC<SelectFormProps> = (
   {
     control, name, options, rules,
     error, selectInterface, disabled,
-    onChangePartial, ...rest
+    onChangePartial, disableEntire,  ...rest
   }) => {
 
   const onSelectionChanged = (onChange: (...event: any[]) => void) => (event: IonSelectCustomEvent<SelectChangeEventDetail>) => {
@@ -47,7 +48,7 @@ const SelectForm: React.FC<SelectFormProps> = (
   }
 
   const onSelection = (onChange: (...event: any[]) => void) => (event: any) => {
-    console.log(event)
+    // console.log(event)
   }
 
   const findOption = (v: any) => {
@@ -70,6 +71,7 @@ const SelectForm: React.FC<SelectFormProps> = (
             interface={selectInterface}
             onSelect={onSelection(onChange)}
             onIonChange={onSelectionChanged(onChange)}
+            disabled={disableEntire}
             {...rest}>
             {options.map((o, i) => (<IonSelectOption key={o.key} value={o.key} disabled={disabled}>{o.value}</IonSelectOption>))}
           </IonSelect>)

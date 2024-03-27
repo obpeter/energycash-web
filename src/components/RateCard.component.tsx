@@ -62,6 +62,10 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
                 <p>Umsatzsteuer</p>
                 <p>{(rate.vatInPercent && rate.vatInPercent.length > 0 ? rate.vatInPercent : "0") + " %"}</p>
             </div>}
+            {rate.useMeteringPointFee && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                <p>Zählpunktgebühr</p>
+                <p>{rate.meteringPointFee + " €"}</p>
+            </div>}
             {rate.freeKWh && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Inklusive kWh</p>
               <p>{rate.freeKWh + " kWh"}</p>
@@ -82,6 +86,10 @@ const RateCardComponent: FC<RateCardComponentProps> = ({rate, editable, onSelect
             {rate.useVat && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <p>Umsatzsteuer</p>
                 <p>{(rate.vatInPercent && rate.vatInPercent.length > 0 ? rate.vatInPercent : "0") + " %"}</p>
+            </div>}
+            {rate.useMeteringPointFee && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                <p>Zählpunktgebühr</p>
+                <p>{rate.meteringPointFee + " €"}</p>
             </div>}
             {rate.discount && <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
               <p>Rabatt</p>

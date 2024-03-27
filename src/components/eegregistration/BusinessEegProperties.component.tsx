@@ -6,6 +6,7 @@ import {Metering} from "../../models/meteringpoint.model";
 import SelectForm from "../form/SelectForm.component";
 import CorePageTemplate from "../core/CorePage.template";
 import {IonItem, IonToggle} from "@ionic/react";
+import {IbanInputForm} from "../form/IbanInputForm";
 
 
 interface BusinessEegPropertiesComponentProps {
@@ -31,7 +32,7 @@ const BusinessEegPropertiesComponent: FC<BusinessEegPropertiesComponentProps> = 
         {key: "BIANNUAL", value: "Halbjährlich"},
         {key: "ANNUAL", value: "Jährlich"},
       ]}></SelectForm>
-      <InputForm name={"accountInfo.iban"} label="IBAN" control={control} type="text"/>
+      <IbanInputForm name={"accountInfo.iban"} control={control} />
       <InputForm name={"accountInfo.owner"} label="Konto Inhaber" control={control} type="text"/>
       <IonItem lines="none">
         <Controller

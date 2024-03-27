@@ -6,10 +6,10 @@ import {PieSeriesType, ReportSeriesType} from "../../pages/Dashbaord.page";
 import {EegTariff} from "../../models/eeg.model";
 import {selectedPeriodSelector} from "../../store/energy";
 import {getPreviousPeriod} from "../../util/Helper.util";
-import {energyService} from "../../service/energy.service";
 import {selectedTenant} from "../../store/eeg";
 import {IonContent, IonIcon, IonPopover} from "@ionic/react";
 import {helpCircle, helpCircleOutline} from "ionicons/icons";
+import {Api} from "../../service";
 
 interface OverviewComponentProps {
   consumed: PieSeriesType
@@ -45,7 +45,7 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
   useEffect(() => {
     if (activePeriod) {
       const prePeriod = getPreviousPeriod(activePeriod)
-      energyService.fetchSummary(tenant, prePeriod.year, prePeriod.segment, prePeriod.type).then((r) => {
+      Api.energyService.fetchSummary(tenant, prePeriod.year, prePeriod.segment, prePeriod.type).then((r) => {
         setPreConsumedEnergy(r.consumed)
         setPreDistributedEnergy(r.distributed)
         setPreProducedEnergy(r.produced)
@@ -89,8 +89,6 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
         } else if (tariff.type === 'VZP') {
           return Math.max(utilization - Number(tariff.freeKWh), 0) * (tariff.centPerKWh || 0) / 100 * getDiscountFactor(tariff.discount)
         }
-      } else {
-        console.log("Tariff:", tariff, "Meter: ", m)
       }
     }
     return 0

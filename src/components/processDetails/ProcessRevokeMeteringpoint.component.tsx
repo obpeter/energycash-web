@@ -8,11 +8,11 @@ import {Metering} from "../../models/meteringpoint.model";
 import {EdaProcess, Eeg} from "../../models/eeg.model";
 import {EegParticipant} from "../../models/members.model";
 import CorePageTemplate from "../core/CorePage.template";
-import {eegService} from "../../service/eeg.service";
-import {star} from "ionicons/icons";
 import ProcessHeaderComponent from "./ProcessHeader.component";
 import ProcessContentComponent from "./ProcessContent.component";
 import {BasicSelectComponent} from "../form/BasicSelect.component";
+import {Api} from "../../service";
+import {meteringDisplayName} from "../../util/FilterHelper";
 
 interface ProcessValues {
   communityId: string | undefined
@@ -55,7 +55,6 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
   // }, [meteringPoints])
 
   useEffect(() => {
-    console.log("PID: ", participantId)
     if (participantId) {
       const p = participants.find(p=> p.id === participantId)
       if (p) {
@@ -71,7 +70,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
 
       const meter = meters.filter((m) => data.meteringPoints?.find((s:string) => s === m.meteringPoint))
       if (meter) {
-        eegService.revokeMeteringPoint(
+        Api.eegService.revokeMeteringPoint(
           eeg.rcNumber.toUpperCase(), data.participantId,
           meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
           consentEndDate.getTime(), reason)
@@ -96,13 +95,6 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
       </IonInput>
     );
   });
-
-  const meteringDisplayName = (m: Metering): string => {
-    if (m.equipmentName && m.equipmentName.length > 0) {
-      return `${m.equipmentName} - ${m.meteringPoint}`
-    }
-    return m.meteringPoint
-  }
 
   return (
     <>

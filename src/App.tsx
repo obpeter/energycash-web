@@ -20,12 +20,8 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
-/* Theme variables */
-import './theme/variables.css';
+
 import React, {Suspense} from "react";
-import {KeycloakProvider, useKeycloak} from "./store/hook/AuthProvider";
-import {authKeycloak} from "./keycloak";
-import Login from "./pages/Login";
 import Participants from "./pages/Participants";
 import {EegProvider} from "./store/hook/Eeg.provider";
 import ParticipantProvider from "./store/hook/ParticipantProvider";
@@ -37,19 +33,24 @@ import RateProvider from "./store/hook/Rate.provider";
 import ProfilesPage from "./pages/Profiles.page";
 import ProcessesPage from "./pages/Processes.page";
 import NotificationPage from "./pages/Notification.page";
+import {hasAuthParams, useAuth} from "react-oidc-context";
+
+/* Theme variables */
+import './theme/variables.css';
+import './theme/main.scss'
 
 setupIonicReact();
 
 const DashbaordPage = React.lazy(() => import("./pages/Dashbaord.page"))
 
-const PublicSection: React.FC = () => {
-  return (
-    <IonRouterOutlet id="public">
-      <Route path="/login" component={Login} exact={true}/>
-      <Route path="/" render={() => <Redirect to="/login"/>} exact={true}/>
-    </IonRouterOutlet>
-  )
-}
+// const PublicSection: React.FC = () => {
+//   return (
+//     <IonRouterOutlet id="public">
+//       <Route path="/login" component={Login} exact={true}/>
+//       <Route path="/" render={() => <Redirect to="/login"/>} exact={true}/>
+//     </IonRouterOutlet>
+//   )
+// }
 
 const SecureSection: React.FC = () => {
   return (
@@ -82,43 +83,20 @@ const SecureSection: React.FC = () => {
   )
 }
 
-const PrivateRouter: React.FC<{ children: React.ReactNode }> = ({children}) => {
-  const {isAuthenticated} = useKeycloak();
-  return isAuthenticated ? (
-    <>{children}</>
-  ) : (
-    <Redirect to="/"/>
-  )
-}
-
-const PublicRouter: React.FC<{ children: React.ReactNode }> = ({children}) => {
-  const {isAuthenticated} = useKeycloak();
-  return !isAuthenticated ? (
-    <>{children}</>
-  ) : (
-    // <Redirect to="/page/participants"/>
-    <Redirect to="/page/participants"/>
-  )
-}
-
 const App: React.FC = () => {
+  const auth = useAuth()
+  React.useEffect(() => {
+    const authP = hasAuthParams()
+
+    if (!hasAuthParams() && !auth.isAuthenticated && !auth.activeNavigator && !auth.isLoading) {
+      auth.signinRedirect();
+    }
+  }, [auth.isAuthenticated, auth.activeNavigator, auth.isLoading, auth.signinRedirect]);
+
   return (
-    <KeycloakProvider authClient={authKeycloak}>
       <IonApp>
-        <IonReactRouter>
-          <Route path="/">
-            <PublicRouter>
-              <PublicSection></PublicSection>
-            </PublicRouter>
-          </Route>
-          <Route path="/*">
-            <PrivateRouter>
-              <SecureSection></SecureSection>
-            </PrivateRouter>
-          </Route>
-        </IonReactRouter>
+       <SecureSection></SecureSection>
       </IonApp>
-    </KeycloakProvider>
   );
 };
 
