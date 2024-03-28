@@ -103,8 +103,6 @@ const RateComponent: FC<{ rate: EegTariff, onSubmit: (data: EegTariff) => void, 
         case "EZP":
           return (
             <div>
-              <InputFormComponent label={t("baseFee")} control={control} name={"baseFee"}
-                                  rules={{pattern: {value: /^[0-9]*$/, message: "Nur Zahlen erlaubt"}}} type="text" error={errors.baseFee}/>
               <NumberInputForm label={t("centPerKWh")} control={control} name={"centPerKWh"}/>
             </div>
           )
