@@ -16,7 +16,7 @@ import SelectForm from "../components/form/SelectForm.component";
 import "./Eeg.page.scss"
 import {useTenants} from "../store/hook/AuthProvider";
 import {IonSelectCustomEvent} from "@ionic/core/dist/types/components";
-import {EegContext, useAccessGroups, useTenantSwitch} from "../store/hook/Eeg.provider";
+import {EegContext, useAccessGroups, useTenant, useTenantSwitch} from "../store/hook/Eeg.provider";
 import EegBillingConfigCardComponent from "../components/EegBillingConfigCard.component";
 import {AccountInfo, Address, Contact, Eeg, Optionals} from "../models/eeg.model";
 import {IbanInputForm} from "../components/form/IbanInputForm";
@@ -37,7 +37,7 @@ const EMPTY_EEG_ENTITY = {
 const EegPage: FC = () => {
 
   const eeg = useAppSelector(eegSelector);
-  const tenant = useAppSelector(selectedTenant);
+  const {tenant} = useTenant()
   const dispatcher = useAppDispatch();
 
   const {isAdmin} = useAccessGroups()

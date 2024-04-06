@@ -10,6 +10,10 @@ import CorePageTemplate from "../core/CorePage.template";
 import ProcessHeaderComponent from "./ProcessHeader.component";
 import ProcessContentComponent from "./ProcessContent.component";
 import {Api} from "../../service";
+import {BasicSelectComponent} from "../form/BasicSelect.component";
+import {JoinStrings} from "../../util/Helper.util";
+import {meteringDisplayName} from "../../util/FilterHelper";
+import {useLocale} from "../../store/hook/useLocale";
 
 interface ProcessValues {
   communityId: string | undefined
@@ -30,22 +34,23 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
     meteringPoint: undefined,
   }
 
+  const {t} = useLocale("common")
   const {handleSubmit, reset,
     control, watch,
     setValue, formState} = useForm<ProcessValues>({defaultValues: processValues})
   const [useableMeters, setUsableMeters] = useState<Metering[]>(meters)
   const [meteringPoint, participantId] = watch(['meteringPoint', 'participantId'])
 
-  useEffect(() => {
-    if (!participantId) {
-      if (meteringPoint) {
-        const p = participants.find(p => p.meters.find(m => m.meteringPoint === meteringPoint))
-        if (p) {
-          setValue('participantId', p.id)
-        }
-      }
-    }
-  }, [meteringPoint])
+  // useEffect(() => {
+  //   if (!participantId) {
+  //     if (meteringPoint) {
+  //       const p = participants.find(p => p.meters.find(m => m.meteringPoint === meteringPoint))
+  //       if (p) {
+  //         setValue('participantId', p.id)
+  //       }
+  //     }
+  //   }
+  // }, [meteringPoint])
 
   useEffect(() => {
     if (participantId) {
@@ -53,6 +58,8 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
       if (p) {
         setUsableMeters(p.meters)
       }
+    } else {
+      setUsableMeters(meters)
     }
   }, [participantId])
 
@@ -61,7 +68,7 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
 
       const meter = meters.find((m) => m.meteringPoint === data.meteringPoint)
       if (meter) {
-        Api.eegService.registerMeteringPoint(eeg.rcNumber.toUpperCase(), data.participantId, meter.meteringPoint, meter.direction)
+        Api.eegService.registerMeteringPoint(eeg.id.toUpperCase(), meter.participantId, meter.meteringPoint, meter.direction)
           .finally(() => {
             reset()
           })
@@ -90,13 +97,23 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
     <ProcessContentComponent>
     <CorePageTemplate>
       <>
-        <InputForm name="communityId" label="Gemeinschafts-Id" control={control} readonly={true}/>
-        <SelectForm control={control} name={"participantId"} options={participants.map((p) => {
-          return {key: p.id, value: p.firstname + " " + p.lastname}
-        })} label={"Mitglied"} selectInterface={"popover"} rules={{required: true}}/>
-        <SelectForm control={control} name={"meteringPoint"} options={useableMeters.map((p) => {
-          return {key: p.meteringPoint, value: p.meteringPoint + " (" + p.equipmentName + ")"}
-        })} label={"Zählpunkt"} selectInterface={"popover"}  rules={{required: true}}/>
+        <InputForm name="communityId" label="Gemeinschafts-Id" control={control} protectedControl={true}/>
+        {/*<SelectForm control={control} name={"participantId"} options={participants.map((p) => {*/}
+        {/*  return {key: p.id, value: p.firstname + " " + p.lastname}*/}
+        {/*})} label={"Mitglied"} selectInterface={"popover"} rules={{required: true}}/>*/}
+        {/*<SelectForm control={control} name={"meteringPoint"} options={useableMeters.map((p) => {*/}
+        {/*  return {key: p.meteringPoint, value: p.meteringPoint + " (" + p.equipmentName + ")"}*/}
+        {/*})} label={"Zählpunkt"} selectInterface={"popover"}  rules={{required: true}}/>*/}
+
+        <BasicSelectComponent control={control} name={"participantId"}
+                              options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
+                                return {value: p.id, label: JoinStrings(" ", "-", p.participantNumber, p.lastname, p.firstname)}
+                              })} label={t("participant")}/>
+        <BasicSelectComponent control={control} name={"meteringPoints"}
+                              options={useableMeters.filter(p => p.status !== 'ACTIVE').map((p) => {
+                                return {value: p.meteringPoint, label: JoinStrings(" ", "", meteringDisplayName(p), p.status)}
+                              })} label={t("metering")} multiple={true} rules={{required: true}}/>
+
         <IonItem lines="none" style={{zIndex: "0"}}>
           <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={!formState.isValid}>
             Anfordern

@@ -14,7 +14,7 @@ import cn from "classnames";
 import {syncCircle} from "ionicons/icons";
 import {EegContext} from "../store/hook/Eeg.provider";
 import CorePageTemplate from "../components/core/CorePage.template";
-import {OidcAuthContext} from "../store/hook/AuthProvider";
+import {OidcAuthContext, useRoles, useTenants, useUser} from "../store/hook/AuthProvider";
 
 
 interface ProfileEntry {
@@ -43,7 +43,10 @@ const ProfilesPage: FC = () => {
   const [profileState, setProfileState] = useState()
 
   const {eeg} = useContext(EegContext);
-  const {tenants, roles, claims} = useContext(OidcAuthContext)
+  // const {tenants, roles, claims} = useContext(OidcAuthContext)
+  const tenants = useTenants()
+  const roles = useRoles()
+  const user = useUser()
 
   useEffect(() => {
     setSelectedProcess(processes[0])
@@ -58,7 +61,7 @@ const ProfilesPage: FC = () => {
       return (
         <div className={"details-body"} style={{height: "100%", display: "flex", flexDirection: "column"}}>
           <div className={"details-header"}>
-            <div><h4>{claims.name}</h4></div>
+            <div><h4>{user && user.claims?.name}</h4></div>
           </div>
           <div style={{display: "flex", flexDirection: "column", flexGrow: "1"}}>
             <CorePageTemplate>

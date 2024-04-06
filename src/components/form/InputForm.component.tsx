@@ -43,9 +43,9 @@ const InputForm: (React.FC<InputFormProps>) =
     const { onChange, value, name, ref,onBlur } = field;
     if (protectedControl) {
       return (
-        <div style={{display:"flex", flexFlow:"column"}}>
+        <div style={{display:"flex", flexFlow:"column", border: "1px solid var(--ion-color-light)", padding: "5px", background: "var(--ion-color-light)", borderRadius: "4px"}}>
           <div style={{fontSize:"0.8em", color: "black", fontFamily:'Roboto, "Helvetica Neue", "sans-serif"'}}>{rest.label}:</div>
-          <div style={{fontSize:"1.2em", margin: "8px", color: "var(--ion-color-primary-shade)", fontFamily:'Roboto'}}>{value}</div>
+          <div style={{fontSize:"1.0em", margin: "6px", color: "var(--ion-color-primary-shade)", fontFamily:'Roboto'}}>{value}</div>
         </div>
       )
     }

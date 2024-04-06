@@ -71,7 +71,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
       const meter = meters.filter((m) => data.meteringPoints?.find((s:string) => s === m.meteringPoint))
       if (meter) {
         Api.eegService.revokeMeteringPoint(
-          eeg.rcNumber.toUpperCase(), data.participantId,
+          eeg.id.toUpperCase(), data.participantId,
           meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
           consentEndDate.getTime(), reason)
           .finally(() => {
@@ -102,7 +102,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
       <ProcessContentComponent>
         <CorePageTemplate>
           <>
-            <InputForm name="communityId" label="Gemeinschafts-Id" control={control} readonly={true}/>
+            <InputForm name="communityId" label="Gemeinschafts-Id" control={control} protectedControl={true}/>
             <BasicSelectComponent control={control} name={"participantId"}
                                   options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
               return {value: p.id, label: p.firstname + " " + p.lastname}

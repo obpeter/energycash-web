@@ -8,7 +8,7 @@ import {Metering} from "../models/meteringpoint.model";
 import MeterFormElement from "./core/MeterForm.element";
 import EegPaneTemplate from "./core/EegPane.template";
 import MeterAddressFormElement from "./core/forms/MeterAddressForm/MeterAddressForm.element";
-import {useOnlineState} from "../store/hook/Eeg.provider";
+import {useOnlineState, useTenant} from "../store/hook/Eeg.provider";
 
 interface MeterFromComponentProps {
   meteringPoint: Metering
@@ -20,7 +20,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   const participant = useAppSelector(selectedParticipantSelector);
 
   const rates = useAppSelector(ratesSelector);
-  const tenant = useAppSelector(selectedTenant);
+  const {tenant} = useTenant();
   const metering = useAppSelector(selectedMeterSelector);
 
   const isOnline = useOnlineState()

@@ -13,9 +13,10 @@ import {Metering} from "../../models/meteringpoint.model";
 import {EegParticipant} from "../../models/members.model";
 import {transformMeterReportToEnergySeries} from "../../util/ReportHelper";
 import {Api} from "../../service";
+import {ActiveTenant} from "../../models/eeg.model";
 
 interface MeterChartComponentProps {
-  tenant: string
+  tenant: ActiveTenant
   report: MeterEnergySeries
   activePeriod: SelectedPeriod
   selectedMeter: Metering

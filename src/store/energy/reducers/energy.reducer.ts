@@ -1,6 +1,6 @@
 import {createReducer} from "@reduxjs/toolkit";
 import {metaAdapter, initialState, reportAdapter, participantReportAdapter} from "../states";
-import {clearEnergyState, fetchEnergyReport, fetchEnergyReportV2, setSelectedPeriod} from "../actions";
+import {clearEnergyState, fetchEnergyReportV2, setSelectedPeriod} from "../actions";
 import {SelectedPeriod} from "../../../models/energy.model";
 
 const reportIdToPeriod = (id: string):SelectedPeriod => {
@@ -10,14 +10,6 @@ const reportIdToPeriod = (id: string):SelectedPeriod => {
 
 export const reducer = createReducer(initialState, builder =>
   builder
-    .addCase(fetchEnergyReport.fulfilled, (state, action) => {
-      const {report} = action.payload
-      state.report = report.eeg.report
-      // state.selectedPeriod = reportIdToPeriod(report.eeg.report.id)
-      metaAdapter.setAll(state.meta, report.eeg.meta)
-      reportAdapter.setAll(state.intermediateReportResults, report.eeg.intermediateReportResults)
-      // return { ...state, report: report.eeg.report, selectedPeriod: reportIdToPeriod(report.eeg.report.id)}
-    })
     .addCase(setSelectedPeriod, (state, action) => {
       return {...state, selectedPeriod: action.payload}
     })
@@ -29,7 +21,12 @@ export const reducer = createReducer(initialState, builder =>
       participantReportAdapter.setAll(state.participantReports, report.participantReports)
       metaAdapter.setAll(state.meta, report.meta)
     })
+    .addCase(fetchEnergyReportV2.rejected, (state, action) => {
+      participantReportAdapter.removeAll(state.participantReports)
+      metaAdapter.removeAll(state.meta)
+    })
     .addCase(clearEnergyState, (state, action) => {
       participantReportAdapter.removeAll(state.participantReports)
+      metaAdapter.removeAll(state.meta)
     })
 );

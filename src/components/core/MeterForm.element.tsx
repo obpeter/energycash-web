@@ -114,7 +114,7 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
                    onChangePartial={_onChange}
         />
         <InputForm name={"partFact"} label={t("process.partFact.label")} control={control} rules={{required: true}}
-                   type="number" onChangePartial={_onChange} protectedControl={true}/>
+                   type="number" onChangePartial={_onChange} protectedControl={!isChangeable()}/>
         {area && area === 'BEG' && <>
             <InputForm name={"gridOperatorId"} label={t("gridOperator_id")} control={control} rules={{required: true}}
                        type="text" onChangePartial={_onChange} protectedControl={!isChangeable()}/>

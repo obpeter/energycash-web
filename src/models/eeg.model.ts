@@ -1,4 +1,5 @@
 export interface Eeg {
+  id: string
   name: string;
   rcNumber: string;
   legal: string;
@@ -204,7 +205,7 @@ export class Message {
     return "-"
   }
   public get responseCode(): string | string[] {
-    const value = this.getValue("responseCode")
+    const value = this.getValue("responseCodes")
     if (value instanceof Array) {
       return (value as string[]).join(", ")
     }
@@ -222,3 +223,8 @@ export interface EegNotification {
 
 export type EdaHistories = Record<string, Record<string, Array<any>>>
 
+export interface ActiveTenant {
+  tenant: string
+  ecId: string
+  rcNr: string
+}

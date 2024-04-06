@@ -32,7 +32,7 @@ import {
   updateParticipant, updateParticipantPartial
 } from "../../store/participant";
 import {formatMeteringPointString, GetWeek} from "../../util/Helper.util";
-import {selectedTenant} from "../../store/eeg";
+import {activeTenant, selectedTenant} from "../../store/eeg";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import InvoiceDocumentComponent from "./InvoiceDocument.component";
@@ -42,6 +42,7 @@ import {meteringInterReportSelectorV2, meteringReportSelectorV2, selectedPeriodS
 import MeterChartComponent from "./MeterChart.component";
 import {Api} from "../../service";
 import {useLocale} from "../../store/hook/useLocale";
+import {useTenant} from "../../store/hook/Eeg.provider";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 
@@ -57,7 +58,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const dispatcher = useAppDispatch();
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeter = useAppSelector(selectedMeterSelector);
-  const tenant = useAppSelector(selectedTenant)
+  // const tenant = useAppSelector(activeTenant)
+  const tenant = useTenant()
   const rates = useAppSelector(ratesSelector);
   const activePeriod = useAppSelector(selectedPeriodSelector);
   const report = useAppSelector(meteringInterReportSelectorV2(selectedParticipant?.id, selectedMeter?.meteringPoint))
@@ -90,12 +92,12 @@ const ParticipantDetailsPaneComponent: FC = () => {
   // }, [])
 
   const onUpdateParticipant = (participant: EegParticipant) => {
-    dispatcher(updateParticipant({tenant, participant})).unwrap().then(() => console.log("Participant Updated"))
+    dispatcher(updateParticipant({tenant: tenant!.tenant, participant: participant})).unwrap().then(() => console.log("Participant Updated"))
   }
 
   const onUpdateParticipantPartial = (participantId: string, value: Record<string, any>) => {
     dispatcher(updateParticipantPartial({
-      tenant: tenant,
+      tenant: tenant!.tenant,
       participantId: participantId,
       value: {path: Object.keys(value)[0], value: Object.values(value)[0]}
     })).unwrap()
@@ -115,10 +117,10 @@ const ParticipantDetailsPaneComponent: FC = () => {
         return selectedMeter ? <MeterFormComponent meteringPoint={selectedMeter}/> : <></>
       case "invoiceForm":
         return selectedParticipant ?
-          <InvoiceDocumentComponent tenant={tenant} participant={selectedParticipant}/> : <></>
+          <InvoiceDocumentComponent tenant={tenant!.tenant} participant={selectedParticipant}/> : <></>
       case "documentForm":
         return selectedParticipant ?
-          <ContractDocumentComponent tenant={tenant} participant={selectedParticipant}/> : <></>
+          <ContractDocumentComponent tenant={tenant!.tenant} participant={selectedParticipant}/> : <></>
       default:
         return <></>
     }
@@ -155,8 +157,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
     // }
 
     if (ev.detail.role === 'confirm') {
-      uploadFiles(tenant, participant.id, ev.detail.data)
-        .then(() => dispatcher(confirmParticipant({tenant, participantId: participant.id})).unwrap())
+      uploadFiles(tenant!.tenant, participant.id, ev.detail.data)
+        .then(() => dispatcher(confirmParticipant({tenant: tenant!.tenant, participantId: participant.id})).unwrap())
         .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
         .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
     }
@@ -165,24 +167,6 @@ const ParticipantDetailsPaneComponent: FC = () => {
     // setIsActivationActive(undefined);
   }
 
-  // const meterStatusText = (meter: Metering) => {
-  //   switch (meter.status) {
-  //     case 'NEW':
-  //       return <div>Antwort des Netzbetreibers noch ausstehend</div>
-  //     case 'PENDING':
-  //       return "Zustimmung des Mitglieds noch ausstehend"
-  //     case 'APPROVED':
-  //       return "Abschluss Meldung von Netzbetreiber noch ausstehend"
-  //     case 'REJECTED':
-  //       return "Zählpunkt wurde vom Netzbetreiber abgewiesen"
-  //     case 'REVOKED':
-  //       return "Zählpunkt wurde vom Netzbetreiber aufgehoben"
-  //     case 'INVALID':
-  //       return "Zählpunkt wurde vom Netzbetreiber nicht angenommen"
-  //     default:
-  //       return ""
-  //   }
-  // }
   const meterStatusText = (meter: Metering) => {
     return (
       <div>
@@ -199,7 +183,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const onRemoveMeteringPoint = () => {
     if (selectedMeter && selectedParticipant) {
       dispatcher(removeMeteringPoint(
-        {tenant: tenant, participantId: selectedParticipant.id, meter: selectedMeter}))
+        {tenant: tenant!.tenant, participantId: selectedParticipant.id, meter: selectedMeter}))
     }
   }
 
@@ -219,7 +203,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
       ],
       onDidDismiss: (e: CustomEvent) => {
         if (e.detail.role === 'confirm') {
-          dispatcher(archiveParticipant({participant: selectedParticipant, tenant: tenant}))
+          dispatcher(archiveParticipant({participant: selectedParticipant, tenant: tenant!.tenant}))
             .unwrap()
             .catch(() => {
               toaster({
@@ -355,7 +339,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
                                disabled={true}></IonToggle>
                   </IonItem>
                   {isMeterActive() && report && activePeriod &&
-                      <MeterChartComponent report={report} tenant={tenant} activePeriod={activePeriod}
+                      <MeterChartComponent report={report} tenant={tenant!} activePeriod={activePeriod}
                                            selectedMeter={selectedMeter}
                                            selectedParticipant={selectedParticipant}/>}
                 </div>) :

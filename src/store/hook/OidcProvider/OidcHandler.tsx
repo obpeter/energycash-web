@@ -1,6 +1,7 @@
 import {FC, PropsWithChildren, useEffect, useState} from "react";
 import {hasAuthParams, useAuth} from "react-oidc-context";
-import {IonSpinner} from "@ionic/react";
+import '../../../theme/main.scss'
+import {AuthService} from "../../../service/auth.service";
 
 export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({ children, hasTried}) => {
   const auth = useAuth();
@@ -44,20 +45,24 @@ export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({
   // }, [auth.events, auth.signinSilent]);
 
   if (auth.error) {
+    console.log("################ AUTH ERROR: ", auth.error.stack)
     return (
       <div className="full-screen-center">
-          {auth.error.name}: {auth.error.message}
+        <div style={{margin: "auto"}}>
+          <div style={{fontSize:"24px"}}>Authentication Error</div>
+          <div>{auth.error.name}: {auth.error.message}</div>
+        </div>
       </div>
     );
   }
 
-  if (auth.isLoading) {
-    return (
-      <div className="full-screen-center">
-        <IonSpinner style={{margin: "auto", height: "48px", width: "48px"}}/>
-      </div>
-    );
-  }
+  // if (auth.isLoading) {
+  //   return (
+  //     <div className="full-screen-center">
+  //       <IonSpinner style={{margin: "auto", height: "48px", width: "48px"}}/>
+  //     </div>
+  //   );
+  // }
 
   return <>{children}</>;
 };

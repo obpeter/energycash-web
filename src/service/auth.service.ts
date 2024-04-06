@@ -78,7 +78,7 @@ export class AuthService extends UserManager {
       this.accessGroups = tokenParsed.access_groups;
       this.claims = {"name": tokenParsed.name, "nick": tokenParsed.preferred_username, "email": tokenParsed.email}
 
-      this.onTokenReceived && this.onTokenReceived({tenants: this.tenants, claims: this.claims, accessGroups: this.accessGroups})
+      // this.onTokenReceived && this.onTokenReceived({tenants: this.tenants, claims: this.claims, accessGroups: this.accessGroups})
     }
     return token
   }
@@ -95,7 +95,8 @@ export class AuthService extends UserManager {
       }
       return this.parseToken(user.access_token)
     }
-    throw new Error("Not authorized")
+    return ""
+    // throw new Error("Not authorized")
   }
 
   public async login() {

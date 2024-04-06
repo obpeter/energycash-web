@@ -46,7 +46,7 @@ import {
   resetParticipantAmounts,
   selectBillFetchingSelector,
 } from "../../store/billing";
-import { eegSelector, selectedTenant } from "../../store/eeg";
+import {activeTenant, eegSelector, selectedTenant} from "../../store/eeg";
 import {
   meteringEnergyGroup11,
   selectMetaRecord,
@@ -67,6 +67,7 @@ import {
 } from "ionicons/icons";
 import { eegPlug, eegSolar } from "../../eegIcons";
 import {
+  participantsSelector1,
   selectedMeterIdSelector,
   selectedParticipantSelector,
   selectMetering,
@@ -80,7 +81,7 @@ import {
 import DatepickerPopover from "../dialogs/datepicker.popover";
 import { ExcelReportRequest, InvestigatorCP } from "../../models/reports.model";
 import UploadPopup from "../dialogs/upload.popup";
-import { useRefresh } from "../../store/hook/Eeg.provider";
+import {useRefresh, useTenant} from "../../store/hook/Eeg.provider";
 import {
   billingRunErrorSelector,
   billingRunIsFetchingSelector,
@@ -117,7 +118,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
   }
 ) => {
   const dispatcher = useAppDispatch();
-  const tenant = useAppSelector(selectedTenant);
+  const {tenant, ecId, rcNr} = useTenant()
+  // const ato = useAppSelector(activeTenant);
   const energyMeterGroup = useAppSelector(meteringEnergyGroup11);
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeterId = useAppSelector(selectedMeterIdSelector);
@@ -473,19 +475,20 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
   const onExport = async (type: number, data: any) => {
     if (data && eeg) {
       if (type === 0) {
-        const meta = selectMetaRecord(store.getState());
-        const [start, end] = data;
+        const ap = participantsSelector1(store.getState())
+        const meta = selectMetaRecord(store.getState())
+        const [start, end] = data
         const exportdata = {
           start: start.getTime(),
           end: end.getTime(),
           communityId: eeg.communityId,
-          cps: filterActiveParticipantAndMeter(participants, start, end).reduce(
+          cps: filterActiveParticipantAndMeter(ap, start, end).filter(p => p.meters.length > 0).reduce(
             (r, p) =>
               r.concat(
                 p.meters
                   .filter(
                     (m) =>
-                      m.status === "ACTIVE" &&
+                      (m.status === "ACTIVE" || m.status === 'INACTIVE') &&
                       filterActiveMeter(meta, m, moment(start), moment(end))
                   )
                   .map((m) => {
@@ -498,8 +501,8 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
               ),
             [] as InvestigatorCP[]
           ),
-        } as ExcelReportRequest;
-        return Api.energyService.createReport(tenant, exportdata);
+        } as ExcelReportRequest
+        return Api.energyService.createReport({tenant, ecId, rcNr}, exportdata);
       } else {
         return Api.eegService.exportMasterdata(tenant);
       }
@@ -514,7 +517,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
           case 0:
             loading({ message: "Energiedaten importieren ..." });
             Api.energyService
-              .uploadEnergyFile(tenant, sheetName, file[0])
+              .uploadEnergyFile({tenant, ecId, rcNr}, sheetName, file[0])
               .then(() => refresh())
               .then(() => dismissLoading())
               .then(() => infoToast("Energiedaten-Upload beendet."))

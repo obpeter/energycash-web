@@ -20,13 +20,13 @@
   "centPerKWh": "Arbeitspreis in ct/kWh (netto)",
   "freeKWh": "Kostenlose Energie in kWh (je Abrechnungsintervall)",
   "useMeteringPointFee": "Zählpunkt Gebühr einheben?",
-  "meteringPointFee" : "Zählpunktgebühr in €",
-  "meteringPointFee_card" : "Zählpunktgebühr",
+  "meteringPointFee": "Zählpunktgebühr in €",
+  "meteringPointFee_card": "Zählpunktgebühr",
   "useVat": "Umsatzsteuer anführen",
-  "vatInPercent" : "Umsatzsteuer in %",
+  "vatInPercent": "Umsatzsteuer in %",
   "consumer": "Verbraucher",
   "producer": "Erzeuger",
-  "process" : {
+  "process": {
     "requestValue": {
       "selectEntire": "Zählpunkte für Gesamte EEG nachfordern"
     },
@@ -38,7 +38,12 @@
     "podList": {
       "title": "Teilnehmerliste anfordern",
       "desc": "Anfordern der Teilnehmer einer EEG."
-    }
+    },
+    "EC_PRTFACT_CHANGE": "Änderung des Teilnahmefaktor",
+    "EC_REQ_ONL": "Anmeldung Teilnahme Online",
+    "CR_REQ_PT": "Anfordern von Energiedaten",
+    "CR_MSG": "Versenden der Energiedaten",
+    "CM_REV_IMP": "Datenfreigabe-Aufhebung"
   },
   "menu": {
     "changePassword": "Passwort ändern",
@@ -62,9 +67,8 @@
     "status_text_NEW": "Antwort des Netzbetreibers noch ausstehend.",
     "status_text_PENDING": "Zustimmung des Mitglieds noch ausstehend.",
     "status_text_APPROVED": "Abschluss Meldung von Netzbetreiber noch ausstehend.",
-  "status_text_REJECTED": "ählpunkt wurde vom Netzbetreiber abgewiesen.",
+    "status_text_REJECTED": "Zählpunkt wurde vom Netzbetreiber abgewiesen.",
     "status_text_REVOKED": "Zählpunkt wurde vom Netzbetreiber aufgehoben.",
     "status_text_INVALID": "Zählpunkt wurde vom Netzbetreiber nicht angenommen."
-
   }
 }

@@ -58,7 +58,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
   const isMeterPending = () => isPending() || meter.status === 'NEW' || meter.status === 'PENDING';
   const isMeterRejected = () => meter.status === "REVOKED" || meter.status === "REJECTED"
   const isMeterActive = () => meter.status === "ACTIVE" || meter.status === "INACTIVE"
-  // const isMeterInactive = () => meter.status === "INACTIVE"
+  const isMeterInactive = () => meter.status === "INACTIVE"
 
   const meterValue = () => {
     if (report && report.allocated) {
@@ -105,7 +105,7 @@ const MeterCardComponent: FC<MeterCardComponentProps> = ({participant, meter, hi
       <IonGrid fixed={true} style={{paddingTop: "12px"}}>
         <IonRow style={meterColorStyle()}>
           <IonCol size={"1"}>
-            <IonIcon icon={isMeterRejected() ? eegExclamation : isGenerator(meter) ? eegSolar : eegPlug} size="small"></IonIcon>
+            <IonIcon icon={isMeterRejected() || isMeterInactive() ? eegExclamation : isGenerator(meter) ? eegSolar : eegPlug} size="small"></IonIcon>
           </IonCol>
           <IonCol size={isMeterPending() ? "11" : "7"}>
             {/*<IonLabel style={{textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"}}>{participant.participant.meters[0].meteringPoint}</IonLabel>*/}
