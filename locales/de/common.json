@@ -26,7 +26,9 @@
   "vatInPercent": "Umsatzsteuer in %",
   "consumer": "Verbraucher",
   "producer": "Erzeuger",
+  "calendar_label": "Zeitraum",
   "process": {
+    "submit": "Anfordern",
     "requestValue": {
       "selectEntire": "Zählpunkte für Gesamte EEG nachfordern"
     },
@@ -38,6 +40,23 @@
     "podList": {
       "title": "Teilnehmerliste anfordern",
       "desc": "Anfordern der Teilnehmer einer EEG."
+    },
+    "activateMeter": {
+      "title": "Zählpunkt aktivieren",
+      "desc": "Dieser Prozess dient zur Aktivierung eines Zählpunktes."
+    },
+    "requestMeterData": {
+      "title": "Zählpunktdaten nachfordern",
+      "desc": "Dieser Prozess dient der Anforderung von Energiedaten eines Zählpunktes in einem vom Anforderer zu definierenden Zeitbereich."
+    },
+    "history": {
+      "title": "Prozess History",
+      "desc": "Übersicht der Prozesskommunikation mit den Marktpartner."
+    },
+    "revokeMeter": {
+      "title": "Zählpunkt abmelden",
+      "desc": "Der Marktteilnehmer wird über die Aufhebung einer erteilten Datenfreigabe in Kenntnis gesetzt.",
+      "reason": "Begründung (optional)"
     },
     "EC_PRTFACT_CHANGE": "Änderung des Teilnahmefaktor",
     "EC_REQ_ONL": "Anmeldung Teilnahme Online",
@@ -56,15 +75,22 @@
   },
   "meter": {
     "status_code_56": "Zählpunkt nicht gefunden",
+    "status_code_57": "Zählpunkt nicht versorgt",
+    "status_code_76": "Ungültige Anforderungsdaten",
     "status_code_104": "Falsche Energierichtung",
     "status_code_156": "ZP bereits zugeordnet",
+    "status_code_157": "ZP bereits einem Betreiber zugeordnet",
     "status_code_158": "ZP ist nicht teilnahmeberechtigt",
     "status_code_159": "Zu Prozessdatum ZP inaktiv bzw. noch kein Gerät eingebaut",
-    "status_code_174": "Angefragte Daten nicht lieferbar",
+    "status_code_172": "Kunde hat Datenfreigabe abgelehnt",
+    "status_code_173": "Kunde hat auf Datenfreigabe nicht reagiert (Timeout)",
+    "status_code_177": "Keine Datenfreigabe vorhanden",
     "status_code_181": "Gemeinschafts-ID nicht vorhanden",
     "status_code_184": "Kunde hat optiert",
     "status_code_185": "Zählpunkt befindet sich nicht im Bereich der Energiegemeinschaft",
+    "status_code_196": "Teilnahme-Limit wird überschritten",
     "status_text_NEW": "Antwort des Netzbetreibers noch ausstehend.",
+    "status_text_INIT": "Antwort des Netzbetreibers noch ausstehend.",
     "status_text_PENDING": "Zustimmung des Mitglieds noch ausstehend.",
     "status_text_APPROVED": "Abschluss Meldung von Netzbetreiber noch ausstehend.",
     "status_text_REJECTED": "Zählpunkt wurde vom Netzbetreiber abgewiesen.",

@@ -105,20 +105,22 @@ export class AuthService extends UserManager {
 
   public async refresh() {
     try {
-      return this.signinCallback().then(user => {
+      return this.signinSilent().then(user => {
+      // return this.signinCallback().then(user => {
         if (user) {
-          return user.access_token
+          return this.parseToken(user.access_token)
         }
         throw new Error("Trouble while authenticating you! Try again in few minutes")
       }).catch(() => {
-        this.signinRedirect().then(async () => {
-          const u = await this.getUser();
+        this.signinRedirect().then(() => this.getUser()).then(u => {
           if(u) {
-            return this.parseToken(u?.access_token);
+            return this.parseToken(u?.access_token)
           }
+          throw new Error("Trouble while authenticating you! Try again in few minutes")
         })
       })
     } catch {
+      await this.logout()
     }
   }
 

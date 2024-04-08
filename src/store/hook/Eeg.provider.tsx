@@ -122,6 +122,7 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
 
   const initApplication = useCallback(async () => {
     if (activeTenant && activeTenant.length > 0) {
+      // await auth.signinRedirect()
       Promise.all([
         dispatch(fetchEegModel({tenant: activeTenant})),
         dispatch(fetchRatesModel({tenant: activeTenant})),
@@ -153,15 +154,6 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     localStorage.setItem("tenant", tenant.toUpperCase())
     dispatch(selectTenant(tenant))
   }
-
-  if (!eeg || !activeTenant || auth.isLoading) {
-    return (
-      <div className="full-screen-center">
-        <IonSpinner style={{margin: "auto", height: "48px", width: "48px"}}/>
-      </div>
-    )
-  }
-
 
   const value = {
     eeg: eeg,

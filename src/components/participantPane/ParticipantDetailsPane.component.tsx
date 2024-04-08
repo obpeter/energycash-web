@@ -58,17 +58,12 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const dispatcher = useAppDispatch();
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeter = useAppSelector(selectedMeterSelector);
-  // const tenant = useAppSelector(activeTenant)
   const tenant = useTenant()
   const rates = useAppSelector(ratesSelector);
   const activePeriod = useAppSelector(selectedPeriodSelector);
   const report = useAppSelector(meteringInterReportSelectorV2(selectedParticipant?.id, selectedMeter?.meteringPoint))
 
-  // const [selectedMeter, setSelectedMeter] = useState<Metering | undefined>(undefined)
-
   const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
-  // const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod | undefined>(activePeriod)
-  // const [activeEnergySeries, setActiveEnergySeries] = useState<MeterEnergySeries|undefined>(report)
 
   const [toaster] = useIonToast();
   const [participantAlert] = useIonAlert();
@@ -79,17 +74,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';
 
-  const meterInvalidCodes = [56, 104, 156, 158, 159, 174, 181, 184, 185]
-  // useEffect(() => {
-  //   if (selectedMeterId && selectedParticipant) {
-  //     const meter = selectedParticipant.meters.find(m => m.meteringPoint === selectedMeterId)
-  //     if (meter) {
-  //       setSelectedMeter(meter)
-  //     }
-  //   } else {
-  //     setSelectedMeter(undefined)
-  //   }
-  // }, [])
+  const meterInvalidCodes = [56, 57, 76, 104, 156, 157, 158, 159, 172, 173, 177, 181, 184, 185, 196]
 
   const onUpdateParticipant = (participant: EegParticipant) => {
     dispatcher(updateParticipant({tenant: tenant!.tenant, participant: participant})).unwrap().then(() => console.log("Participant Updated"))
@@ -146,25 +131,12 @@ const ParticipantDetailsPaneComponent: FC = () => {
       return new Promise<any>((resolve) => resolve(true))
     }
 
-    // if (ev.detail.role === 'confirm' && ev.detail.data) {
-    //   const data:FormData = ev.detail.data
-    //   fileService.uploadContractDocuments(tenant, participant.id,
-    //     data.getAll("docfiles").map(e => e as File)
-    //   )
-    //     .then(() => dispatcher(confirmParticipant({tenant, participantId: participant.id})).unwrap())
-    //     .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
-    //     .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
-    // }
-
     if (ev.detail.role === 'confirm') {
       uploadFiles(tenant!.tenant, participant.id, ev.detail.data)
         .then(() => dispatcher(confirmParticipant({tenant: tenant!.tenant, participantId: participant.id})).unwrap())
         .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
         .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
     }
-
-    // clearAll();
-    // setIsActivationActive(undefined);
   }
 
   const meterStatusText = (meter: Metering) => {
@@ -176,10 +148,6 @@ const ParticipantDetailsPaneComponent: FC = () => {
     )
   }
 
-  if (!selectedParticipant) {
-    return <></>
-  }
-
   const onRemoveMeteringPoint = () => {
     if (selectedMeter && selectedParticipant) {
       dispatcher(removeMeteringPoint(
@@ -187,7 +155,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
     }
   }
 
-  const archive = () => {
+  const archive = (sp: EegParticipant) => {
     participantAlert({
       subHeader: "Mitglied archivieren",
       message: "Das Mitglied ist nach dem ARCHIVIERUNG'S Prozess in deiner Übersicht nicht mehr verhanden.",
@@ -203,7 +171,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
       ],
       onDidDismiss: (e: CustomEvent) => {
         if (e.detail.role === 'confirm') {
-          dispatcher(archiveParticipant({participant: selectedParticipant, tenant: tenant!.tenant}))
+          dispatcher(archiveParticipant({participant: sp, tenant: tenant!.tenant}))
             .unwrap()
             .catch(() => {
               toaster({
@@ -218,143 +186,146 @@ const ParticipantDetailsPaneComponent: FC = () => {
   }
 
   const hasStatusCode = (meter: Metering) => {
-    return (meter && meter.statusCode && meterInvalidCodes.includes(meter.statusCode)) ? true : false
+    return !!(meter && meter.statusCode && meterInvalidCodes.includes(meter.statusCode))
   }
-
-  return (
-    <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
-      <div className={"details-header"}>
-        <div><h4>{selectedParticipant.firstname} {selectedParticipant.lastname}</h4></div>
-        <div style={{minWidth: "240px"}}>
-          <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}}
-                   className={"participant-header"}
-                   onClick={() => archive()}>
-            <IonIcon icon={trashBin} slot="start"
-                     style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
-            <IonLabel>Benutzer archivieren</IonLabel>
-          </IonItem>
-        </div>
-      </div>
-      <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
-        <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
-          <div className={"details-box"}>
-            {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (
-              <div style={{color: "black"}}>
-                <AllowParticipantDialog trigger="open-participant-allow-dialog"
-                                        participant={selectedParticipant}
-                                        onDismiss={onWillDismiss}/>
-                <IonCard color="warning-light">
-                  <IonItem lines="none" color="warning-light">
-                    <IonIcon icon={eegStar} slot="start"/>
-                    <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG
-                      aufnehmen?</IonLabel>
-                  </IonItem>
-                  <IonItem lines="none" color="warning-light">
-                    <IonButton id="open-participant-allow-dialog" slot="end" color="warning"
-                               size="default">Ja,
-                      Zulassen</IonButton>
-                  </IonItem>
-                </IonCard>
-              </div>) : (<></>)}
-            <div>
-              <IonItem button lines="full"
-                       className={cn("eeg-item-box", {"selected": activeMenu === "memberForm"})}
-                       onClick={() => setActiveMenu("memberForm")}>
-                <IonIcon icon={person} slot="start"></IonIcon>
-                <IonLabel>
-                  <div className={"detail-header"}>Details</div>
-                  <div className={"detail-subheader"}>Kontakt, Adresse, Bankdaten, ...</div>
-                </IonLabel>
-              </IonItem>
-            </div>
-            <div>
-              <IonItem button lines="full"
-                       className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}
-                       onClick={() => setActiveMenu("documentForm")}>
-                <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
-                <div>
-                  <div className={"detail-header"}>Dokumente</div>
-                  <div className={"detail-subheader"}>z.B. Verträge</div>
-                </div>
-              </IonItem>
-            </div>
-            <div>
-              <IonItem button lines="full"
-                       className={cn("eeg-item-box", {"selected": activeMenu === "invoiceForm"})}
-                       onClick={() => setActiveMenu("invoiceForm")}>
-                <IonIcon icon={logoEuro} slot="start"></IonIcon>
-                <IonLabel>
-                  <div className={"detail-header"}>Meine Rechnungen</div>
-                </IonLabel>
-              </IonItem>
-            </div>
-            <div>
-              <IonItem lines="full" className={"eeg-item-box"}>
-                <IonIcon icon={eegShieldCrown} slot="start"></IonIcon>
-                <div>
-                  <div
-                    className={"detail-header"}>{`Mitglied ist ${selectedParticipant?.role === 'EEG_USER' ? 'kein' : ''} Administrator`}</div>
-                </div>
-                <IonToggle slot="end" checked={selectedParticipant?.role !== 'EEG_USER'}
-                           disabled={true}></IonToggle>
-              </IonItem>
-            </div>
+  if (!selectedParticipant) {
+    return <></>
+  } else {
+    return (
+      <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
+        <div className={"details-header"}>
+          <div><h4>{selectedParticipant.firstname} {selectedParticipant.lastname}</h4></div>
+          <div style={{minWidth: "240px"}}>
+            <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}}
+                     className={"participant-header"}
+                     onClick={() => archive(selectedParticipant)}>
+              <IonIcon icon={trashBin} slot="start"
+                       style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
+              <IonLabel>Benutzer archivieren</IonLabel>
+            </IonItem>
           </div>
-          <div className={"details-box"}>
-            {selectedMeter ? (
-                <div className="ion-padding" slot="content">
-                  <IonToolbar
-                    color="primary"><IonTitle>{formatMeteringPointString(selectedMeter.meteringPoint)}</IonTitle></IonToolbar>
+        </div>
+        <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
+          <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
+            <div className={"details-box"}>
+              {(selectedParticipant.status === 'NEW' || selectedParticipant.status === 'PENDING') ? (
+                <div style={{color: "black"}}>
+                  <AllowParticipantDialog trigger="open-participant-allow-dialog"
+                                          participant={selectedParticipant}
+                                          onDismiss={onWillDismiss}/>
+                  <IonCard color="warning-light">
+                    <IonItem lines="none" color="warning-light">
+                      <IonIcon icon={eegStar} slot="start"/>
+                      <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG
+                        aufnehmen?</IonLabel>
+                    </IonItem>
+                    <IonItem lines="none" color="warning-light">
+                      <IonButton id="open-participant-allow-dialog" slot="end" color="warning"
+                                 size="default">Ja,
+                        Zulassen</IonButton>
+                    </IonItem>
+                  </IonCard>
+                </div>) : (<></>)}
+              <div>
+                <IonItem button lines="full"
+                         className={cn("eeg-item-box", {"selected": activeMenu === "memberForm"})}
+                         onClick={() => setActiveMenu("memberForm")}>
+                  <IonIcon icon={person} slot="start"></IonIcon>
+                  <IonLabel>
+                    <div className={"detail-header"}>Details</div>
+                    <div className={"detail-subheader"}>Kontakt, Adresse, Bankdaten, ...</div>
+                  </IonLabel>
+                </IonItem>
+              </div>
+              <div>
+                <IonItem button lines="full"
+                         className={cn("eeg-item-box", {"selected": activeMenu === "documentForm"})}
+                         onClick={() => setActiveMenu("documentForm")}>
+                  <IonIcon icon={documentTextOutline} slot="start"></IonIcon>
+                  <div>
+                    <div className={"detail-header"}>Dokumente</div>
+                    <div className={"detail-subheader"}>z.B. Verträge</div>
+                  </div>
+                </IonItem>
+              </div>
+              <div>
+                <IonItem button lines="full"
+                         className={cn("eeg-item-box", {"selected": activeMenu === "invoiceForm"})}
+                         onClick={() => setActiveMenu("invoiceForm")}>
+                  <IonIcon icon={logoEuro} slot="start"></IonIcon>
+                  <IonLabel>
+                    <div className={"detail-header"}>Meine Rechnungen</div>
+                  </IonLabel>
+                </IonItem>
+              </div>
+              <div>
+                <IonItem lines="full" className={"eeg-item-box"}>
+                  <IonIcon icon={eegShieldCrown} slot="start"></IonIcon>
+                  <div>
+                    <div
+                      className={"detail-header"}>{`Mitglied ist ${selectedParticipant.role === 'EEG_USER' ? 'kein' : ''} Administrator`}</div>
+                  </div>
+                  <IonToggle slot="end" checked={selectedParticipant.role !== 'EEG_USER'}
+                             disabled={true}></IonToggle>
+                </IonItem>
+              </div>
+            </div>
+            <div className={"details-box"}>
+              {selectedMeter ? (
+                  <div className="ion-padding" slot="content">
+                    <IonToolbar
+                      color="primary"><IonTitle>{formatMeteringPointString(selectedMeter.meteringPoint)}</IonTitle></IonToolbar>
 
-                  {!isMeterActive() &&
-                      <IonCard color="warning-light">
-                          <IonItem lines="none" color="warning-light">
-                              <IonIcon icon={eegSandClass} slot="start"/>
-                              <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
-                          </IonItem>
-                        {selectedMeter.status === "INVALID" &&
-                            <IonItem>
-                                <IonButton color="warning" slot="end" size="small" fill="outline"
-                                           onClick={() => onRemoveMeteringPoint()}>Löschen</IonButton>
+                    {!isMeterActive() &&
+                        <IonCard color="warning-light">
+                            <IonItem lines="none" color="warning-light">
+                                <IonIcon icon={eegSandClass} slot="start"/>
+                                <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
                             </IonItem>
-                        }
-                      </IonCard>
-                  }
+                          {selectedMeter.status === "INVALID" &&
+                              <IonItem>
+                                  <IonButton color="warning" slot="end" size="small" fill="outline"
+                                             onClick={() => onRemoveMeteringPoint()}>Löschen</IonButton>
+                              </IonItem>
+                          }
+                        </IonCard>
+                    }
 
-                  <IonItem button lines="full"
-                           className={cn("eeg-item-box", {"selected": activeMenu === "meterForm"})}
-                           onClick={() => setActiveMenu("meterForm")}>
-                    <IonIcon icon={isGenerator() ? eegSolar : eegPlug} slot="start"></IonIcon>
-                    <div>
-                      <div className={"detail-header"}>Details und Adresse</div>
-                    </div>
-                  </IonItem>
-                  <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterNew()}>
-                    <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
-                    <div>
-                      <div
-                        className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
-                    </div>
-                    <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"}
-                               disabled={true}></IonToggle>
-                  </IonItem>
-                  {isMeterActive() && report && activePeriod &&
-                      <MeterChartComponent report={report} tenant={tenant!} activePeriod={activePeriod}
-                                           selectedMeter={selectedMeter}
-                                           selectedParticipant={selectedParticipant}/>}
-                </div>) :
-              <></>
-            }
+                    <IonItem button lines="full"
+                             className={cn("eeg-item-box", {"selected": activeMenu === "meterForm"})}
+                             onClick={() => setActiveMenu("meterForm")}>
+                      <IonIcon icon={isGenerator() ? eegSolar : eegPlug} slot="start"></IonIcon>
+                      <div>
+                        <div className={"detail-header"}>Details und Adresse</div>
+                      </div>
+                    </IonItem>
+                    <IonItem lines="full" className={"eeg-item-box"} disabled={isMeterNew()}>
+                      <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
+                      <div>
+                        <div
+                          className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
+                      </div>
+                      <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"}
+                                 disabled={true}></IonToggle>
+                    </IonItem>
+                    {isMeterActive() && report && activePeriod &&
+                        <MeterChartComponent report={report} tenant={tenant!} activePeriod={activePeriod}
+                                             selectedMeter={selectedMeter}
+                                             selectedParticipant={selectedParticipant}/>}
+                  </div>) :
+                <></>
+              }
+            </div>
           </div>
-        </div>
-        <div className="pane-content-details">
-          <div className="pane-content-details-content">
-            {dynamicComponent(activeMenu)}
+          <div className="pane-content-details">
+            <div className="pane-content-details-content">
+              {dynamicComponent(activeMenu)}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 }
 
 export default ParticipantDetailsPaneComponent;

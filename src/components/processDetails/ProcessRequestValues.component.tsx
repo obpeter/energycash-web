@@ -94,7 +94,7 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
     return (
       <IonInput
         {...p}
-        label={"Zeitraum"}
+        label={t("calendar_label")}
         placeholder="Enter text"
         fill="outline"
         labelPlacement={"floating"}
@@ -158,7 +158,7 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
             </div>
             <IonItem lines="none" style={{zIndex: "0"}}>
               <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={((!formState.isValid && !selectEntire) || !startDate || !endDate)}>
-                Anfordern
+                {t("process.submit")}
               </IonButton>
             </IonItem>
           </>

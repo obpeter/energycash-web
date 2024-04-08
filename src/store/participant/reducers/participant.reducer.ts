@@ -27,6 +27,10 @@ export const reducer = createReducer(initialState, builder =>
       const {participants} = action.payload
       return adapter.setAll({...state, selectedParticipant: undefined, selectedMeter: undefined, isFetching: false}, participants)
     })
+    .addCase(fetchParticipantModel.pending, (state, action) => {
+      state.selectedParticipant = undefined
+      state.selectedMeter = undefined
+    })
     .addCase(newParticipant, (state, action) => {
       return {...state, isFetching: false,
         selectedParticipant: {...action.payload, status: "NEW", id: v4(), role: "EEG_USER",

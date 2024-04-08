@@ -1,5 +1,6 @@
 import {AuthService} from "./auth.service";
 import {determineErrTxt, ErrorResponse, IErrorResponse} from "./error.text";
+import {Mutex} from "async-mutex";
 
 export const API_API_SERVER = import.meta.env.VITE_API_SERVER_URL;
 export const FILESTORE_API_SERVER = import.meta.env.VITE_FILESTORE_SERVER_URL;
@@ -16,6 +17,36 @@ export class HttpError extends Error {
   }
 }
 
+function createLoc<T>() {
+  const queue: any[] = [];
+  let active = false;
+  return (fn: any) => {
+    let deferredResolve: (value: (T | PromiseLike<T>)) => void;
+    let deferredReject: (value: (T | PromiseLike<T>)) => void;
+    const deferred = new Promise<T>((resolve, reject) => {
+      deferredResolve = resolve;
+      deferredReject = reject;
+    });
+    const exec = async () => {
+      await fn().then(deferredResolve, deferredReject);
+      if (queue.length > 0) {
+        queue.shift()();
+      } else {
+        active = false;
+      }
+    };
+    if (active) {
+      queue.push(exec);
+    } else {
+      active = true;
+      exec();
+    }
+    return deferred;
+  };
+};
+const Lock = createLoc<string>()
+const mutex = new Mutex();
+
 class EegBaseService {
 
   public constructor(private authService: AuthService) {
@@ -27,9 +58,21 @@ class EegBaseService {
     })
   }
 
-  lock = this.createLoc<string>()
+  // lock = this.createLoc<string>()
   protected async lookupToken() {
-    return this.lock(async () => {
+    // return Lock(async () => {
+    //   try {
+    //     const token = await this.getUser()
+    //     if (token) {
+    //       return token
+    //     }
+    //   } catch {
+    //     console.log("Not Authenticated")
+    //   }
+    //   throw new Error()
+    // })
+
+    return mutex.runExclusive(async () => {
       try {
         const token = await this.getUser()
         if (token) {
@@ -38,6 +81,7 @@ class EegBaseService {
       } catch {
         console.log("Not Authenticated")
       }
+      console.log("######################## errror")
       throw new Error()
     })
   }
@@ -118,34 +162,6 @@ class EegBaseService {
       return true;
     });
   }
-
-  private createLoc<T>() {
-    const queue: any[] = [];
-    let active = false;
-    return (fn: any) => {
-      let deferredResolve: (value: (T | PromiseLike<T>)) => void;
-      let deferredReject: (value: (T | PromiseLike<T>)) => void;
-      const deferred = new Promise<T>((resolve, reject) => {
-        deferredResolve = resolve;
-        deferredReject = reject;
-      });
-      const exec = async () => {
-        await fn().then(deferredResolve, deferredReject);
-        if (queue.length > 0) {
-          queue.shift()();
-        } else {
-          active = false;
-        }
-      };
-      if (active) {
-        queue.push(exec);
-      } else {
-        active = true;
-        exec();
-      }
-      return deferred;
-    };
-  };
 }
 
 export default EegBaseService

@@ -46,7 +46,6 @@ import {
   resetParticipantAmounts,
   selectBillFetchingSelector,
 } from "../../store/billing";
-import {activeTenant, eegSelector, selectedTenant} from "../../store/eeg";
 import {
   meteringEnergyGroup11,
   selectMetaRecord,
@@ -81,7 +80,7 @@ import {
 import DatepickerPopover from "../dialogs/datepicker.popover";
 import { ExcelReportRequest, InvestigatorCP } from "../../models/reports.model";
 import UploadPopup from "../dialogs/upload.popup";
-import {useRefresh, useTenant} from "../../store/hook/Eeg.provider";
+import {EegContext, useRefresh, useTenant} from "../../store/hook/Eeg.provider";
 import {
   billingRunErrorSelector,
   billingRunIsFetchingSelector,
@@ -92,9 +91,7 @@ import {
   fetchBillingRunById,
 } from "../../store/billingRun";
 import DatePickerCoreElement from "../core/elements/DatePickerCore.element";
-import DatePicker from "react-datepicker";
 
-import { useSelector } from "react-redux";
 import {
   filterActiveMeter,
   filterActiveParticipantAndMeter,
@@ -124,13 +121,16 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
   const selectedParticipant = useAppSelector(selectedParticipantSelector);
   const selectedMeterId = useAppSelector(selectedMeterIdSelector);
   const billingInfo = useAppSelector(billingSelector);
-  const eeg = useAppSelector(eegSelector);
 
   const billingRun = useAppSelector(billingRunSelector);
   const billingRunStatus = useAppSelector(billingRunStatusSelector);
   const billingRunIsFetching = useAppSelector(billingRunIsFetchingSelector);
   const selectBillIsFetching = useAppSelector(selectBillFetchingSelector);
   const billingRunErrorMessage = useAppSelector(billingRunErrorSelector);
+
+  const {
+    eeg,
+  } = useContext(EegContext)
 
   let documentDatePreview: Date = new Date();
   let documentDateBilling: Date = new Date();

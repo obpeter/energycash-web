@@ -1,10 +1,13 @@
-import {FC, PropsWithChildren, useEffect, useState} from "react";
+import React, {FC, PropsWithChildren, useEffect, useState} from "react";
 import {hasAuthParams, useAuth} from "react-oidc-context";
 import '../../../theme/main.scss'
 import {AuthService} from "../../../service/auth.service";
+import {useUser} from "../AuthProvider";
+import {IonSpinner} from "@ionic/react";
 
 export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({ children, hasTried}) => {
   const auth = useAuth();
+  const user = useUser()
   const [hasTriedSignin, setHasTriedSignin] = useState(false);
 
   console.log("OIDC Handler", hasTriedSignin, auth)
@@ -34,17 +37,16 @@ export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({
     })()
   }, [auth, hasTriedSignin]);
 
-
-  // useEffect(() => {
-  //   // the `return` is important - addAccessTokenExpiring() returns a cleanup function
-  //   return auth.events.addAccessTokenExpiring(() => {
-  //     // if (alert("You're about to be signed out due to inactivity. Press continue to stay signed in.")) {
-  //     //   auth.signinSilent();
-  //     // }
-  //   })
-  // }, [auth.events, auth.signinSilent]);
+  if (auth.isLoading) {
+    return (
+      <div className="full-screen-center">
+        <IonSpinner style={{margin: "auto", height: "48px", width: "48px"}}/>
+      </div>
+    );
+  }
 
   if (auth.error) {
+    // user && user.logout()
     console.log("################ AUTH ERROR: ", auth.error.stack)
     return (
       <div className="full-screen-center">
@@ -55,14 +57,6 @@ export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({
       </div>
     );
   }
-
-  // if (auth.isLoading) {
-  //   return (
-  //     <div className="full-screen-center">
-  //       <IonSpinner style={{margin: "auto", height: "48px", width: "48px"}}/>
-  //     </div>
-  //   );
-  // }
 
   return <>{children}</>;
 };

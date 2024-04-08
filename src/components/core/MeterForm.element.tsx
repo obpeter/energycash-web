@@ -35,7 +35,7 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
     if (meterReadOnly === undefined) {
       return true
     }
-    return !meterReadOnly || status === 'INVALID'
+    return !meterReadOnly || status === 'NEW' || status === 'INVALID' || status === 'INACTIVE' || status === 'REJECTED' || status === 'REVOKED'
   }
 
   useEffect(() => {

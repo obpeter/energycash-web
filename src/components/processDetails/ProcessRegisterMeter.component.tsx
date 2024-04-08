@@ -81,7 +81,7 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
     return (
       <IonInput
         {...p}
-        label={"Zeitraum"}
+        label={t("calendar_label")}
         placeholder="Enter text"
         fill="outline"
         labelPlacement={"floating"}
@@ -97,7 +97,7 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
     <ProcessContentComponent>
     <CorePageTemplate>
       <>
-        <InputForm name="communityId" label="Gemeinschafts-Id" control={control} protectedControl={true}/>
+        <InputForm name="communityId" label={t("communityId")} control={control} protectedControl={true}/>
         {/*<SelectForm control={control} name={"participantId"} options={participants.map((p) => {*/}
         {/*  return {key: p.id, value: p.firstname + " " + p.lastname}*/}
         {/*})} label={"Mitglied"} selectInterface={"popover"} rules={{required: true}}/>*/}
@@ -116,7 +116,7 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
 
         <IonItem lines="none" style={{zIndex: "0"}}>
           <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={!formState.isValid}>
-            Anfordern
+            {t("process.submit")}
           </IonButton>
         </IonItem>
       </>
