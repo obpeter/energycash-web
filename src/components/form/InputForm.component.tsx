@@ -8,7 +8,7 @@ import {IonInputCustomEvent} from "@ionic/core/dist/types/components";
 import {InputInputEventDetail} from "@ionic/core/dist/types/components/input/input-interface";
 import {ControllerFieldState} from "react-hook-form/dist/types/controller";
 
-export type InputPartialFunction = (name: string, value: any, event?: any) => void
+export type PartialChangeFunction = (name: string, value: any, event?: any) => void
 
 interface InputFormProps {
   control: Control<any, any>,
@@ -26,7 +26,7 @@ interface InputFormProps {
   pattern?: string,
   onPaste?: (e: ClipboardEvent<HTMLIonInputElement>) => void,
   onTransform?: (e: IonInputCustomEvent<InputInputEventDetail>) => string | number,
-  onChangePartial?: InputPartialFunction
+  onChangePartial?: PartialChangeFunction
   protectedControl?: boolean
   mask?: React.RefCallback<HTMLElement>
 }
@@ -34,7 +34,7 @@ interface InputFormProps {
 const InputForm: (React.FC<InputFormProps>) =
   ({ control, name,rules, error, placeholder, onTransform, onChangePartial, type, protectedControl,...rest}) => {
 
-  const handleOnChange = (onChange: InputPartialFunction | undefined, fieldState: ControllerFieldState) => (e:IonInputCustomEvent<InputChangeEventDetail>) => {
+  const handleOnChange = (onChange: PartialChangeFunction | undefined, fieldState: ControllerFieldState) => (e:IonInputCustomEvent<InputChangeEventDetail>) => {
     if (onChange === undefined) return undefined
     if (!fieldState.invalid && fieldState.isDirty) onChange(name, e.target.value, e)
   }

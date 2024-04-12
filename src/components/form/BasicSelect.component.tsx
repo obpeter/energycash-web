@@ -50,7 +50,6 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
   }, [controlValue]);
 
   const onSelectionChanged = (change: (...event: any[]) => void) => (selectedOptions: OnChangeValue<SelectOptions, IsMulti>, actionMeta: ActionMeta<OnChangeValue<SelectOptions, IsMulti>>) => {
-    console.log(actionMeta)
     if (actionMeta.action === "clear") {
       change(undefined)
       return

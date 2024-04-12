@@ -89,7 +89,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
     return (
       <IonInput
         {...p}
-        label={t("calendar_label")}
+        label={t("button_labels.calendar")}
         placeholder="Enter text"
         fill="outline"
         labelPlacement={"floating"}

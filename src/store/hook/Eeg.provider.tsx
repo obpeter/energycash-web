@@ -94,7 +94,6 @@ export const EegProvider: FC<{ children: ReactNode }> = ({children}) => {
     if (eeg) {
       getCurrentPeroid(eeg)
         .then(p => dispatch(setSelectedPeriod(p)))
-        .catch(e => console.log(e))
     }
   }, [eeg]);
 

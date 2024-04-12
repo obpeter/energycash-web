@@ -4,34 +4,34 @@ import cn from "classnames";
 
 import "./ParticipantDetailsPane.compoenent.css"
 import {
-  IonButton, IonButtons, IonCard,
+  IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonContent, IonFooter,
   IonIcon,
   IonItem,
-  IonLabel,
+  IonLabel, IonPage,
   IonTitle,
   IonToggle,
-  IonToolbar, useIonAlert, useIonToast
+  IonToolbar, useIonAlert, useIonModal, useIonToast
 } from "@ionic/react";
 import {
   caretForwardOutline,
   documentTextOutline,
-  logoEuro,
+  logoEuro, moveOutline,
   person,
   trashBin
 } from "ionicons/icons";
 import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
-import {useAppDispatch, useAppSelector} from "../../store";
+import {store, useAppDispatch, useAppSelector} from "../../store";
 import {Metering} from "../../models/meteringpoint.model";
 import MemberFormComponent from "../MemberForm.component";
-import MeterFormComponent from "../MeterForm.component";
+import MeterFormComponent from "./MeterForm.component";
 import {
   archiveParticipant,
-  confirmParticipant, removeMeteringPoint,
+  confirmParticipant, moveMeteringPoint, participantsSelector1, removeMeteringPoint,
   selectedMeterSelector,
   selectedParticipantSelector, selectParticipantById,
   updateParticipant, updateParticipantPartial
 } from "../../store/participant";
-import {formatMeteringPointString, GetWeek} from "../../util/Helper.util";
+import {formatMeteringPointString, GetWeek, JoinStrings} from "../../util/Helper.util";
 import {activeTenant, selectedTenant} from "../../store/eeg";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
@@ -42,7 +42,10 @@ import {meteringInterReportSelectorV2, meteringReportSelectorV2, selectedPeriodS
 import MeterChartComponent from "./MeterChart.component";
 import {Api} from "../../service";
 import {useLocale} from "../../store/hook/useLocale";
-import {useTenant} from "../../store/hook/Eeg.provider";
+import {useAccessGroups, useTenant} from "../../store/hook/Eeg.provider";
+import {BasicSelectComponent} from "../form/BasicSelect.component";
+import {useForm} from "react-hook-form";
+import {useMoveMeteringPointHook} from "../../store/hook/MoveMeteringPoint.hook";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 
@@ -51,6 +54,36 @@ type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoic
 // }
 //
 // type NonNullable<T> = Exclude<T, null | undefined>;
+
+// const MoveParticipantModel: FC<{meter: Metering, participants: EegParticipant[]}> = ({meter, participants}) => {
+//   const {control} = useForm<Metering>({defaultValues: meter})
+//   return (
+//     <IonPage>
+//       {/*<IonCard>*/}
+//         <IonCardHeader>Zählpunkt verschieben</IonCardHeader>
+//         <IonCardContent>
+//           <BasicSelectComponent control={control} name="participantId"
+//                                 options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
+//             return {value: p.id, label: JoinStrings(" ", "-", p.participantNumber, p.lastname, p.firstname)}
+//           })} label={"Verschieben zu"} />
+//           <div style={{padding: "25px"}}>
+//           <p style={{paddingBottom: "20px"}}>
+//             Wenn ein Zählpunkt innerhalb Ihrer Gemeinschaft auf ein anderes Mitglied übertragen wird,
+//             ändert sich ab diesem Zeitpunkt die Zuordnung für die Abrechnung. Bitte beachten Sie,
+//             dass eine Übertragung innerhalb eines Abrechnungszeitraums Auswirkungen auf spätere Abrechnungen haben kann.
+//             Der gesamte Verbrauch des Zählpunkts wird dem Mitglied in Rechnung gestellt, dem er zu diesem Zeitpunkt zugeordnet ist.
+//           </p>
+//           <p>Alle bisher ausgestellten Rechnungen werden nicht verschoben.</p>
+//           </div>
+//         </IonCardContent>
+//       {/*</IonCard>*/}
+//       <IonFooter>
+//         <IonButton onClick={() => dism}>Abbrechen</IonButton>
+//         <IonButton>Verschieben</IonButton>
+//       </IonFooter>
+//     </IonPage>
+//   )
+// }
 
 const ParticipantDetailsPaneComponent: FC = () => {
 
@@ -65,6 +98,14 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
 
+  const {isAdmin} = useAccessGroups()
+  // const [moveMeterModal] = useIonModal(MoveParticipantModel, {meter: selectedMeter, participants: participantsSelector1(store.getState())});
+  const {showMoveMeteringModal} = useMoveMeteringPointHook(selectedMeter!,
+    participantsSelector1(store.getState()), (name: string, value: string, event?: any) => {
+    console.log("meter", value)
+      dispatcher(moveMeteringPoint({tenant: tenant.tenant, sParticipantId: selectedParticipant!.id, dParticipantId: value, meter: selectedMeter!}))
+    });
+
   const [toaster] = useIonToast();
   const [participantAlert] = useIonAlert();
 
@@ -77,7 +118,10 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const meterInvalidCodes = [56, 57, 76, 104, 156, 157, 158, 159, 172, 173, 177, 181, 184, 185, 196]
 
   const onUpdateParticipant = (participant: EegParticipant) => {
-    dispatcher(updateParticipant({tenant: tenant!.tenant, participant: participant})).unwrap().then(() => console.log("Participant Updated"))
+    dispatcher(updateParticipant({
+      tenant: tenant!.tenant,
+      participant: participant
+    })).unwrap().then(() => console.log("Participant Updated"))
   }
 
   const onUpdateParticipantPartial = (participantId: string, value: Record<string, any>) => {
@@ -273,9 +317,14 @@ const ParticipantDetailsPaneComponent: FC = () => {
             <div className={"details-box"}>
               {selectedMeter ? (
                   <div className="ion-padding" slot="content">
-                    <IonToolbar
-                      color="primary"><IonTitle>{formatMeteringPointString(selectedMeter.meteringPoint)}</IonTitle></IonToolbar>
-
+                    <IonToolbar color="primary">
+                      <IonTitle>{formatMeteringPointString(selectedMeter.meteringPoint)}</IonTitle>
+                      {isAdmin() && <IonButtons slot="end">
+                        <IonButton fill="clear" onClick={() => showMoveMeteringModal()}>
+                          <IonIcon icon={moveOutline} size="small"/>
+                        </IonButton>
+                      </IonButtons>}
+                    </IonToolbar>
                     {!isMeterActive() &&
                         <IonCard color="warning-light">
                             <IonItem lines="none" color="warning-light">

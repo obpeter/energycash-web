@@ -81,7 +81,6 @@ class EegBaseService {
       } catch {
         console.log("Not Authenticated")
       }
-      console.log("######################## errror")
       throw new Error()
     })
   }

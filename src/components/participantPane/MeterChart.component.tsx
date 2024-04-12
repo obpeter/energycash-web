@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from "react";
-import MeterChartNavbarComponent from "../MeterChartNavbar.component";
+import MeterChartNavbarComponent from "./MeterChartNavbar.component";
 import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {
   EnergySeries,

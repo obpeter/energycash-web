@@ -1,13 +1,24 @@
 {
+  "firstname": "Vorname",
+  "lastname": "Nachname",
+  "company-name": "Firmenname",
   "communityId": "Gemeinschafts ID",
   "gridOperator_id": "Netzbetreiber ID",
   "gridOperator_name": "Netzbetreiber Name",
   "participant": "Mitglied",
+  "participant-nr": "Mitglieds-Nr",
+  "participant-title_before": "Titel (Vor)",
+  "participant-title_after": "Titel (Nach)",
+  "participant-title_company": "Firma",
+  "participant-title_privat": "Privat",
   "metering": "Zählpunkt",
   "metering_missing_msg": "Zählpunktnummer fehlt",
   "tariff": "Tarif",
   "tariffLabel": "Tarifbezeichnung",
   "tariffParts": "Bestandteile",
+  "consumer_tariff": "Verbrauchertarife",
+  "producer_tariff": "Erzeugertarife",
+  "participant_tariff": "Mitglieds-Tarif",
   "inverterCheckbox_label": "Wechselrichter anlegen",
   "inverternr_label": "Wechselrichternummer",
   "transformer_label": "Transformator",
@@ -26,7 +37,32 @@
   "vatInPercent": "Umsatzsteuer in %",
   "consumer": "Verbraucher",
   "producer": "Erzeuger",
-  "calendar_label": "Zeitraum",
+  "city": "Ort",
+  "street": "Straße",
+  "street_number": "Hausnummer",
+  "zip": "Postleitzahl",
+  "email": "E-Mail",
+  "uid": "UID",
+  "account-owner": "Kontoinhaber",
+  "participant-since": "Mitglied seit ...",
+  "date": "Datum",
+  "warnings": {
+    "email_missing": "Email Adresse fehlt!",
+    "email_wrong": "Email Adresse ist nicht valide!",
+    "firstname_missing": "Vorname fehlt!",
+    "lastname_missing": "Nachname fehlt!",
+    "company-name_missing": "Firmenname fehlt!"
+  },
+  "alerts": {
+    "changeDirection_0": "Energierichtung zu einen $t(producer) ändern? Es gilt zu beachten, dass diese Änderung nicht mit dem Netzbetreiber kommuniziert wird. Die Änderung wird nur in EEGFaktura vollzogen und keine Auswirkung beim Netzbetreiber!",
+    "changeDirection_1": "Energierichtung zu einen $t(consumer) ändern? Es gilt zu beachten, dass diese Änderung nicht mit dem Netzbetreiber kommuniziert wird. Die Änderung wird nur in EEGFaktura vollzogen und keine Auswirkung beim Netzbetreiber!"
+  },
+  "button_labels": {
+    "calendar": "Zeitraum",
+    "cancel": "Abbrechen",
+    "submit": "Bestätigen",
+    "ok": "Ok"
+  },
   "process": {
     "submit": "Anfordern",
     "requestValue": {

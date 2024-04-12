@@ -626,16 +626,15 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
             const eq =
               m.equipmentName && m.equipmentName.length > 0
                 ? m.equipmentName.toLowerCase().indexOf(query) > -1
-                : false;
-            console.log(eq);
-            return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq;
+                : false
+            return m.meteringPoint.toLowerCase().indexOf(query) > -1 || eq
           }) !== undefined
         );
       };
 
       const origin = JSON.parse(
         JSON.stringify(sortedParticipants)
-      ) as EegParticipant[];
+      ) as EegParticipant[]
 
       const sp = origin.filter((d: EegParticipant) => {
         const [matchParticipant, matchMeter] = filterEntries(d);

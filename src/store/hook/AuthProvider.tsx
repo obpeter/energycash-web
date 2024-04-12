@@ -103,7 +103,6 @@ export function createOidcAuthProvider<T extends OidcAuthProviderType & UserMana
       const { authService } = this.state
 
       if (!authService) {
-        console.log("################## AUTH-SERVICE NOT READY")
         return (
           <div className="full-screen-center">
             <IonSpinner style={{margin: "auto", height: "48px", width: "48px", color:"red"}}/>

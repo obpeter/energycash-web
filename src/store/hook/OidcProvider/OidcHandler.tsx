@@ -10,8 +10,6 @@ export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({
   const user = useUser()
   const [hasTriedSignin, setHasTriedSignin] = useState(false);
 
-  console.log("OIDC Handler", hasTriedSignin, auth)
-
   useEffect(() => {
     (async () => {
       if (
@@ -24,15 +22,6 @@ export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({
       ) {
         await auth.signinRedirect();
         setHasTriedSignin(true);
-      } else if (
-        !hasAuthParams() &&
-        auth.isAuthenticated &&
-        !auth.isLoading &&
-        !hasTriedSignin) {
-        console.log("Upps! It is already authenticated!")
-        // await auth.clearStaleState()
-        // await auth.signinSilent()
-        // setHasTriedSignin(true);
       }
     })()
   }, [auth, hasTriedSignin]);
@@ -47,7 +36,6 @@ export const OidcHandler: FC<PropsWithChildren & {hasTried: () => boolean}> = ({
 
   if (auth.error) {
     // user && user.logout()
-    console.log("################ AUTH ERROR: ", auth.error.stack)
     return (
       <div className="full-screen-center">
         <div style={{margin: "auto"}}>

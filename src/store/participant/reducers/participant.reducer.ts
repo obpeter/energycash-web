@@ -5,7 +5,7 @@ import {
   chancelNewParticipant,
   confirmParticipant,
   createParticipant,
-  fetchParticipantModel,
+  fetchParticipantModel, moveMeteringPoint,
   newParticipant,
   registerMeteringpoint,
   removeMeteringPoint,
@@ -79,6 +79,22 @@ export const reducer = createReducer(initialState, builder =>
               meters: state.entities[participantId] ?
                 state.entities[participantId]!.meters.map(m => m.meteringPoint === meter.meteringPoint ? meter : m) : undefined}
         })
+    })
+    .addCase(moveMeteringPoint.fulfilled, (state, action) => {
+      const {meter, sParticipantId, dParticipantId} = action.payload;
+      const newSelectedParticipant = state.entities[dParticipantId]
+      const oldSelectedParticipant = state.entities[sParticipantId]
+      return adapter.updateMany({...state, selectedMeter: meter.meteringPoint,
+        selectedParticipant: newSelectedParticipant
+          ? newSelectedParticipant
+          : undefined
+      }, [
+        {id: sParticipantId, changes: {...oldSelectedParticipant, meters: oldSelectedParticipant ?
+              oldSelectedParticipant.meters.filter(m => m.meteringPoint !== meter.meteringPoint) : undefined}
+        },
+        {id: dParticipantId, changes: {...newSelectedParticipant, meters: newSelectedParticipant ?
+              [...newSelectedParticipant.meters.filter(m => m.meteringPoint !== meter.meteringPoint), meter] : undefined}
+        }])
     })
     .addCase(confirmParticipant.fulfilled, (state, action) => {
       const participant = action.payload

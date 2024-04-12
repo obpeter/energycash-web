@@ -31,7 +31,6 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
     if (beginDate && endDate) {
       Api.eegService.getHistories(eeg.id.toUpperCase(), beginDate.getTime(), endDate.getTime() + (60 * 60 * 24 * 1000))
         .then(h => setEntries(h))
-        .catch(console.log)
     }
   }, [historyDate])
 
@@ -260,15 +259,15 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
       case "EC_PRTFACT_CHANGE": {
         const history_ec_prt_fact_change = msg.map((e) => {
           e.date = new Date(e.date)
+          e.meteringPoint = e.message.meterList ? e.message.meterList.length > 0 ?
+            e.message.meterList[0].meteringPoint ? "-" : "-" : "-" : "-"
+          e.meteringPoints = e.message.meterList ? e.message.meterList.map((m: any) => m.meteringPoint) : []
           switch (e.processType) {
             case "ANFORDERUNG_CPF":
-              e.meteringPoint = e.message.meterList ? e.message.meterList.length > 0 ?
-                e.message.meterList[0].meteringPoint ? "-" : "-" : "-" : "-"
-              e.meteringPoints = e.message.meterList ? e.message.meterList.map((m: any) => m.meteringPoint) : []
+              e.responseCode = e.message.meterList ? e.message.meterList.length > 0 ?
+                (e.message.meterList[0].partFact+' %') ? "" : "" : "" : ""
               return e
             default:
-              e.meteringPoint = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
-              e.meteringPoints = e.message.responseData.map((r: Record<string, any>) => r.meteringPoint)
               e.responseCode = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
               return e
           }
