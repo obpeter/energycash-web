@@ -78,7 +78,7 @@ export class AuthService extends UserManager {
       this.accessGroups = tokenParsed.access_groups;
       this.claims = {"name": tokenParsed.name, "nick": tokenParsed.preferred_username, "email": tokenParsed.email}
 
-      this.onTokenReceived && this.onTokenReceived({tenants: this.tenants, claims: this.claims, accessGroups: this.accessGroups})
+      // this.onTokenReceived && this.onTokenReceived({tenants: this.tenants, claims: this.claims, accessGroups: this.accessGroups})
     }
     return token
   }
@@ -95,7 +95,8 @@ export class AuthService extends UserManager {
       }
       return this.parseToken(user.access_token)
     }
-    throw new Error("Not authorized")
+    return ""
+    // throw new Error("Not authorized")
   }
 
   public async login() {
@@ -104,20 +105,22 @@ export class AuthService extends UserManager {
 
   public async refresh() {
     try {
-      return this.signinCallback().then(user => {
+      return this.signinSilent().then(user => {
+      // return this.signinCallback().then(user => {
         if (user) {
-          return user.access_token
+          return this.parseToken(user.access_token)
         }
         throw new Error("Trouble while authenticating you! Try again in few minutes")
       }).catch(() => {
-        this.signinRedirect().then(async () => {
-          const u = await this.getUser();
+        this.signinRedirect().then(() => this.getUser()).then(u => {
           if(u) {
-            return this.parseToken(u?.access_token);
+            return this.parseToken(u?.access_token)
           }
+          throw new Error("Trouble while authenticating you! Try again in few minutes")
         })
       })
     } catch {
+      await this.logout()
     }
   }
 

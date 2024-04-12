@@ -13,6 +13,8 @@ import ProcessContentComponent from "./ProcessContent.component";
 import {BasicSelectComponent} from "../form/BasicSelect.component";
 import {Api} from "../../service";
 import {meteringDisplayName} from "../../util/FilterHelper";
+import {useLocale} from "../../store/hook/useLocale";
+import {JoinStrings} from "../../util/Helper.util";
 
 interface ProcessValues {
   communityId: string | undefined
@@ -35,6 +37,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
     reason: undefined,
   }
 
+  const {t} = useLocale("common")
   const {handleSubmit, reset,
     control, watch,
     setValue, formState} = useForm<ProcessValues>({defaultValues: processValues})
@@ -71,7 +74,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
       const meter = meters.filter((m) => data.meteringPoints?.find((s:string) => s === m.meteringPoint))
       if (meter) {
         Api.eegService.revokeMeteringPoint(
-          eeg.rcNumber.toUpperCase(), data.participantId,
+          eeg.id.toUpperCase(), data.participantId,
           meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
           consentEndDate.getTime(), reason)
           .finally(() => {
@@ -86,7 +89,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
     return (
       <IonInput
         {...p}
-        label={"Zeitraum"}
+        label={t("button_labels.calendar")}
         placeholder="Enter text"
         fill="outline"
         labelPlacement={"floating"}
@@ -102,15 +105,15 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
       <ProcessContentComponent>
         <CorePageTemplate>
           <>
-            <InputForm name="communityId" label="Gemeinschafts-Id" control={control} readonly={true}/>
+            <InputForm name="communityId" label={t("communityId")} control={control} protectedControl={true}/>
             <BasicSelectComponent control={control} name={"participantId"}
                                   options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
-              return {value: p.id, label: p.firstname + " " + p.lastname}
-            })} label={"Mitglied"} selectInterface={"popover"} rules={{required: true}}/>
+              return {value: p.id, label: JoinStrings(" ", " - ", p.participantNumber, p.lastname, p.firstname)}
+            })} label={t("participant")} rules={{required: true}}/>
             <SelectForm control={control} name={"meteringPoints"} options={useableMeters.map((p) => {
               return {key: p.meteringPoint, value: meteringDisplayName(p)}
-            })} label={"Zählpunkt"} selectInterface={"popover"} multiple={true} rules={{required: true}}/>
-            <InputForm name="reason" label="Begründung (optional)" control={control}/>
+            })} label={t("metering")} selectInterface={"popover"} multiple={true} rules={{required: true}}/>
+            <InputForm name="reason" label={t("process.revokeMeter.reason")} control={control}/>
             <div className="form-element">
               <DatePicker
                 selectsRange={false}
@@ -123,7 +126,7 @@ const ProcessRevokeMeteringpointComponent: FC<ProcessRevokeMeteringpointComponen
             </div>
             <IonItem lines="none" style={{zIndex: "0"}}>
               <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={(!formState.isValid || !consentEndDate)}>
-                Anfordern
+                {t("process.submit")}
               </IonButton>
             </IonItem>
           </>

@@ -21,23 +21,23 @@ export const energyGraphqlQuery = (tenant: string, year: number, month: number) 
   }
 };
 
-const ReportDateQuery = (tenant: string) => `{
-  lastEnergyDate(tenant:"${tenant}")
+const ReportDateQuery = (tenant: string, ecId: string) => `{
+  lastEnergyDate(tenant:"${tenant}", ecId: "${ecId}")
 }`; // graphQl Query
 
-export const reportDateGraphqlQuery = (tenant: string) => {
+export const reportDateGraphqlQuery = (tenant: string, ecId: string) => {
   return {
     operationName: null,
-    query: `query ReportDate ${ReportDateQuery(tenant.toLowerCase())}`,
+    query: `query ReportDate ${ReportDateQuery(tenant.toLowerCase(), ecId)}`,
     variables: {},
   }
 };
 
-const UploadEneryMutation = (tenant: string, sheet: string) => `{
-  singleUpload(tenant: "${tenant}", sheet: "${sheet}", file: $energyData)
+const UploadEneryMutation = (tenant: string, ecId: string, sheet: string) => `{
+  singleUpload(tenant: "${tenant}", ecId: "${ecId}", sheet: "${sheet}", file: $energyData)
 }`; // graphQl Query
 
-export const uploadEnergyGraphqlMutation = async (tenant: string, sheet: string, data: File) => {
+export const uploadEnergyGraphqlMutation = async (tenant: string, ecId: string, sheet: string, data: File) => {
 
   const fileToBlob = async (file: File) => new Blob([new Uint8Array(await file.arrayBuffer())], {type: file.type });
 
@@ -45,7 +45,7 @@ export const uploadEnergyGraphqlMutation = async (tenant: string, sheet: string,
 
   formData.append("operations", JSON.stringify({
     operationName: null,
-    query: `mutation ($energyData: Upload!) ${UploadEneryMutation(tenant.toLowerCase(), sheet)}`,
+    query: `mutation ($energyData: Upload!) ${UploadEneryMutation(tenant.toLowerCase(), ecId, sheet)}`,
     variables: {"energyData": null},
   }))
   formData.append("map", JSON.stringify({"0": ["variables.energyData"]}))

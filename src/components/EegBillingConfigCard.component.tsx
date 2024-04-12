@@ -16,7 +16,7 @@ import {closeCircleOutline, imageOutline} from "ionicons/icons";
 import {useAppDispatch, useAppSelector} from "../store";
 import {billingConfigErrorSelector, billingConfigSelector} from "../store/billingConfig";
 import UploadImagePopup from "./dialogs/uploadImage.popup";
-import {useAccessGroups} from "../store/hook/Eeg.provider";
+import {useAccessGroups, useTenant} from "../store/hook/Eeg.provider";
 import {selectedTenant} from "../store/eeg";
 import {
     createBillingConfig,
@@ -33,7 +33,7 @@ const EegBillingConfigCardComponent: FC = () => {
     // const BILLING_API_SERVER = import.meta.env.VITA_BILLING_SERVER_URL;
 
     const {isAdmin} = useAccessGroups()
-    const tenant = useAppSelector(selectedTenant);
+    const {tenant} = useTenant()
     const billingConfig = useAppSelector(billingConfigSelector)
     const dispatcher = useAppDispatch();
     const billingConfigErrorMessage = useAppSelector(billingConfigErrorSelector);

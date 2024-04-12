@@ -9,6 +9,7 @@ import DateComponent from "../dialogs/date.component";
 import {EdaHistory, EdaResponseCode} from "../../models/process.model";
 import {Api} from "../../service";
 import {GroupBy} from "../../util/Helper.util";
+import {useLocale} from "../../store/hook/useLocale";
 
 interface ProcessHistoryComponentProps {
   eeg: Eeg
@@ -18,6 +19,7 @@ interface ProcessHistoryComponentProps {
 
 const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProcess, today}) => {
 
+  const {t} = useLocale("common")
   const [entries, setEntries] = useState<EdaHistories>({})
   const [processFilter, setProcessFilter] = useState<Record<string, string | undefined>>({})
   const [selectedItem, setSelectedItem] = useState(0)
@@ -27,9 +29,8 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
   const fetchHistory = useCallback(() => {
     const [beginDate, endDate] = historyDate
     if (beginDate && endDate) {
-      Api.eegService.getHistories(eeg.rcNumber, beginDate.getTime(), endDate.getTime() + (60 * 60 * 24 * 1000))
+      Api.eegService.getHistories(eeg.id.toUpperCase(), beginDate.getTime(), endDate.getTime() + (60 * 60 * 24 * 1000))
         .then(h => setEntries(h))
-        .catch(console.log)
     }
   }, [historyDate])
 
@@ -68,20 +69,7 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
     return h.sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
   }
 
-  const historyItems = ["EC_REQ_ONL", "CM_REV_IMP", "CR_REQ_PT", "CR_MSG"]
-
-  const getLabelName = (p: string) => {
-    switch (p) {
-      case "CM_REV_IMP":
-        return "Datenfreigabe-Aufhebung"
-      case "CR_REQ_PT":
-        return "Anfordern von Energiedaten"
-      case "CR_MSG":
-        return "Versenden der Energiedaten"
-      case "EC_REQ_ONL":
-        return "Anmeldung Teilnahme Online"
-    }
-  }
+  const historyItems = ["EC_REQ_ONL", "CM_REV_IMP", "CR_REQ_PT", "EC_PRTFACT_CHANGE", "CR_MSG"]
 
   const renderTableWithConversationId = (headers: string[], e: EdaHistory[]) => {
     return(
@@ -144,6 +132,13 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
             {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Info"], v)}
           </div>
         )
+      case "EC_PRTFACT_CHANGE":
+        return (
+          <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
+               className="ion-padding" slot="content">
+            {renderTableWithConversationId(["Abgewickelt am:", "Protokoll", "Info"], v)}
+          </div>
+        )
       case "CR_MSG":
         return (
           <div style={{boxShadow: "2px 1px 1px lightgray", margin: "10px", border: "1px solid #d3d3d34f"}}
@@ -197,6 +192,11 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
               e.meteringPoint = e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-"
               e.meteringPoints = e["message"]["meter"].meteringPoint ? [e["message"]["meter"].meteringPoint] : []
               break;
+            case "AUFHEBUNG_CCMI":
+              e.meteringPoint = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
+              e.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
+              e.responseCode = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.consentEnd ? new Date(r.consentEnd).toDateString() : z, "-")
+              break
             default:
               e.responseCode = "-"
           }
@@ -256,6 +256,24 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
         })
         return sortHistories(history_cr_req_pt)
       }
+      case "EC_PRTFACT_CHANGE": {
+        const history_ec_prt_fact_change = msg.map((e) => {
+          e.date = new Date(e.date)
+          e.meteringPoint = e.message.meterList ? e.message.meterList.length > 0 ?
+            e.message.meterList[0].meteringPoint ? "-" : "-" : "-" : "-"
+          e.meteringPoints = e.message.meterList ? e.message.meterList.map((m: any) => m.meteringPoint) : []
+          switch (e.processType) {
+            case "ANFORDERUNG_CPF":
+              e.responseCode = e.message.meterList ? e.message.meterList.length > 0 ?
+                (e.message.meterList[0].partFact+' %') ? "" : "" : "" : ""
+              return e
+            default:
+              e.responseCode = e.message.responseData.reduce((z: string, r: Record<string, any>) => r.responseCode ? EdaResponseCode.getMessage(r.responseCode[0]) : z, "-")
+              return e
+          }
+        })
+        return sortHistories(history_ec_prt_fact_change)
+      }
     }
     return [] as EdaHistory[]
   }
@@ -285,7 +303,7 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
             {historyItems.map((p, i) => (
               <div key={p + i}>
                 <IonItem button onClick={() => selectedItem !== i + 1 ? setSelectedItem(i + 1) : setSelectedItem(0)}>
-                  <IonLabel>{getLabelName(p)}</IonLabel>
+                  <IonLabel>{t(`process.${p}`)}</IonLabel>
                 </IonItem>
                 {selectedItem === (i + 1) &&
                     <div style={{margin: "10px 24px"}}>

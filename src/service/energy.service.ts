@@ -10,18 +10,19 @@ import {
 import {AuthService} from "./auth.service";
 import {reportDateGraphqlQuery, uploadEnergyGraphqlMutation} from "./graphql-query";
 import {ExcelReportRequest} from "../models/reports.model";
+import {ActiveTenant} from "../models/eeg.model";
 
 export class EnergyService extends BaseService {
   public constructor(authService: AuthService) {
     super(authService);
   }
 
-  async fetchReportV2(tenant: string, year: number, segment: number, type: string, participants: ParticipantReport[]): Promise<EnergyReportResponse> {
+  async fetchReportV2(tenant: ActiveTenant, year: number, segment: number, type: string, participants: ParticipantReport[]): Promise<EnergyReportResponse> {
     const token = await this.lookupToken()
-    return await fetch(`${ENERGY_API_SERVER}/eeg/report/v2`, {
+    return await fetch(`${ENERGY_API_SERVER}/eeg/v2/${tenant.ecId}/report`, {
       method: 'POST',
       headers: {
-        ...this.getSecureHeadersX(token, tenant),
+        ...this.getSecureHeadersX(token, tenant.rcNr),
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
@@ -29,7 +30,7 @@ export class EnergyService extends BaseService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async fetchLastReportEntryDate(tenant: string, token?: string): Promise<string> {
+  async fetchLastReportEntryDate(tenant: string, ecId: string, token?: string): Promise<string> {
     if (!token) {
       token = await this.lookupToken()
     }
@@ -40,7 +41,7 @@ export class EnergyService extends BaseService {
         'Accept': 'application/json',
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(reportDateGraphqlQuery(tenant))
+      body: JSON.stringify(reportDateGraphqlQuery(tenant, ecId))
     }).then(this.handleErrors).then(res => res.json().then(data => data.data ? data.data.lastEnergyDate : ""));
     //   return await Http.post({
     //     url: `${ENERGY_API_SERVER}/query`,
@@ -59,7 +60,7 @@ export class EnergyService extends BaseService {
     //     }
     //   })
   }
-  async fetchIntraDayReportV2(tenant: string, selectedPeroid: SelectedPeriod): Promise<SummaryReportData[]> {
+  async fetchIntraDayReportV2(tenant: ActiveTenant, selectedPeroid: SelectedPeriod): Promise<SummaryReportData[]> {
     const token = await this.lookupToken()
 
     const calcStartEndTime = (selectedPeroid: SelectedPeriod) => {
@@ -79,10 +80,10 @@ export class EnergyService extends BaseService {
       throw new Error("wrong period type. Expected [Y, YH, YQ, YM]. Got " + type)
     }
 
-    return await fetch(`${ENERGY_API_SERVER}/eeg/v2/intradayreport`, {
+    return await fetch(`${ENERGY_API_SERVER}/eeg/v2/${tenant.ecId}/intradayreport`, {
       method: 'POST',
       headers: {
-        ...this.getSecureHeadersX(token, tenant),
+        ...this.getSecureHeadersX(token, tenant.rcNr),
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
@@ -90,12 +91,12 @@ export class EnergyService extends BaseService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async fetchSummary(tenant: string, year: number, segment: number, type: string): Promise<RecordV2> {
+  async fetchSummary(tenant: ActiveTenant, year: number, segment: number, type: string): Promise<RecordV2> {
     const token = await this.lookupToken()
-    return await fetch(`${ENERGY_API_SERVER}/eeg/v2/summary`, {
+    return await fetch(`${ENERGY_API_SERVER}/eeg/v2/${tenant.ecId}/summary`, {
       method: 'POST',
       headers: {
-        ...this.getSecureHeadersX(token, tenant),
+        ...this.getSecureHeadersX(token, tenant.rcNr),
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
@@ -103,12 +104,12 @@ export class EnergyService extends BaseService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async createReport(tenant: string, payload: ExcelReportRequest) {
+  async createReport(tenant: ActiveTenant, payload: ExcelReportRequest) {
     const token = await this.lookupToken()
-    return fetch(`${ENERGY_API_SERVER}/eeg/excel/report/download`, {
+    return fetch(`${ENERGY_API_SERVER}/eeg/${tenant.ecId}/excel/report/download`, {
       method: 'POST',
       headers: {
-        ...this.getSecureHeadersX(token, tenant),
+        ...this.getSecureHeadersX(token, tenant.rcNr),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
@@ -117,11 +118,11 @@ export class EnergyService extends BaseService {
       .then( response => this.handleDownload(response, "energy-export"));
   }
 
-  async fetchReport(tenant: string, year: number, segment: number, type: string, token?: string): Promise<EegEnergyReport> {
+  async fetchReport(tenant: string, ecId: string, year: number, segment: number, type: string, token?: string): Promise<EegEnergyReport> {
     if (!token) {
       token = await this.lookupToken()
     }
-    return await fetch(`${ENERGY_API_SERVER}/eeg/report`, {
+    return await fetch(`${ENERGY_API_SERVER}/eeg/${ecId}/report`, {
       method: 'POST',
       headers: {
         ...this.getSecureHeadersX(token, tenant),
@@ -149,16 +150,16 @@ export class EnergyService extends BaseService {
     //   })
   }
 
-  async uploadEnergyFile(tenant: string, sheet: string, data: File): Promise<boolean> {
+  async uploadEnergyFile(tenant: ActiveTenant, sheet: string, data: File): Promise<boolean> {
     const token = await this.lookupToken()
     return await fetch(`${ENERGY_API_SERVER}/query`, {
       method: 'POST',
       headers: {
-        ...this.getSecureHeadersX(token, tenant),
+        ...this.getSecureHeadersX(token, tenant.rcNr),
         'Accept': 'application/json',
         // 'Content-Type': 'multipart/form-data'
       },
-      body: await uploadEnergyGraphqlMutation(tenant, sheet, data)
+      body: await uploadEnergyGraphqlMutation(tenant.rcNr, tenant.ecId, sheet, data)
     }).then(this.handleErrors).then(this.handleGQLResponse).then(res => true);
   }
 

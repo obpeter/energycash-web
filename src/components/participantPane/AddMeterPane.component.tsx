@@ -12,14 +12,14 @@ import {useAppDispatch, useAppSelector} from "../../store";
 import {ratesSelector} from "../../store/rate";
 import {selectedTenant} from "../../store/eeg";
 import MeterAddressFormElement from "../core/forms/MeterAddressForm/MeterAddressForm.element";
-import {useGridOperator, useOnlineState} from "../../store/hook/Eeg.provider";
+import {useGridOperator, useOnlineState, useTenant} from "../../store/hook/Eeg.provider";
 import moment from "moment";
 
 const AddMeterPaneComponent: FC = () => {
 
   const dispatcher = useAppDispatch()
   const rates = useAppSelector(ratesSelector);
-  const tenant = useAppSelector(selectedTenant);
+  const {tenant} = useTenant()
   const participant = useAppSelector(selectedParticipantSelector);
 
   const isOnline = useOnlineState()

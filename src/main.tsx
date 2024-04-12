@@ -18,7 +18,7 @@ import i18n from "./util/I18n";
 
 // import './util/I18n';
 
-const initApiServices = (config: AppConfig): AuthService => {
+const initApiServices = async (config: AppConfig): Promise<AuthService> => {
 
   const userManagerConfig = {
     authority: `${config.authServerUrl.replace(/\/+$/, "")}/realms/${config.realm}/`,
@@ -56,8 +56,8 @@ fetch(globalConfigUrl)
       resource: appC.resource,
     } as AppConfig
   })
-  .then(keycloakConfig => {
-    const userManager = initApiServices(keycloakConfig)
+  .then(keycloakConfig => initApiServices(keycloakConfig))
+  .then(userManager => {
     root.render(
       <React.StrictMode>
         <Provider store={store}>
@@ -71,7 +71,7 @@ fetch(globalConfigUrl)
     )
   })
   .catch(e => {
-    console.error("Err[Index]: ", e)
+    console.error("################ Err[Index]: ", e)
     root.render(
       <React.StrictMode>
         <div className="full-screen-center">

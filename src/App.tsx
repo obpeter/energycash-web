@@ -38,6 +38,7 @@ import {hasAuthParams, useAuth} from "react-oidc-context";
 /* Theme variables */
 import './theme/variables.css';
 import './theme/main.scss'
+import {ErrorBoundary} from "react-error-boundary";
 
 setupIonicReact();
 
@@ -94,9 +95,11 @@ const App: React.FC = () => {
   }, [auth.isAuthenticated, auth.activeNavigator, auth.isLoading, auth.signinRedirect]);
 
   return (
+    <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <IonApp>
        <SecureSection></SecureSection>
       </IonApp>
+    </ErrorBoundary>
   );
 };
 

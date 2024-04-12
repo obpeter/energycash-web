@@ -32,8 +32,6 @@ const ProcessDetailPaneComponent: FC<ProcessDetailPaneComponentProps> = ({
                                                                            participants
                                                                          }) => {
 
-  const tenant = useAppSelector(selectedTenant)
-
   const renderProcess = () => {
     if (selectedProcess) {
       switch (selectedProcess?.type) {

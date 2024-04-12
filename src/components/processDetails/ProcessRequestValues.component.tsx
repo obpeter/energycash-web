@@ -15,6 +15,9 @@ import CheckboxComponent from "../form/Checkbox.component";
 import {useLocale} from "../../store/hook/useLocale";
 import {useAppDispatch} from "../../store";
 import {ErrorState, setErrorState} from "../../store/eeg";
+import {BasicSelectComponent} from "../form/BasicSelect.component";
+import {JoinStrings} from "../../util/Helper.util";
+import {meteringDisplayName} from "../../util/FilterHelper";
 
 interface ProcessValues {
   communityId: string | undefined
@@ -63,6 +66,8 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
       if (p) {
         setUsableMeters(p.meters)
       }
+    } else {
+      setUsableMeters(meters)
     }
   }, [participantId])
 
@@ -72,7 +77,7 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
       const meter = meters.filter((m) => data.meteringPoints?.find((s:string) => s === m.meteringPoint))
       if (meter) {
         Api.eegService.syncMeteringPoint(
-          eeg.rcNumber.toUpperCase(),
+          eeg.id.toUpperCase(),
           meter.map(m => {return {meter: m.meteringPoint, direction: m.direction}}),
           startDate.getTime(), endDate.getTime())
           .catch(e => dispatcher(setErrorState({message: "Fehler beim Senden!"} as ErrorState)))
@@ -89,7 +94,7 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
     return (
       <IonInput
         {...p}
-        label={"Zeitraum"}
+        label={t("button_labels.calendar")}
         placeholder="Enter text"
         fill="outline"
         labelPlacement={"floating"}
@@ -123,15 +128,23 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
       <ProcessContentComponent>
         <CorePageTemplate>
           <>
-            <InputForm name="communityId" label={t("communityId")} control={control} readonly={true}/>
+            <InputForm name="communityId" label={t("communityId")} control={control} protectedControl={true}/>
             <CheckboxComponent label={t("process.requestValue.selectEntire")} setChecked={(c) => selectAllMeteringPoints(c)}
                                checked={selectEntire!}/>
-            <SelectForm control={control} name={"participantId"} options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
-              return {key: p.id, value: p.firstname + " " + p.lastname}
-            })} label={t("participant")} selectInterface={"popover"} disableEntire={selectEntire}/>
-            <SelectForm control={control} name={"meteringPoints"} options={useableMeters.map((p) => {
-              return {key: p.meteringPoint, value: meteringDisplayName(p)}
-            })} label={t("metering")} selectInterface={"popover"} multiple={true} rules={{required: true}} disableEntire={selectEntire}/>
+            {/*<SelectForm control={control} name={"participantId"} options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {*/}
+            {/*  return {key: p.id, value: p.firstname + " " + p.lastname}*/}
+            {/*})} label={t("participant")} selectInterface={"popover"} disableEntire={selectEntire}/>*/}
+            {/*<SelectForm control={control} name={"meteringPoints"} options={useableMeters.map((p) => {*/}
+            {/*  return {key: p.meteringPoint, value: meteringDisplayName(p)}*/}
+            {/*})} label={t("metering")} selectInterface={"popover"} multiple={true} rules={{required: true}} disableEntire={selectEntire}/>*/}
+            <BasicSelectComponent control={control} name={"participantId"}
+                                  options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
+                                    return {value: p.id, label: JoinStrings(" ", "-", p.participantNumber, p.lastname, p.firstname)}
+                                  })} label={t("participant")} disabled={selectEntire}/>
+            <BasicSelectComponent control={control} name={"meteringPoints"}
+                                  options={useableMeters.filter(p => p.status === 'ACTIVE').map((p) => {
+                                    return {value: p.meteringPoint, label: JoinStrings(" ", "", meteringDisplayName(p), p.status)}
+                                  })} label={t("metering")} multiple={true} rules={{required: true}} disabled={selectEntire}/>
             <div className="form-element">
               <DatePicker
                 selectsRange={true}
@@ -145,7 +158,7 @@ const ProcessRequestValuesComponent: FC<ProcessRequestValuesComponentProps> = ({
             </div>
             <IonItem lines="none" style={{zIndex: "0"}}>
               <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={((!formState.isValid && !selectEntire) || !startDate || !endDate)}>
-                Anfordern
+                {t("process.submit")}
               </IonButton>
             </IonItem>
           </>

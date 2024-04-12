@@ -20,6 +20,7 @@ import {HttpError} from "../service/base.service";
 import {participantsSelector1} from "../store/participant";
 import {FormProvider, useForm} from "react-hook-form";
 import {EegParticipant} from "../models/members.model";
+import {useTenant} from "../store/hook/Eeg.provider";
 
 interface RateDetailPaneComponentProps {
   onSubmit: (data: EegTariff) => void;
@@ -30,7 +31,7 @@ interface RateDetailPaneComponentProps {
 const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, submitId, mode}) => {
   const dispatcher = useAppDispatch();
   const selectedTariff = useAppSelector(selectedRateSelector)
-  const tenant = useAppSelector(selectedTenant)
+  const {tenant} = useTenant()
 
   const [presentAlert] = useIonAlert();
   const [showToast] = useIonToast();

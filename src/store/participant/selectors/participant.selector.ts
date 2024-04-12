@@ -6,6 +6,7 @@ import {Metering} from "../../../models/meteringpoint.model";
 import {SelectedPeriod} from "../../../models/energy.model";
 import {selectedPeriodSelector} from "../../energy";
 import participants from "../../../pages/Participants";
+import {filterActiveParticipantAndMeter} from "../../../util/FilterHelper.unit";
 
 const {selectAll, selectById, selectEntities} = adapter.getSelectors();
 
@@ -53,25 +54,6 @@ const getPeriodDates = (period: SelectedPeriod) => {
   }
 }
 
-// export const activeParticipantsSelector = (period: SelectedPeriod | undefined) => createSelector(
-//   participantsSelector1,
-//     (participants): EegParticipant[] => {
-//     if (period) {
-//       const [start, end] = getPeriodDates(period)
-//       const n = participants.map(p => {
-//         return {
-//           ...p, meters: p.meters.filter(m =>
-//             new Date(m.registeredSince).getTime() >= start.getTime() &&
-//             (m.inactiveSince ? new Date(m.inactiveSince).getTime() <= end.getTime() && new Date(m.inactiveSince).getTime() >= start.getTime() : false)
-//           )
-//         } as EegParticipant
-//       })
-//       return n
-//     }
-//     return participants
-//   }
-// )
-
 /**
  * Selector: Returns Participants with active metering points
  *
@@ -83,17 +65,18 @@ export const activeParticipantsSelector1 = createSelector(
   (participants, period): EegParticipant[] => {
     if (period) {
       const [start, end] = getPeriodDates(period)
-      const n = participants.map(p => {
-        return {
-          ...p, meters: p.meters ? p.meters.filter(m =>
-            (m.participantState
-              ? (new Date(m.participantState.inactiveSince).getTime() >= end.getTime() && new Date(m.participantState.activeSince).getTime() <= end.getTime()) ||
-              (new Date(m.participantState.inactiveSince).getTime() >= start.getTime() && new Date(m.participantState.inactiveSince).getTime() <= end.getTime())
-              : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
-          ) : [/*{meteringPoint: "AT9900000000000000000000000000111", direction: "CONSUMPTION"} as Metering*/]
-        } as EegParticipant
-      }) //.filter(p => p.meters.length > 0)
-      return n
+      // const n = participants.map(p => {
+      //   return {
+      //     ...p, meters: p.meters ? p.meters.filter(m =>
+      //       (m.participantState
+      //         ? (new Date(m.participantState.inactiveSince).getTime() >= end.getTime() && new Date(m.participantState.activeSince).getTime() <= end.getTime()) ||
+      //         (new Date(m.participantState.inactiveSince).getTime() >= start.getTime() && new Date(m.participantState.inactiveSince).getTime() <= end.getTime())
+      //         : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
+      //     ) : [/*{meteringPoint: "AT9900000000000000000000000000111", direction: "CONSUMPTION"} as Metering*/]
+      //   } as EegParticipant
+      // }) //.filter(p => p.meters.length > 0)
+      // return n
+      return filterActiveParticipantAndMeter(participants, start, end)
     }
     return [...participants]
     // return []
@@ -103,13 +86,6 @@ export const activeParticipantsSelector1 = createSelector(
 export const activeMetersSelector = createSelector(
   activeParticipantsSelector1,
   (participants): Metering[] => participants.flatMap(p => p.meters))
-
-// export const participantSelector = createSelector(
-//   featureStateSelector,
-//   (participantState: ParticipantState): EegParticipant | undefined => {
-//     return selectById(participantState, (participantState.selectedParticipant?.id || "")) || undefined;
-//   }
-// )
 
 export const selectParticipantById = (id: string) =>
   createSelector(

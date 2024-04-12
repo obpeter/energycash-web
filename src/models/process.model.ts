@@ -89,6 +89,8 @@ export class EdaResponseCode {
         return "Zählpunkt befindet sich nicht im Bereich der Energiegemeinschaft"
       case 187:
         return "ConsentID und Zählpunkt passen nicht zusammen"
+      case 188:
+        return "Teilnahmefaktor von 100 % würde überschritten werden"
     }
     return code.toString()
   }

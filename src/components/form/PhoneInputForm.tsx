@@ -1,5 +1,5 @@
-import {Control, FieldError, FieldValues, UseFormSetValue} from "react-hook-form";
-import InputForm, {InputPartialFunction} from "./InputForm.component";
+import {Control, FieldError, FieldValues, set, UseFormSetValue} from "react-hook-form";
+import InputForm, {PartialChangeFunction} from "./InputForm.component";
 import {useMaskito} from "@maskito/react";
 import React, {ClipboardEvent} from "react";
 
@@ -9,28 +9,32 @@ interface PhoneInputFormProps<T extends object> {
   control: Control<T, any>
   setValue: UseFormSetValue<any>,
   error?: FieldError
-  onChangePartial?: InputPartialFunction
+  onChangePartial?: PartialChangeFunction
   readonly?: boolean,
 }
 
 export function PhoneInputForm<T extends object>({setValue, ...props} : PhoneInputFormProps<T>) {
+// export function PhoneInputForm<T extends object>(props : PhoneInputFormProps<T>) {
   const phoneMask = useMaskito({
     options: {
-      mask: /^\d{0,4}\s\d*$/,
+      // mask: /^\d{0,4}\s{0,1}\d*$/,
+      mask: /\+?[0-9]{0,2}([0-9]|\/|\(|\)|\-|\s)*/,
     },
   });
 
   const handlePhonePaste = (e: ClipboardEvent<HTMLIonInputElement>) => {
     e.persist()
     e.clipboardData.items[0].getAsString(text=>{
-      setValue(props.name, text.replace(/\+/gi, "00").replace(/\s/gi,""))
+      setValue(props.name, test)
+      // setValue(props.name, text.replace(/\+/gi, "00").replace(/\s/gi,""))
+      console.log("Clipboard-Text: ", text, text.replace(/\+/gi, "00").replace(/\s/gi,""))
     })
     e.stopPropagation()
   }
 
   return (
     <InputForm label="Telefon"
-               rules={{required: "IBAN fehlt", minLength: {value: 24, message: "IBAN ist ungültig"}}}
+               rules={{required: "Telefonnummer ist erforderlich", minLength: {value: 4, message: "Telefonnummer ist ungültig"}}}
                type="text"
                mask={phoneMask}
                onPaste={handlePhonePaste}

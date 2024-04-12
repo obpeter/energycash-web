@@ -30,18 +30,18 @@ const ProcessesPage: FC = () => {
 
   const processes: EdaProcess[] = [
     {
-      name: "Zählpunktdaten nachfordern",
-      description: "Dieser Prozess dient der Anforderung von Energiedaten eines Zählpunktes in einem vom Anforderer zu definierenden Zeitbereich",
+      name: t("process.requestMeterData.title"),
+      description: t("process.requestMeterData.desc"),
       type: "CR_REQ_PT"
     },
     {
-      name: "Zählpunkt aktivieren",
-      description: "Dieser Prozess dient zur Aktivierung eines Zählpunktes. ",
+      name:  t("process.activateMeter.title"),
+      description:  t("process.activateMeter.desc"),
       type: "EC_REQ_ONL"
     },
     {
-      name: "Zählpunkt abmelden",
-      description: "Der Marktteilnehmer wird über die Aufhebung einer erteilten Datenfreigabe in Kenntnis gesetzt.",
+      name: t("process.revokeMeter.title"),
+      description:t("process.revokeMeter.desc"),
       type: "CM_REV_CUS"
     },
     {
@@ -55,8 +55,8 @@ const ProcessesPage: FC = () => {
       type: "EC_PODLIST"
     },
     {
-      name: "Prozess History",
-      description: "Übersicht der Prozesskommunikation mit den Marktpartner",
+      name: t("process.history.title"),
+      description: t("process.history.desc"),
       type: "HISTORY"
     },
   ]
@@ -71,44 +71,50 @@ const ProcessesPage: FC = () => {
     setSelectedProcess(processes[processId])
   }
 
-  return (
-    <IonPage>
-      <IonContent fullscreen color="eeg">
-        <div style={{display: "flex", flexDirection: "row", height: "100vh"}}>
-          <div className={"ratePane"}>
-            <div className={"pane-content"}>
-              <IonList color="eeg">
-                {processes.map((p, i) =>
-                  <div key={p.type} className={cn("eeg-cards", {"selected": processes[i].type === selectedProcess?.type})}>
-                    <IonCard color="eeg" onClick={() => onSelect(i)}>
-                      <IonGrid>
-                        <IonRow>
-                          <IonCol size="auto">
-                            <div style={{paddingTop: "5px", display: "flex", fontSize: "20px"}}>
-                              <IonIcon icon={syncCircle} size="large"></IonIcon>
-                            </div>
-                          </IonCol>
-                          <IonCol>
-                            <IonLabel>
-                              <h2><b>{p.name}</b></h2>
-                              <p>{p.description}</p>
-                            </IonLabel>
-                          </IonCol>
-                        </IonRow>
-                      </IonGrid>
-                    </IonCard>
-                  </div>
-                )}
-              </IonList>
+  if (!eeg) {
+    return <></>
+  } else {
+    return (
+      <IonPage>
+        <IonContent fullscreen color="eeg">
+          <div style={{display: "flex", flexDirection: "row", height: "100vh"}}>
+            <div className={"ratePane"}>
+              <div className={"pane-content"}>
+                <IonList color="eeg">
+                  {processes.map((p, i) =>
+                    <div key={p.type}
+                         className={cn("eeg-cards", {"selected": processes[i].type === selectedProcess?.type})}>
+                      <IonCard color="eeg" onClick={() => onSelect(i)}>
+                        <IonGrid>
+                          <IonRow>
+                            <IonCol size="auto">
+                              <div style={{paddingTop: "5px", display: "flex", fontSize: "20px"}}>
+                                <IonIcon icon={syncCircle} size="large"></IonIcon>
+                              </div>
+                            </IonCol>
+                            <IonCol>
+                              <IonLabel>
+                                <h2><b>{p.name}</b></h2>
+                                <p>{p.description}</p>
+                              </IonLabel>
+                            </IonCol>
+                          </IonRow>
+                        </IonGrid>
+                      </IonCard>
+                    </div>
+                  )}
+                </IonList>
+              </div>
+            </div>
+            <div style={{flexGrow: "1", background: "#EAE7D9"}}>
+              {eeg ? <ProcessDetailPaneComponent selectedProcess={selectedProcess} eeg={eeg} participants={participants}
+                                                 meters={meters}/> : <></>}
             </div>
           </div>
-          <div style={{flexGrow: "1", background: "#EAE7D9"}}>
-            {eeg ? <ProcessDetailPaneComponent selectedProcess={selectedProcess} eeg={eeg} participants={participants} meters={meters}/> : <></>}
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
-  )
+        </IonContent>
+      </IonPage>
+    )
+  }
 }
 
 export default ProcessesPage;

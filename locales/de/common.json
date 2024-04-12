@@ -1,13 +1,24 @@
 {
+  "firstname": "Vorname",
+  "lastname": "Nachname",
+  "company-name": "Firmenname",
   "communityId": "Gemeinschafts ID",
   "gridOperator_id": "Netzbetreiber ID",
   "gridOperator_name": "Netzbetreiber Name",
   "participant": "Mitglied",
+  "participant-nr": "Mitglieds-Nr",
+  "participant-title_before": "Titel (Vor)",
+  "participant-title_after": "Titel (Nach)",
+  "participant-title_company": "Firma",
+  "participant-title_privat": "Privat",
   "metering": "Zählpunkt",
   "metering_missing_msg": "Zählpunktnummer fehlt",
   "tariff": "Tarif",
   "tariffLabel": "Tarifbezeichnung",
   "tariffParts": "Bestandteile",
+  "consumer_tariff": "Verbrauchertarife",
+  "producer_tariff": "Erzeugertarife",
+  "participant_tariff": "Mitglieds-Tarif",
   "inverterCheckbox_label": "Wechselrichter anlegen",
   "inverternr_label": "Wechselrichternummer",
   "transformer_label": "Transformator",
@@ -20,13 +31,40 @@
   "centPerKWh": "Arbeitspreis in ct/kWh (netto)",
   "freeKWh": "Kostenlose Energie in kWh (je Abrechnungsintervall)",
   "useMeteringPointFee": "Zählpunkt Gebühr einheben?",
-  "meteringPointFee" : "Zählpunktgebühr in €",
-  "meteringPointFee_card" : "Zählpunktgebühr",
+  "meteringPointFee": "Zählpunktgebühr in €",
+  "meteringPointFee_card": "Zählpunktgebühr",
   "useVat": "Umsatzsteuer anführen",
-  "vatInPercent" : "Umsatzsteuer in %",
+  "vatInPercent": "Umsatzsteuer in %",
   "consumer": "Verbraucher",
   "producer": "Erzeuger",
-  "process" : {
+  "city": "Ort",
+  "street": "Straße",
+  "street_number": "Hausnummer",
+  "zip": "Postleitzahl",
+  "email": "E-Mail",
+  "uid": "UID",
+  "account-owner": "Kontoinhaber",
+  "participant-since": "Mitglied seit ...",
+  "date": "Datum",
+  "warnings": {
+    "email_missing": "Email Adresse fehlt!",
+    "email_wrong": "Email Adresse ist nicht valide!",
+    "firstname_missing": "Vorname fehlt!",
+    "lastname_missing": "Nachname fehlt!",
+    "company-name_missing": "Firmenname fehlt!"
+  },
+  "alerts": {
+    "changeDirection_0": "Energierichtung zu einen $t(producer) ändern? Es gilt zu beachten, dass diese Änderung nicht mit dem Netzbetreiber kommuniziert wird. Die Änderung wird nur in EEGFaktura vollzogen und keine Auswirkung beim Netzbetreiber!",
+    "changeDirection_1": "Energierichtung zu einen $t(consumer) ändern? Es gilt zu beachten, dass diese Änderung nicht mit dem Netzbetreiber kommuniziert wird. Die Änderung wird nur in EEGFaktura vollzogen und keine Auswirkung beim Netzbetreiber!"
+  },
+  "button_labels": {
+    "calendar": "Zeitraum",
+    "cancel": "Abbrechen",
+    "submit": "Bestätigen",
+    "ok": "Ok"
+  },
+  "process": {
+    "submit": "Anfordern",
     "requestValue": {
       "selectEntire": "Zählpunkte für Gesamte EEG nachfordern"
     },
@@ -38,7 +76,29 @@
     "podList": {
       "title": "Teilnehmerliste anfordern",
       "desc": "Anfordern der Teilnehmer einer EEG."
-    }
+    },
+    "activateMeter": {
+      "title": "Zählpunkt aktivieren",
+      "desc": "Dieser Prozess dient zur Aktivierung eines Zählpunktes."
+    },
+    "requestMeterData": {
+      "title": "Zählpunktdaten nachfordern",
+      "desc": "Dieser Prozess dient der Anforderung von Energiedaten eines Zählpunktes in einem vom Anforderer zu definierenden Zeitbereich."
+    },
+    "history": {
+      "title": "Prozess History",
+      "desc": "Übersicht der Prozesskommunikation mit den Marktpartner."
+    },
+    "revokeMeter": {
+      "title": "Zählpunkt abmelden",
+      "desc": "Der Marktteilnehmer wird über die Aufhebung einer erteilten Datenfreigabe in Kenntnis gesetzt.",
+      "reason": "Begründung (optional)"
+    },
+    "EC_PRTFACT_CHANGE": "Änderung des Teilnahmefaktor",
+    "EC_REQ_ONL": "Anmeldung Teilnahme Online",
+    "CR_REQ_PT": "Anfordern von Energiedaten",
+    "CR_MSG": "Versenden der Energiedaten",
+    "CM_REV_IMP": "Datenfreigabe-Aufhebung"
   },
   "menu": {
     "changePassword": "Passwort ändern",
@@ -51,20 +111,26 @@
   },
   "meter": {
     "status_code_56": "Zählpunkt nicht gefunden",
+    "status_code_57": "Zählpunkt nicht versorgt",
+    "status_code_76": "Ungültige Anforderungsdaten",
     "status_code_104": "Falsche Energierichtung",
     "status_code_156": "ZP bereits zugeordnet",
+    "status_code_157": "ZP bereits einem Betreiber zugeordnet",
     "status_code_158": "ZP ist nicht teilnahmeberechtigt",
     "status_code_159": "Zu Prozessdatum ZP inaktiv bzw. noch kein Gerät eingebaut",
-    "status_code_174": "Angefragte Daten nicht lieferbar",
+    "status_code_172": "Kunde hat Datenfreigabe abgelehnt",
+    "status_code_173": "Kunde hat auf Datenfreigabe nicht reagiert (Timeout)",
+    "status_code_177": "Keine Datenfreigabe vorhanden",
     "status_code_181": "Gemeinschafts-ID nicht vorhanden",
     "status_code_184": "Kunde hat optiert",
     "status_code_185": "Zählpunkt befindet sich nicht im Bereich der Energiegemeinschaft",
+    "status_code_196": "Teilnahme-Limit wird überschritten",
     "status_text_NEW": "Antwort des Netzbetreibers noch ausstehend.",
+    "status_text_INIT": "Antwort des Netzbetreibers noch ausstehend.",
     "status_text_PENDING": "Zustimmung des Mitglieds noch ausstehend.",
     "status_text_APPROVED": "Abschluss Meldung von Netzbetreiber noch ausstehend.",
-  "status_text_REJECTED": "ählpunkt wurde vom Netzbetreiber abgewiesen.",
+    "status_text_REJECTED": "Zählpunkt wurde vom Netzbetreiber abgewiesen.",
     "status_text_REVOKED": "Zählpunkt wurde vom Netzbetreiber aufgehoben.",
     "status_text_INVALID": "Zählpunkt wurde vom Netzbetreiber nicht angenommen."
-
   }
 }

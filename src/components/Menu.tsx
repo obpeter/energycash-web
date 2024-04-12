@@ -19,7 +19,7 @@ import {
 } from 'ionicons/icons';
 import './Menu.css';
 import React, {FC, useEffect, useRef, useState} from "react";
-import {eegChartBubble, eegChatIcon, eegProcess} from "../eegIcons";
+import {eegAvatar, eegChartBubble, eegChatIcon, eegProcess} from "../eegIcons";
 import {useAppSelector} from "../store";
 import {eegSelector} from "../store/eeg";
 import {useAccessGroups} from "../store/hook/Eeg.provider";
@@ -175,7 +175,8 @@ const Menu: FC = () => {
           <IonTitle>EEG <span style={{color: "#79DFB4"}}>Faktura</span></IonTitle>
           <IonChip slot="end" onClick={openPopover}>
             <IonAvatar>
-              <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+              <img alt="Silhouette of a person's head" src="/assets/icon/avatar.svg" />
+              {/*<IonIcon icon={eegAvatar} size="large"/>*/}
             </IonAvatar>
             <IonLabel style={{color: "white"}}>...</IonLabel>
           </IonChip>

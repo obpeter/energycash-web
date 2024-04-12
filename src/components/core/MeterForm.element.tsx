@@ -1,5 +1,5 @@
 import React, {ClipboardEvent, FC, useEffect, useState} from "react";
-import {IonCol, IonGrid, IonList, IonRow} from "@ionic/react";
+import {IonButton, IonCol, IonGrid, IonIcon, IonList, IonRow, useIonAlert} from "@ionic/react";
 import SelectForm from "../form/SelectForm.component";
 import InputForm from "../form/InputForm.component";
 import CheckboxComponent from "../form/Checkbox.component";
@@ -9,8 +9,9 @@ import {useFormContext} from "react-hook-form";
 import ToggleButtonComponent from "../ToggleButton.component";
 import {eegPlug, eegSolar} from "../../eegIcons";
 import {EegParticipant} from "../../models/members.model";
-import {useEegArea} from "../../store/hook/Eeg.provider";
+import {useAccessGroups, useEegArea} from "../../store/hook/Eeg.provider";
 import {useLocale} from "../../store/hook/useLocale";
+import {swapHorizontalSharp} from "ionicons/icons";
 
 interface MeterFormElementProps {
   rates: EegTariff[]
@@ -26,6 +27,9 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
 
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
 
+  const {isAdmin} = useAccessGroups()
+  const [presentAlert] = useIonAlert();
+
   const [selectedDirection, setSelectedDirection] = useState(0);
   const [withWechselrichter, setWithWechselrichter] = useState(false);
 
@@ -35,7 +39,7 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
     if (meterReadOnly === undefined) {
       return true
     }
-    return !meterReadOnly || status === 'INVALID'
+    return !meterReadOnly || status === 'NEW' || status === 'INVALID' || status === 'INACTIVE' || status === 'REJECTED' || status === 'REVOKED'
   }
 
   useEffect(() => {
@@ -75,17 +79,21 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
     if (onChange) onChange([{name, value}], event)
   }
 
+  const askFor = (msg: string, okHandler: () => void, cancelHandler?: () => void) => {
+    presentAlert(msg, [{text: t("button_labels.cancel"), handler: cancelHandler}, {text: t("button_labels.ok"), handler: okHandler}])
+  }
+
   const getTarifHeaderString = () => {
     return selectedDirection === 0 ?
-      ("Verbrauchertarife")
+      t("consumer_tariff")
       :
-      ("Erzeugertarife")
+      t("producer_tariff")
   }
 
   return (
     <>
       <IonGrid>
-        <IonRow>
+        <IonRow class="ion-justify-content-between">
           <IonCol size="auto">
             <ToggleButtonComponent
               buttons={[{label: t("consumer"), icon: eegPlug}, {label: t("producer"), icon: eegSolar}]}
@@ -94,6 +102,19 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
               changeable={isChangeable()}
             />
           </IonCol>
+          {isAdmin() && !isChangeable() &&
+          <IonCol size="auto">
+            <div>
+              <IonButton size="small" fill="clear" onClick={() => {
+                askFor(t("alerts.changeDirection", { context: ''+selectedDirection }),
+                  () => {
+                    onChangeDirection(selectedDirection === 0 ? 1 : 0)
+                  });
+              }}>
+                <IonIcon slot="icon-only" icon={swapHorizontalSharp} size="small"></IonIcon>
+              </IonButton>
+            </div>
+          </IonCol>}
         </IonRow>
       </IonGrid>
       <IonList>
@@ -114,12 +135,12 @@ const MeterFormElement: FC<MeterFormElementProps> = ({rates, participant, meterR
                    onChangePartial={_onChange}
         />
         <InputForm name={"partFact"} label={t("process.partFact.label")} control={control} rules={{required: true}}
-                   type="number" onChangePartial={_onChange} protectedControl={true}/>
+                   type="number" onChangePartial={_onChange} protectedControl={!isChangeable()}/>
         {area && area === 'BEG' && <>
             <InputForm name={"gridOperatorId"} label={t("gridOperator_id")} control={control} rules={{required: true}}
-                       type="text" onChangePartial={_onChange} protectedControl={!isChangeable()}/>
+                       type="text" onChangePartial={_onChange} protectedControl={!(isChangeable() && status !== 'INACTIVE')}/>
             <InputForm name={"gridOperatorName"} label={t("gridOperator_name")} control={control} rules={{required: true}}
-                       type="text" onChangePartial={_onChange} protectedControl={!isChangeable()}/>
+                       type="text" onChangePartial={_onChange} protectedControl={!(isChangeable() && status !== 'INACTIVE')}/>
         </>}
         <CheckboxComponent label={t("inverterCheckbox_label")} setChecked={setWithWechselrichter}
                            checked={withWechselrichter} style={{paddingTop: "0px"}}></CheckboxComponent>

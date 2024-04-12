@@ -16,7 +16,7 @@ export interface EegState extends EntityState<Eeg, string> {
 }
 
 export const adapter = createEntityAdapter<Eeg, string>({
-  selectId: (eeg) => eeg.rcNumber
+  selectId: (eeg) => eeg.id
 });
 // export const adapter = createEntityAdapter<Eeg>();
 
