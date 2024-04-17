@@ -3,16 +3,10 @@ import {AuthProvider, AuthProviderProps} from "react-oidc-context";
 import {OidcHandler} from "./OidcHandler";
 import {rootUrl} from "./utils";
 import {User, UserManager, WebStorageStateStore} from "oidc-client-ts";
-import {AuthService} from "../../service/auth.service";
-
-const isEnterprise = true
+import {AuthService} from "../../../service/auth.service";
 
 type AuthServiceType = Omit<AuthService, "_logoutActive"> & UserManager
 export const OidcProvider: FC<PropsWithChildren & {_userManager: AuthServiceType}> = ({ children, _userManager}) => {
-
-  if (!isEnterprise) {
-    return <>{children}</>;
-  }
 
   const oidcConfig : AuthProviderProps = {
       post_logout_redirect_uri: rootUrl,

@@ -1,5 +1,5 @@
 import React, {FC, ReactNode, useState} from "react";
-import {IonChip, IonIcon, IonLabel} from "@ionic/react";
+import {IonButton, IonChip, IonIcon, IonLabel} from "@ionic/react";
 
 import "./ToggleButton.css"
 
@@ -25,14 +25,16 @@ const ToggleButtonComponent: FC<ToggleButtonComponentProps>
   }
 
   return (
-    <>
+    <div style={{display: "flex", justifyContent: "space-between"}}>
+      <div>
       {buttons.map((b, idx) => (
         <IonChip key={idx} className="ToggleButtonComponent" outline={!(value === idx)} onClick={() => handleSelected(idx)}>
           {b.icon && <IonIcon icon={b.icon}/>}
           <IonLabel>{b.label}</IonLabel>
         </IonChip>
       ))}
-    </>
+      </div>
+    </div>
   )
 }
 

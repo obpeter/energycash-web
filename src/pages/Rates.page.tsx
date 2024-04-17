@@ -19,13 +19,14 @@ import RateDetailPaneComponent from "../components/RateDetailPane.component";
 import {selectedTenant} from "../store/eeg";
 import {useRateType} from "../store/hook/Rate.provider";
 import { get } from "react-hook-form";
+import {useTenant} from "../store/hook/Eeg.provider";
 
 const RatesPage: FC = () => {
 
   const dispatcher = useAppDispatch();
   const selectedTariff = useAppSelector(selectedRateSelector)
   const rates = useAppSelector(ratesSelector)
-  const tenant = useAppSelector(selectedTenant)
+  const {tenant} = useTenant()
 
   const [showToast] = useIonToast();
 

@@ -5,10 +5,11 @@ import {useAppSelector} from "../store";
 import {selectedTenant} from "../store/eeg";
 import NotificationLayoutComponent from "../components/notification/NotificationLayout.component";
 import {Api} from "../service";
+import {useTenant} from "../store/hook/Eeg.provider";
 
 
 const NotificationPage: FC = () => {
-  const tenant = useAppSelector(selectedTenant);
+  const {tenant} = useTenant()
   const [notifictions, setNotifications] = useState<{type: string, date: Date, notification: EegNotification}[]>([])
 
   useEffect(() => {

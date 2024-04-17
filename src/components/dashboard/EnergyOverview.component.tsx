@@ -6,10 +6,11 @@ import {PieSeriesType, ReportSeriesType} from "../../pages/Dashbaord.page";
 import {EegTariff} from "../../models/eeg.model";
 import {selectedPeriodSelector} from "../../store/energy";
 import {getPreviousPeriod} from "../../util/Helper.util";
-import {selectedTenant} from "../../store/eeg";
+import {activeTenant, selectedTenant} from "../../store/eeg";
 import {IonContent, IonIcon, IonPopover} from "@ionic/react";
 import {helpCircle, helpCircleOutline} from "ionicons/icons";
 import {Api} from "../../service";
+import {useTenant} from "../../store/hook/Eeg.provider";
 
 interface OverviewComponentProps {
   consumed: PieSeriesType
@@ -22,7 +23,8 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
 
   const meterGroup = useAppSelector(activeMeterEnergyArray)
   const activePeriod = useAppSelector(selectedPeriodSelector)
-  const tenant = useAppSelector(selectedTenant)
+  // const tenant = useAppSelector(activeTenant)
+  const tenant = useTenant()
 
   const [producedEnergy, setProducedEnergy] = useState<number>(0)
   const [consumedEnergy, setConsumedEnergy] = useState<number>(0)
@@ -43,7 +45,7 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
   }, [meterGroup, rates]);
 
   useEffect(() => {
-    if (activePeriod) {
+    if (tenant && activePeriod) {
       const prePeriod = getPreviousPeriod(activePeriod)
       Api.energyService.fetchSummary(tenant, prePeriod.year, prePeriod.segment, prePeriod.type).then((r) => {
         setPreConsumedEnergy(r.consumed)
@@ -55,7 +57,7 @@ const EnergyOverviewComponent: FC<OverviewComponentProps> = ({consumed, produced
         setPreProducedEnergy(0)
       })
     }
-  }, [activePeriod, tenant]);
+  }, [activePeriod]);
   const calculateSummary = () => {
     let consumerSum = 0
     let producerSum = 0

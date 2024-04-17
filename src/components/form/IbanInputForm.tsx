@@ -1,13 +1,13 @@
 import React, {FC} from "react";
 import {useMaskito} from "@maskito/react";
-import InputForm, {InputPartialFunction} from "./InputForm.component";
+import InputForm, {PartialChangeFunction} from "./InputForm.component";
 import {Control, FieldError} from "react-hook-form";
 
 interface IbanInputFormProps<T extends object> {
   name: string
   control: Control<T, any>
   error?: FieldError
-  onChangePartial?: InputPartialFunction
+  onChangePartial?: PartialChangeFunction
   readonly?: boolean,
 }
 

@@ -8,6 +8,7 @@ import {IonContent, IonInput, IonItem, IonLabel, SelectChangeEventDetail} from "
 
 import "./BasicSelect.component.scss"
 import {ActionMeta} from "react-select/dist/declarations/src/types";
+import {activeMeterEnergyArray} from "../../store";
 
 export interface SelectOptions {
   readonly label: string,
@@ -49,7 +50,10 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
   }, [controlValue]);
 
   const onSelectionChanged = (change: (...event: any[]) => void) => (selectedOptions: OnChangeValue<SelectOptions, IsMulti>, actionMeta: ActionMeta<OnChangeValue<SelectOptions, IsMulti>>) => {
-    console.log(actionMeta)
+    if (actionMeta.action === "clear") {
+      change(undefined)
+      return
+    }
     if(selectedOptions) {
       change(multiple ? (selectedOptions as SelectOptions[]).map(s => s.value) : (selectedOptions as SelectOptions).value);
     }
@@ -94,6 +98,7 @@ export const BasicSelectComponent: FC<BasicSelectFormProps> = ({control, name, l
                   options={options}
                   onChange={onSelectionChanged(onChange)}
                   value={selectedValue}
+                  isDisabled={rest.disabled}
                 />
               </>
             )

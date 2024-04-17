@@ -1,14 +1,14 @@
 import React, {FC, useEffect} from "react";
 import {FormProvider, useForm} from "react-hook-form";
-import {useAppDispatch, useAppSelector} from "../store";
-import {ratesSelector} from "../store/rate";
-import {selectedTenant} from "../store/eeg";
-import {selectedMeterSelector, selectedParticipantSelector, updateMeteringPoint} from "../store/participant";
-import {Metering} from "../models/meteringpoint.model";
-import MeterFormElement from "./core/MeterForm.element";
-import EegPaneTemplate from "./core/EegPane.template";
-import MeterAddressFormElement from "./core/forms/MeterAddressForm/MeterAddressForm.element";
-import {useOnlineState} from "../store/hook/Eeg.provider";
+import {useAppDispatch, useAppSelector} from "../../store";
+import {ratesSelector} from "../../store/rate";
+import {selectedTenant} from "../../store/eeg";
+import {selectedMeterSelector, selectedParticipantSelector, updateMeteringPoint} from "../../store/participant";
+import {Metering} from "../../models/meteringpoint.model";
+import MeterFormElement from "../core/MeterForm.element";
+import EegPaneTemplate from "../core/EegPane.template";
+import MeterAddressFormElement from "../core/forms/MeterAddressForm/MeterAddressForm.element";
+import {useOnlineState, useTenant} from "../../store/hook/Eeg.provider";
 
 interface MeterFromComponentProps {
   meteringPoint: Metering
@@ -20,7 +20,7 @@ const MeterFormComponent: FC<MeterFromComponentProps> = ({meteringPoint}) => {
   const participant = useAppSelector(selectedParticipantSelector);
 
   const rates = useAppSelector(ratesSelector);
-  const tenant = useAppSelector(selectedTenant);
+  const {tenant} = useTenant();
   const metering = useAppSelector(selectedMeterSelector);
 
   const isOnline = useOnlineState()

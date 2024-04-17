@@ -1,15 +1,15 @@
 import React, {FC, useCallback, useEffect, useState} from "react";
 import {IonButton, IonButtons} from "@ionic/react";
-import {createNewPeriod} from "../util/Helper.util";
+import {createNewPeriod} from "../../util/Helper.util";
 import {
   EegEnergyReport,
   EnergySeries,
   ReportType,
   SelectedPeriod
-} from "../models/energy.model";
-import PeriodSelectorElement from "./core/PeriodSelector.element";
-import {useAppSelector} from "../store";
-import {periodsSelector} from "../store/energy";
+} from "../../models/energy.model";
+import PeriodSelectorElement from "../core/PeriodSelector.element";
+import {useAppSelector} from "../../store";
+import {periodsSelector} from "../../store/energy";
 
 interface MeterChartNavbarComponentProps {
   selectedMeterId: string

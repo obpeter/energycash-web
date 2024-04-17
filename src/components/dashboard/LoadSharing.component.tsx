@@ -17,9 +17,11 @@ type LoadSharingData = {
   name: string
 }
 
+const EMPTY_LOADSHARING_DATA = {} as LoadSharingData
+
 const LoadSharingComponent: FC<LoadSharingComponentProps> = ({intermediateSeries, report, activePeriod}) => {
 
-  const [data, setData] = useState<LoadSharingData[]>([] as LoadSharingData[])
+  const [data, setData] = useState<LoadSharingData[]>([EMPTY_LOADSHARING_DATA] as LoadSharingData[])
 
   useEffect(() => {
     setData(report.map((r, i) => {

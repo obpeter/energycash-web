@@ -25,13 +25,14 @@ import ParticipantRegisterMeterPaneComponent from "../components/ParticipantRegi
 import {FormProvider, useForm} from "react-hook-form";
 import {Metering} from "../models/meteringpoint.model";
 import {RouteComponentProps} from "react-router";
+import {useTenant} from "../store/hook/Eeg.provider";
 
 const ParticipantRegisterPage: FC<RouteComponentProps> = ({history}) => {
 
 
   const dispatch = useAppDispatch();
 
-  const tenant = useAppSelector(selectedTenant)
+  const {tenant} = useTenant()
   const participants = useAppSelector(activeParticipantsSelector1);
   const [defaultParticipantNumber, setDefaultParticipantNumber] = useState(participants.length.toString().padStart(3, '0'))
 

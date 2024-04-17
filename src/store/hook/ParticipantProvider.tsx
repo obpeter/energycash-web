@@ -7,8 +7,9 @@ import {
 } from "../participant";
 import {EegTariff, RateTypeEnum} from "../../models/eeg.model";
 import {clearEnergyState, fetchEnergyReportV2, selectedPeriodSelector} from "../energy";
-import {selectedTenant} from "../eeg";
+import {activeTenant, selectedTenant} from "../eeg";
 import {MeterReport, ParticipantReport, SelectedPeriod} from "../../models/energy.model";
+import {useTenant} from "./Eeg.provider";
 
 
 export interface ParicipantState {
@@ -56,7 +57,7 @@ export const ParticipantContext = createContext(initialState)
 const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
 
   const dispatch = useAppDispatch();
-  const tenant = useAppSelector(selectedTenant)
+  const tenant = useTenant()
   const activePeriod = useAppSelector(selectedPeriodSelector)
   const participants = useAppSelector(activeParticipantsSelector1)
 
@@ -140,8 +141,8 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
   //   }
   // }, [activePeriod]);
 
-  useEffect(() => {
-    if (activePeriod && participants && participants.length > 0) {
+  const fetchEnergyReport = useCallback(() => {
+    if (tenant && activePeriod && participants && participants.length > 0) {
       const participantsReport = participants.map(p => {
         return {
           participantId: p.id,
@@ -155,7 +156,11 @@ const ParticipantProvider: FC<{children: ReactNode}> = ({children}) => {
     } else if (participants && participants.length == 0) {
       dispatch(clearEnergyState())
     }
-  },[activePeriod, participants])
+  }, [activePeriod, participants])
+
+  useEffect(() => {
+    fetchEnergyReport()
+  },[fetchEnergyReport])
 
   return (
     <ParticipantContext.Provider value={value}>

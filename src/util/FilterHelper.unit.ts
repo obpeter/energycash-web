@@ -3,6 +3,15 @@ import {EnergyMeta} from "../models/energy.model";
 import {Metering} from "../models/meteringpoint.model";
 import moment from "moment";
 
+/**
+ * filter active participant for a particular period (start to end). A active Participants has metering points with status ACTIVE or INACTIVE.
+ * INACTIVE meteringpoint has been revoked by netoperators or by customer itself.
+ * ACTIVE meteringpoints are still participate
+ *
+ * @param participants
+ * @param start activesince field is less
+ * @param end inactivesince is between
+ */
 export const filterActiveParticipantAndMeter = (participants: EegParticipant[], start: Date, end: Date) => {
   return participants.map(p => {
     return {
@@ -13,7 +22,7 @@ export const filterActiveParticipantAndMeter = (participants: EegParticipant[], 
           : true) || (m.status !== 'ACTIVE' && m.status !== 'INACTIVE')
       )
     } as EegParticipant
-  }).filter(p => p.meters.length > 0)
+  })/*.filter(p => p.meters.length > 0)*/
 }
 
 export const filterActiveMeter = <T extends Record<string, EnergyMeta>>(meta: T, m: Metering, start: moment.Moment, end: moment.Moment) => {

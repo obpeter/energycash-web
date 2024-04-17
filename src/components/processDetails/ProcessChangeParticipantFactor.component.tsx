@@ -69,7 +69,7 @@ const ProcessChangeParticipantFactorComponent: FC<ProcessChangeParticipantFactor
         meters.filter((m) => data.meteringPoints?.find((s: string) => s === m.meteringPoint))
       if (meter) {
         Api.eegService.changeMeterPartitionFactor(
-          eeg.rcNumber.toUpperCase(),
+          eeg.id.toUpperCase(),
           meter.map(m => {return {meter: m.meteringPoint, direction: m.direction, activation: m.participantState.activeSince, partFact: data.partFact || 100}}))
           .finally(() => {
             reset()
@@ -84,7 +84,7 @@ const ProcessChangeParticipantFactorComponent: FC<ProcessChangeParticipantFactor
       <ProcessContentComponent>
         <CorePageTemplate>
           <>
-            <InputForm name="communityId" label={t("communityId")} control={control} readonly={true}/>
+            <InputForm name="communityId" label={t("communityId")} control={control} protectedControl={true}/>
             <BasicSelectComponent control={control} name={"participantId"}
                                   options={participants.sort((a,b) => a.lastname.localeCompare(b.lastname)).map((p) => {
                                     return {value: p.id, label: JoinStrings(" ", "-", p.participantNumber, p.lastname, p.firstname)}
