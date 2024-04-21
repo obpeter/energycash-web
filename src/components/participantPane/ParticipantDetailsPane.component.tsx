@@ -230,7 +230,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   }
 
   const hasStatusCode = (meter: Metering) => {
-    return !!(meter && meter.statusCode && meterInvalidCodes.includes(meter.statusCode))
+    return !!(meter && (meter.status === 'INVALID' || meter.status === 'REJECTED') && meter.statusCode && meterInvalidCodes.includes(meter.statusCode))
   }
   if (!selectedParticipant) {
     return <></>
@@ -239,15 +239,15 @@ const ParticipantDetailsPaneComponent: FC = () => {
       <div className={"details-body"} style={{display: "flex", flexDirection: "column", height: "100%"}}>
         <div className={"details-header"}>
           <div><h4>{selectedParticipant.firstname} {selectedParticipant.lastname}</h4></div>
-          <div style={{minWidth: "240px"}}>
-            <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}}
-                     className={"participant-header"}
-                     onClick={() => archive(selectedParticipant)}>
-              <IonIcon icon={trashBin} slot="start"
-                       style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>
-              <IonLabel>Benutzer archivieren</IonLabel>
-            </IonItem>
-          </div>
+          {/*<div style={{minWidth: "240px"}}>*/}
+          {/*  <IonItem button lines="none" style={{fontSize: "12px", marginRight: "60px"}}*/}
+          {/*           className={"participant-header"}*/}
+          {/*           onClick={() => archive(selectedParticipant)}>*/}
+          {/*    <IonIcon icon={trashBin} slot="start"*/}
+          {/*             style={{marginRight: "10px", fontSize: "16px"}}></IonIcon>*/}
+          {/*    <IonLabel>Benutzer archivieren</IonLabel>*/}
+          {/*  </IonItem>*/}
+          {/*</div>*/}
         </div>
         <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
           <div style={{display: "flex", flexDirection: "column", width: "50%"}}>
