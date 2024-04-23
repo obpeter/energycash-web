@@ -545,6 +545,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
     }
   };
 
+  const [previewValid,setPreviewValid] = useState(true);
   const onDoBilling = (preview: boolean, documentDate: Date) => {
     if (activePeriod) {
       documentDate?.setHours(12);
@@ -562,18 +563,40 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
           ? documentDate.toISOString().substring(0, 10)
           : documentDate,
       } as ClearingPreviewRequest;
-      dispatcher(fetchEnergyBills({ tenant, invoiceRequest })).then(() => {
-        dispatcher(
-          fetchBillingRun({
-            tenant: tenant,
-            clearingPeriodType: activePeriod.type,
-            clearingPeriodIdentifier: createPeriodIdentifier(
-              activePeriod.type,
-              activePeriod.year,
-              activePeriod.segment
-            ),
-          })
-        );
+      dispatcher(fetchEnergyBills({ tenant, invoiceRequest })).then((returnValue: any) => {
+            console.log("Billing Preview: ", activePeriod);
+            if (
+              returnValue.payload.billing.abstractText
+                .toString()
+                .includes("Abrechnung fehlgeschlagen")
+              //"erfolgreich abgeschlossen."
+              //Abrechnung fehlgeschlagen
+            ) {
+              setPreviewValid(false);
+              presentAlert({
+                subHeader: "Fehler bei der Vorschauerstellung",
+                message:
+                  "Bei der Erstellung der Vorschau ist ein Fehler aufgetreten. Bitte prüfen Sie die Stammdaten und achten Sie vor allem darauf, bei allen Nutzern & Zählpunkten einen Tarif zu setzen. Wiederholen Sie den Vorgang, wenn allen Daten korrigiert wurden.",
+                buttons: ["OK"],
+              });
+            } else {
+              setPreviewValid(true);
+              dispatcher(
+                fetchBillingRun({
+                  tenant: tenant,
+                  clearingPeriodType: activePeriod.type,
+                  clearingPeriodIdentifier: createPeriodIdentifier(
+                    activePeriod.type,
+                    activePeriod.year,
+                    activePeriod.segment
+                  ),
+                })
+              );
+            }
+            console.log("Valid 2 : ", previewValid);
+            var temp = activePeriod === undefined || !previewValid;
+
+            console.log("res : ",temp);
       });
     }
   };
@@ -907,7 +930,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
                       </IonButton>
                       <IonButton
                         expand="block"
-                        disabled={activePeriod === undefined}
+                        disabled={activePeriod === undefined || !previewValid}
                         onClick={() =>
                           presentAlert({
                             subHeader: "Abrechnungslauf",
