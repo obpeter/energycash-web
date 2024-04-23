@@ -880,31 +880,39 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
                         onChange={onUpdateDocumentDate}
                       />
 
-                      <IonButton
-                        disabled={activePeriod === undefined}
-                        onClick={() => onDoBilling(true, documentDateBilling)}
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(3, 1fr)",
+                          gap: "10px",
+                        }}
                       >
-                        {`Vorschau Akt.`}
-                        <IonIcon
-                          slot="end"
-                          icon={reloadCircleOutline}
-                        ></IonIcon>
-                      </IonButton>
-                      <IonButton
-                        onClick={() => exportBillingArchive(billingRun.id)}
-                      >
-                        <IonIcon slot="end" icon={archiveOutline}></IonIcon>
-                        {"ZIP"}
-                      </IonButton>
-                      <IonButton
-                        onClick={() => exportBillingExcel(billingRun.id)}
-                      >
-                        <IonIcon
-                          slot="end"
-                          icon={documentTextOutline}
-                        ></IonIcon>
-                        {"EXCEL"}
-                      </IonButton>
+                        <IonButton
+                          disabled={activePeriod === undefined}
+                          onClick={() => onDoBilling(true, documentDateBilling)}
+                        >
+                          {`Vorschau Akt.`}
+                          <IonIcon
+                            slot="end"
+                            icon={reloadCircleOutline}
+                          ></IonIcon>
+                        </IonButton>
+                        <IonButton
+                          onClick={() => exportBillingArchive(billingRun.id)}
+                        >
+                          <IonIcon slot="end" icon={archiveOutline}></IonIcon>
+                          {"ZIP"}
+                        </IonButton>
+                        <IonButton
+                          onClick={() => exportBillingExcel(billingRun.id)}
+                        >
+                          <IonIcon
+                            slot="end"
+                            icon={documentTextOutline}
+                          ></IonIcon>
+                          {"EXCEL"}
+                        </IonButton>
+                      </div>
                       <IonButton
                         expand="block"
                         disabled={activePeriod === undefined}
@@ -926,7 +934,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
                             onDidDismiss: (e: CustomEvent) => {
                               if (e.detail.role === "confirmInvoice") {
                                 onDoBilling(false, documentDateBilling);
-                              } 
+                              }
                             },
                           })
                         }
