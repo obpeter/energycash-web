@@ -37,7 +37,10 @@ const ProcessPodListComponent: FC<ProcessPodListComponentProps> = ({eeg, edaProc
   const request = () => {
     Api.eegService.syncMeteringPointList(eeg.rcNumber)
       .then(() => infoToast(errorT("process.podList_ok")))
-      .catch(() => errorToast(errorT("process.podList_error")))
+      .catch((e) => {
+        console.log(e)
+        errorToast(errorT("process.podList_error"))
+      })
   }
 
   return (

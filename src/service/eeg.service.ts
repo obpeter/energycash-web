@@ -97,7 +97,7 @@ export class EegService extends EegBaseService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async confirmParticipant(tenant: string, pid: string/*, data: FormData*/): Promise<EegParticipant> {
+  async confirmParticipant(tenant: string, pid: string, meters: Metering[]/*, data: FormData*/): Promise<EegParticipant> {
     const token = await this.lookupToken()
     return await fetch(`${API_API_SERVER}/participant/${pid}/confirm`, {
       method: 'POST',
@@ -106,7 +106,7 @@ export class EegService extends EegBaseService {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      // body: data
+      body: JSON.stringify(meters)
     }).then(this.handleErrors).then(res => res.json());
 
   }
@@ -429,7 +429,7 @@ export class EegService extends EegBaseService {
     }).then(this.handleErrors).then(response => response.blob());
   }
 
-  async syncMeteringPointList(tenant: string): Promise<EegEnergyReport> {
+  async syncMeteringPointList(tenant: string): Promise<void> {
     const token = await this.lookupToken()
     return await fetch(`${API_API_SERVER}/eeg/sync/participants`, {
       method: 'POST',
@@ -438,7 +438,7 @@ export class EegService extends EegBaseService {
         'Accept': 'application/json'
       },
       // body: JSON.stringify(body)
-    }).then(this.handleErrors).then(res => res.json());
+    }).then(this.handleErrors).then(res => new Promise<void>((resolve) => resolve()));
   }
 
   async syncMeteringPoint(tenant: string, meters: {meter: string, direction: string}[], from: number, to: number): Promise<any> {
@@ -483,9 +483,9 @@ export class EegService extends EegBaseService {
     }).then(this.handleErrors).then(res => res.json());
   }
 
-  async registerMeteringPoint(tenant: string, participantId: string, meter: string, direction: string): Promise<EegEnergyReport> {
+  async registerMeteringPoint(tenant: string, participantId: string, meter: string, direction: string, mode: 'ONLINE' | 'OFFLINE', code?: string): Promise<EegEnergyReport> {
     const token = await this.lookupToken()
-    const body = {meteringPoint: meter, direction: direction}
+    const body = {meteringPoint: meter, direction: direction, activationCode: code, activationMode: mode}
     return await fetch(`${API_API_SERVER}/meteringpoint/${participantId}/register`, {
       method: 'POST',
       headers: {

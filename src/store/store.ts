@@ -1,5 +1,4 @@
 
-
 import * as eeg from './eeg';
 import * as participant from './participant';
 import * as rate from './rate';

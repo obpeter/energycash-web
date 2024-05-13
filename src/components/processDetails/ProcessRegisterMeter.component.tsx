@@ -14,11 +14,15 @@ import {BasicSelectComponent} from "../form/BasicSelect.component";
 import {JoinStrings} from "../../util/Helper.util";
 import {meteringDisplayName} from "../../util/FilterHelper";
 import {useLocale} from "../../store/hook/useLocale";
+import CheckboxComponent from "../form/Checkbox.component";
+import InputComponent from "../form/Input.component";
 
 interface ProcessValues {
   communityId: string | undefined
   participantId: string | undefined
   meteringPoint: string | undefined
+  activationMode: 'ONLINE' | 'OFFLINE'
+  activationCode: string | undefined
 }
 
 interface ProcessRegisterMeterComponentProps {
@@ -38,6 +42,8 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
     communityId: eeg.communityId,
     participantId: undefined,
     meteringPoint: undefined,
+    activationMode: 'ONLINE' as 'ONLINE' | 'OFFLINE',
+    activationCode: undefined,
   }
 
   const {t} = useLocale("common")
@@ -48,6 +54,7 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
   } = useForm<ProcessValues>({defaultValues: processValues})
   const [useableMeters, setUsableMeters] = useState<Metering[]>(meters)
   const [meteringPoint, participantId] = watch(['meteringPoint', 'participantId'])
+  const [offline, setOffline] = useState(false)
 
   useEffect(() => {
     if (meteringPoint) {
@@ -70,16 +77,20 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
   }, [participantId])
 
   const onRequest = (data: ProcessValues) => {
+    console.log("data", data, "participants", participants)
     if (data.meteringPoint) {
       const p = participants.find(p => p.meters.find(m => m.meteringPoint === data.meteringPoint))
       const meter = p?.meters.find(m => m.meteringPoint === data.meteringPoint)
       if (p && meter) {
-        Api.eegService.registerMeteringPoint(eeg.id.toUpperCase(), p.id, data.meteringPoint, meter.direction)
+        Api.eegService.registerMeteringPoint(eeg.id.toUpperCase(), p.id, data.meteringPoint, meter.direction, offline ? 'OFFLINE' : 'ONLINE', data.activationCode)
           .finally(() => {
             reset()
           })
-
+      } else {
+        console.log("p", p, "meter", meter, "data", data, "participants", participants)
       }
+    } else {
+      console.log("DATA:", data)
     }
   }
 
@@ -126,6 +137,10 @@ const ProcessRegisterMeterComponent: FC<ProcessRegisterMeterComponentProps> = ({
                                     }
                                   })} label={t("metering")} rules={{required: true}}/>
 
+            <CheckboxComponent label={"Offline Registrierung"} checked={offline} setChecked={setOffline}></CheckboxComponent>
+            { offline && 
+              <InputForm name="activationCode" control={control} label={"Aktivierungs-Code"} counter={true} maxlength={33}/>
+            }
             <IonItem lines="none" style={{zIndex: "0"}}>
               <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={!formState.isValid}>
                 {t("process.submit")}

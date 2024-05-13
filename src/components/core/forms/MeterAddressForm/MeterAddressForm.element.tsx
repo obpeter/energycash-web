@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from "react";
-import {useFormContext} from "react-hook-form";
+import {set, useFormContext} from "react-hook-form";
 import {Metering} from "../../../../models/meteringpoint.model";
 import {EegParticipant} from "../../../../models/members.model";
 import {IonList, IonListHeader} from "@ionic/react";
@@ -15,6 +15,7 @@ interface MeterAddressFormElementProps {
   isEditable?: boolean
   // showStatus?: boolean
   isOnline?: boolean
+  showActivationMode: boolean
   onChange?: (values: {name: string, value: any}[], event?: any) => void
 }
 
@@ -23,13 +24,16 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                                                                      isOnline,
                                                                      isEditable,
                                                                      onChange,
+                                                                     showActivationMode,
                                                                    }) => {
   const {control, watch, setValue, formState: {errors}} = useFormContext<Metering>()
   const [withOwner, setWithOwner] = useState(false);
+  // const [offline, setOffline] = useState(false);
   const {isAdmin} = useAccessGroups()
 
   // const isEditable = setValue !== undefined
   const currentMeterState = watch ? watch("status") : "NEW"
+  const offline = watch ? watch("activationMode") : 'ONLINE'
 
   const isTakeOverAddressEnabled = () => participant !== undefined && isEditable
   const disableAddressFields = isTakeOverAddressEnabled() && withOwner
@@ -37,6 +41,11 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
   useEffect(() => {
     setWithOwner(false)
   }, [participant])
+
+  const onSetOffline = (o: boolean) => {
+    // setOffline(o)
+    setValue("activationMode", o ? "OFFLINE" : "ONLINE")
+  }
 
   const takeOverAddress = (ok: boolean) => {
     if (isTakeOverAddressEnabled() && participant!.billingAddress) {
@@ -85,6 +94,14 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                  type="text" error={errors?.zip} disabled={disableAddressFields} onChangePartial={_onChange}/>
       <InputForm name={"city"} label="Ort" control={control} rules={{required: "Ortsangabe fehlt"}} type="text"
                  error={errors?.city} disabled={disableAddressFields} onChangePartial={_onChange}/>
+      {showActivationMode &&
+      <CheckboxComponent label="Offline Registrierung" setChecked={onSetOffline}
+                         checked={offline === 'OFFLINE'} style={{paddingTop: "0px"}}></CheckboxComponent>
+      }
+      { showActivationMode && offline === 'OFFLINE' &&
+          <InputForm name={"activationCode"} label="Activierungs-Code" control={control} rules={{required: "ActivierungsCode erforderlich"}} type="text"
+                     counter={true} maxlength={33} error={errors?.city} onChangePartial={_onChange}/>
+      }
       {isAdmin() && !isOnline &&
           <>
               <SelectForm control={control}

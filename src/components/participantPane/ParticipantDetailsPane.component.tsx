@@ -163,7 +163,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
     });
   };
 
-  function onWillDismiss(participant: EegParticipant, ev: CustomEvent<OverlayEventDetail<FormData>>) {
+  function onWillDismiss(participant: EegParticipant, meters: Metering[], ev: CustomEvent<OverlayEventDetail<FormData>>) {
 
     const uploadFiles = async (tenant: string, participantId: string, data?: FormData) => {
       if (data) {
@@ -177,7 +177,11 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
     if (ev.detail.role === 'confirm') {
       uploadFiles(tenant!.tenant, participant.id, ev.detail.data)
-        .then(() => dispatcher(confirmParticipant({tenant: tenant!.tenant, participantId: participant.id})).unwrap())
+        .then(() => {
+          console.log(meters)
+          return participant
+        })
+        .then(() => dispatcher(confirmParticipant({tenant: tenant!.tenant, participantId: participant.id, meters: meters.filter(m=>m.enabled)})).unwrap())
         .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
         .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
     }
@@ -256,6 +260,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
                 <div style={{color: "black"}}>
                   <AllowParticipantDialog trigger="open-participant-allow-dialog"
                                           participant={selectedParticipant}
+                                          meters = {selectedParticipant.meters.map(m => {return {...m, activationCode: '', activationMode:'ONLINE', enabled: true}})}
                                           onDismiss={onWillDismiss}/>
                   <IonCard color="warning-light">
                     <IonItem lines="none" color="warning-light">

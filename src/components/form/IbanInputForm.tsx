@@ -2,6 +2,7 @@ import React, {FC} from "react";
 import {useMaskito} from "@maskito/react";
 import InputForm, {PartialChangeFunction} from "./InputForm.component";
 import {Control, FieldError} from "react-hook-form";
+import {MaskitoOptions} from "@maskito/core";
 
 interface IbanInputFormProps<T extends object> {
   name: string
@@ -12,21 +13,27 @@ interface IbanInputFormProps<T extends object> {
 }
 
 export function IbanInputForm<T extends object>(props : IbanInputFormProps<T>) {
+  const digitsOnlyMask: MaskitoOptions = {
+    mask:  [
+      ...Array(2).fill(/[A-Z]/),
+      ...Array(2).fill(/\d/),
+      ' ',
+      ...Array(4).fill(/[A-Z0-9]/),
+      ' ',
+      ...Array(4).fill(/\d/),
+      ' ',
+      ...Array(4).fill(/\d/),
+      ' ',
+      ...Array(4).fill(/\d/),
+      ' ',
+      ...Array(4).fill(/\d/),
+      ' ',
+      ...Array(4).fill(/\d/),
+    ]
+  }
+
   const ibanMask = useMaskito({
-    options: {
-      mask: [
-        'A', 'T',
-        ...Array(2).fill(/\d/),
-        ' ',
-        ...Array(4).fill(/\d/),
-        ' ',
-        ...Array(4).fill(/\d/),
-        ' ',
-        ...Array(4).fill(/\d/),
-        ' ',
-        ...Array(4).fill(/\d/),
-      ],
-    },
+    options: digitsOnlyMask,
   });
 
   return (

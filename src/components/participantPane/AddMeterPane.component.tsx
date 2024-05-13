@@ -34,6 +34,7 @@ const AddMeterPaneComponent: FC = () => {
     gridOperatorName: gridOperatorName,
     gridOperatorId: gridOperatorId,
     participantState: {activeSince: new Date(Date.now()), inactiveSince: moment.utc([2999, 11, 31]).toDate()} as ParticipantState,
+    activationMode: 'ONLINE'
   } as Metering
 
   const formMethods = useForm<Metering>({mode: 'onBlur', defaultValues: meter});
@@ -70,7 +71,7 @@ const AddMeterPaneComponent: FC = () => {
           <EegPaneTemplate>
             <FormProvider {...formMethods}>
               <MeterFormElement rates={rates} participant={participant}/>
-              <MeterAddressFormElement participant={participant} isEditable={true} isOnline={isOnline}/>
+              <MeterAddressFormElement participant={participant} isEditable={true} isOnline={isOnline} showActivationMode={true}/>
             </FormProvider>
           </EegPaneTemplate>
         </form>
