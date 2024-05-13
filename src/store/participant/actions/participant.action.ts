@@ -125,9 +125,9 @@ export const removeMeteringPoint = createAsyncThunk(
 
 export const confirmParticipant = createAsyncThunk(
   `${featureKey}/participant/confirm`,
-  async (args: {tenant: string, participantId: string/*, data: FormData*/}) => {
-    const {tenant, participantId} = args
-    return await Api.eegService.confirmParticipant(tenant, participantId);
+  async (args: {tenant: string, participantId: string, meters: Metering[]}) => {
+    const {tenant, participantId, meters} = args
+    return await Api.eegService.confirmParticipant(tenant, participantId, meters);
   }
 )
 

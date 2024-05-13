@@ -101,10 +101,10 @@ class EegBaseService {
     if (!response.ok) {
       switch (response.status) {
         case 401:
-          await this.authService.login()
+          // await this.authService.logout()
           break
         default:
-          const errorBody = await response.json()
+          const errorBody = await response.json().catch(e => response.text())
           if (isErrorResponse(errorBody)) {
             throw new Error(determineErrTxt(new ErrorResponse(errorBody.error)));
           } else {

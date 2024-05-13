@@ -186,7 +186,7 @@ const ProcessHistoryComponent: FC<ProcessHistoryComponentProps> = ({eeg, edaProc
             case "ABLEHNUNG_CCMS":
               e.meteringPoint = e["message"]["responseData"].reduce((z: string, r: Record<string, any>) => r.meteringPoint ? r.meteringPoint : z, "-")
               e.meteringPoints = e["message"]["responseData"].map((m: Record<string, any>) => m.meteringPoint)
-              e.responseCode = e["message"].responseCode ? EdaResponseCode.getMessage(e["message"].responseCode[0]) : "-"
+              e.responseCode = e["message"].responseData ? e["message"].responseData[0].responseCode.map((c:number) => EdaResponseCode.getMessage(c)).join(", ") : "-"
               break;
             case "AUFHEBUNG_CCMS":
               e.meteringPoint = e["message"]["meter"].meteringPoint ? e["message"]["meter"].meteringPoint : "-"

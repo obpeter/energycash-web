@@ -270,7 +270,7 @@ const ParticipantPaneComponent: FC<ParticipantPaneProps> = (
   const errorToast = (message: string) => {
     toaster({
       message: message,
-      duration: 3500,
+      duration: 4500,
       position: "bottom",
       color: "danger",
     });

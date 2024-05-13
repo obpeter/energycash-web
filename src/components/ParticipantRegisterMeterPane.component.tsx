@@ -5,7 +5,7 @@ import {EegParticipant} from "../models/members.model";
 import MeterCardComponent from "./participantPane/MeterCard.component";
 import {useFieldArray, useFormContext} from "react-hook-form";
 import RegisterMeterPaneComponent from "./RegisterMeterPane.component";
-import {Metering} from "../models/meteringpoint.model";
+import { Metering } from "../models/meteringpoint.model";
 import {useEegArea, useGridOperator, useOnlineState} from "../store/hook/Eeg.provider";
 
 interface ParticipantRegisterMeterPaneComponentProps {

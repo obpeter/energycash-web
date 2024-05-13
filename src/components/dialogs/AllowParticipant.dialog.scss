@@ -1,6 +1,6 @@
 ion-modal#doc-upload-modal {
   --width: fit-content;
-  --max-width: 250px;
+  --max-width: 550px;
   --height: fit-content;
   --border-radius: 6px;
   --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
@@ -10,6 +10,11 @@ ion-modal#doc-upload-modal {
 
 ion-modal#doc-upload-modal h3 {
   margin: 20px 20px 10px 20px;
+}
+
+ion-modal#doc-upload-modal ion-radio::part(container) {
+  width: 15px;
+  height: 15px;
 }
 
 //ion-modal#doc-upload-modal ion-icon {

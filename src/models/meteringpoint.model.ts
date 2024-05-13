@@ -6,6 +6,14 @@ export interface ParticipantState {
 export type MeteringStatusType = "NEW" | "PENDING" | "APPROVED" | "ACTIVE" | "INACTIVE" | "REJECTED" | "REVOKED" | "INVALID"
 export type MeterDirectionType = "GENERATION" | "CONSUMPTION"
 
+// type MapMeterType<PropType> =
+//   PropType extends Metering ? Metering & ActivationProps : PropType;
+//
+// type MapParticipantObject<T> = {
+//   [PropertyKey in keyof T]:
+//   MapMeterType<T[PropertyKey]>;
+// }
+
 export interface Metering {
   meteringPoint: string;
   direction: MeterDirectionType;
@@ -29,7 +37,18 @@ export interface Metering {
   modifiedBy: string,
   participantState: ParticipantState,
   partFact: number,
+  activationCode?: string
+  activationMode: 'ONLINE' | 'OFFLINE'
+  enabled: boolean
 }
+
+/*
+export interface ActivationProps {
+  enabled: boolean
+  activationCode: string
+  activationMode: 'ONLINE' | 'OFFLINE'
+}
+*/
 
 //@TODO: Refactor diesen Type --> billing.model.ts (o.ä.)
 export interface ClearingPreviewRequest {

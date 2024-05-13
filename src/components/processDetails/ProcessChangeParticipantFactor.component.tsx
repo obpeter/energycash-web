@@ -93,7 +93,8 @@ const ProcessChangeParticipantFactorComponent: FC<ProcessChangeParticipantFactor
                                   options={useableMeters.map((p) => {
                                     return {value: p.meteringPoint, label: meteringDisplayName(p) + ' - ' + p.partFact + '%'}
                                   })} label={t("metering")} multiple={true} rules={{required: true}}/>
-            <InputForm name="partFact" label={t("process.partFact.label")} control={control} rules={{required: true}} type={"number"} pattern={"^([0-9]|[1-9][0-9]|100)$"} maxlength={3}/>
+            <InputForm name="partFact" label={t("process.partFact.label")}
+                       control={control} rules={{required: true}} type={"number"} pattern={"^([0-9]|[1-9][0-9]|100)$"} maxlength={3} isNumber={true}/>
             <IonItem lines="none" style={{zIndex: "0"}}>
               <IonButton slot="end" onClick={handleSubmit(onRequest)} disabled={(!formState.isValid)}>
                 Anfordern
