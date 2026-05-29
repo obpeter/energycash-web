@@ -32,7 +32,7 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
   const {isAdmin} = useAccessGroups()
 
   // const isEditable = setValue !== undefined
-  const currentMeterState = watch ? watch("status") : "NEW"
+  const currentMeterProcessState = watch ? watch("processState") : "NEW"
   const offline = watch ? watch("activationMode") : 'ONLINE'
 
   const isTakeOverAddressEnabled = () => participant !== undefined && isEditable
@@ -100,7 +100,7 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
       }
       { showActivationMode && offline === 'OFFLINE' &&
           <InputForm name={"activationCode"} label="Activierungs-Code" control={control} rules={{required: "ActivierungsCode erforderlich"}} type="text"
-                     counter={true} maxlength={33} error={errors?.city} onChangePartial={_onChange}/>
+                     counter={true} maxlength={35} error={errors?.activationCode} onChangePartial={_onChange}/>
       }
       {isAdmin() && !isOnline &&
           <>
@@ -114,13 +114,13 @@ const MeterAddressFormElement: FC<MeterAddressFormElementProps> = ({
                           label={"Status"}
                           onChangePartial={_onChange}
               />
-            {currentMeterState === "ACTIVE" &&
-                <DatePickerFormElement control={control} name={"participantState.activeSince"} label="Aktiv seit"
-                                       placeholder={"Datum"} error={errors?.registeredSince} onChangeDate={_onChange}/>
-
-              // <DatePickerCoreElement initialValue={watch("participantState.activeSince")} onChange={_onChange} name={"participantState.activeSince"} label={"Aktiv seit"}/>
-            }
           </>
+      }
+      {currentMeterProcessState === "ACTIVE" &&
+          <DatePickerFormElement control={control} name={"participantState.activeSince"} label="Aktiv seit"
+                                 placeholder={"Datum"} error={errors?.registeredSince} onChangeDate={_onChange}/>
+
+        // <DatePickerCoreElement initialValue={watch("participantState.activeSince")} onChange={_onChange} name={"participantState.activeSince"} label={"Aktiv seit"}/>
       }
     </IonList>
   )
