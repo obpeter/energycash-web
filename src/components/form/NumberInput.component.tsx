@@ -30,6 +30,7 @@ interface NumberInput {
   onKeyUp?: (e: KeyboardEvent<HTMLIonInputElement>) => void
   maxlength?: number
   maxValue?: number
+  helperText?: string
 }
 
 const NumberInput: FC<NumberInput> = ({
@@ -41,7 +42,8 @@ const NumberInput: FC<NumberInput> = ({
                                         maxValue,
                                         decimalScale,
                                         onKeyDown = noop,
-                                        onKeyUp = noop
+                                        onKeyUp = noop,
+                                        helperText,
                                       }) => {
 
   const [value, setValue] = useState<string>("");
@@ -50,7 +52,6 @@ const NumberInput: FC<NumberInput> = ({
 
 
   useEffect(() => {
-    console.log("NumberInput", name, value)
     setValue(initialValue ? formatValue(initialValue.toString()) : "")
   }, [initialValue]);
 
@@ -186,6 +187,7 @@ const NumberInput: FC<NumberInput> = ({
       // ref={inputRef}
               onIonChange={onChangeValue}
               onIonInput={(e) => handleValueChange(e as IonInputCustomEvent<HTMLInputElement>)}
+              helperText={helperText}
       // onKeyDown={_onKeyDown}
       // onKeyUp={_onKeyUp}
     >
@@ -203,13 +205,11 @@ const NumberInputForm = <T extends FieldValues>(props: NumberInputFormProps<T>) 
         rules={rules}
         render={({field, fieldState, formState}) => {
           const {onChange, value, name, ref} = field;
-          console.log("Input: ", name, value)
           return (
             <NumberInput onChange={onChange} name={name} label={label} placeholder={placeholder} initialValue={value || undefined}
-                         decimalScale={2}/>)
+                         decimalScale={2} helperText={fieldState.error?.message}/>)
         }}
       />
-      {/*</IonItem>*/}
       {error && <div className={"error-line"}>{error.message}</div>}
     </div>
   )

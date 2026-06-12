@@ -15,7 +15,7 @@ import {trashBin} from "ionicons/icons";
 import RateComponent from "./Rate.component";
 import {useAppDispatch, useAppSelector} from "../store";
 import {archiveRate, selectedRateSelector, selectRate} from "../store/rate";
-import {participantsSelector1} from "../store/participant";
+import {allParticipantsSelector} from "../store/participant";
 import {FormProvider, useForm} from "react-hook-form";
 import {useTenant} from "../store/hook/Eeg.provider";
 
@@ -39,7 +39,7 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
     return (selectedTariff && selectedTariff.id.length === 0) ? 'NEW' : undefined
   }
 
-  const participants = useAppSelector(participantsSelector1)
+  const participants = useAppSelector(allParticipantsSelector)
 
   const archiveTariff = () => {
     if (participants.filter(p => p.tariffId === selectedTariff!.id).length > 0) {
@@ -75,6 +75,10 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
     }
   }
 
+  const canSubmitted = (): boolean => {
+    return !(formMethods.formState.isDirty && formMethods.formState.isValid)
+  }
+
   if (selectedTariff) {
     return (
       <div className={"details-body"} style={{height: "100%", display: "flex", flexDirection: "column"}}>
@@ -94,15 +98,15 @@ const RateDetailPaneComponent: FC<RateDetailPaneComponentProps> = ({onSubmit, su
               <RateComponent rate={selectedTariff} onSubmit={onSubmit} submitId={submitId} mode={getMode()}/>
             </div>
           </div>
-        </FormProvider>
         <div>
           <IonFooter>
             <IonToolbar className={"ion-padding-horizontal"}>
               <IonButton fill="clear" slot="start" onClick={() => dispatcher(selectRate(undefined))}>Zurück</IonButton>
-              <IonButton form={submitId} type="submit" slot="end" disabled={!formMethods.formState.isDirty && formMethods.formState.isValid}>Änderungen speichern</IonButton>
+              <IonButton form={submitId} type="submit" slot="end" disabled={canSubmitted()}>Änderungen speichern</IonButton>
             </IonToolbar>
           </IonFooter>
         </div>
+        </FormProvider>
       </div>
     )
   }

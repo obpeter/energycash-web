@@ -22,6 +22,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/energystore': {
+        // target: 'http://localhost:9081',
         target: 'http://localhost:9081',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/energystore/, ''),

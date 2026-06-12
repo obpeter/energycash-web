@@ -21,28 +21,20 @@ export class EegService extends EegBaseService {
   public constructor(authService: AuthService) {
     super(authService);
   }
-  
+
   async fetchEeg(tenant: string, token?: string): Promise<Eeg> {
     if (!token) {
       token = await this.lookupToken()
     }
-    return await fetch(`${API_API_SERVER}/query`, {
-      method: 'POST',
+    return await fetch(`${API_API_SERVER}/eeg`, {
+      method: 'GET',
       headers: {
         ...this.getSecureHeaders(token, tenant),
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(eegGraphqlQuery)
-    }).then((res) => this.handleErrors(res)).then(async res => {
-      if (res.status === 200) {
-        const data = await res.json();
-        if (data.data.eeg) {
-          return data.data.eeg;
-        }
+        'Accept': 'application/json'
       }
-      throw new Error("E_1001")
-    });
+    }).then(this.handleErrors).then(res => res.json())
   }
+
 
   async updateEeg(tenant: string, eeg: Record<string, any>): Promise<Eeg> {
     const token = await this.lookupToken()
@@ -54,61 +46,6 @@ export class EegService extends EegBaseService {
       },
       body: JSON.stringify(eeg)
     }).then(this.handleErrors).then(res => res.json());
-  }
-
-  async fetchParicipants(tenant: string, token?: string, period?: SelectedPeriod): Promise<EegParticipant[]> {
-    if (!token) {
-      token = await this.lookupToken()
-    }
-    let url = "participant"
-    if (period) {
-      url += `?type=${period.type}&year=${period.year}&segment=${period.segment}`
-    }
-    return await fetch(`${API_API_SERVER}/${url}`, {
-      method: 'GET',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json'
-      }
-    }).then(this.handleErrors).then(res => res.json());
-  }
-
-  async createParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
-    const token = await this.lookupToken()
-    return await fetch(`${API_API_SERVER}/participant`, {
-      method: 'POST',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(participant)
-    }).then(this.handleErrors).then(res => res.json());
-  }
-
-  async updateParticipant(tenant: string, participant: EegParticipant): Promise<EegParticipant> {
-    const token = await this.lookupToken()
-    return await fetch(`${API_API_SERVER}/participant/${participant.id}`, {
-      method: 'PUT',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(participant)
-    }).then(this.handleErrors).then(res => res.json());
-  }
-
-  async confirmParticipant(tenant: string, pid: string, meters: Metering[]/*, data: FormData*/): Promise<EegParticipant> {
-    const token = await this.lookupToken()
-    return await fetch(`${API_API_SERVER}/participant/${pid}/confirm`, {
-      method: 'POST',
-      headers: {
-        ...this.getSecureHeaders(token, tenant),
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(meters)
-    }).then(this.handleErrors).then(res => res.json());
-
   }
 
   async fetchRates(tenant: string, token?: string): Promise<EegTariff[]> {
@@ -303,7 +240,19 @@ export class EegService extends EegBaseService {
       headers: {
         ...this.getSecureHeaders(token, tenant),
       },
-    }).then(this.handleErrors).then(res => this.handleDownload(res, billingRunId+".xlsx"));
+    }).then(this.handleErrors).then(res => this.handleDownload(res, billingRunId+".xlsx", tenant));
+  }
+
+  async exportBillingExcelForSepa(tenant: string, billingRunId : string, token? : string): Promise<Response> {
+    if (!token) {
+      token = await this.lookupToken()
+    }
+    return await fetch(`${BILLING_API_SERVER}/api/billingRuns/${billingRunId}/billingDocuments/xlsx`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then(this.handleErrors);
   }
 
   async billingRunSendmail(tenant: string, billingRunId : string, token? : string): Promise<boolean> {
@@ -543,6 +492,16 @@ export class EegService extends EegBaseService {
         ...this.getSecureHeaders(token, tenant),
       },
     }).then((res) => this.handleErrors(res)).then(res => res.json());
+  }
+
+  async getHistories1(tenant: string, protocols: Array<string>, beginTimestamp: number, endTimestamp: number): Promise<EdaHistories> {
+    const token = await this.lookupToken()
+    return await fetch(`${API_API_SERVER}/process/history?start=${beginTimestamp}&end=${endTimestamp}&protocol=${protocols.join(';')}&ps=0`, {
+      method: 'GET',
+      headers: {
+        ...this.getSecureHeaders(token, tenant),
+      },
+    }).then((res) => this.handleErrors(res)).then(res => res.json()).then(res => res.data);
   }
 
   async getGridOperators(tenant: string): Promise<Record<string, string>> {

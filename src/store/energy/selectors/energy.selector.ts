@@ -7,7 +7,7 @@ import {
   EnergyReport,
   EnergySeries,
   MeterEnergySeries,
-  ProducerReport
+  ProducerReport, SelectedPeriod
 } from "../../../models/energy.model";
 import {calc, splitDate} from "../../../util/Helper.util";
 import {Metering, MeteringEnergyGroupType} from "../../../models/meteringpoint.model";

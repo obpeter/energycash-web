@@ -24,7 +24,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
     participantId: "",
     meteringPoint: "",
     direction: "CONSUMPTION",
-    registeredSince: isOnline ? new Date() : new Date(2023, 0, 1, 0, 0, 0, 0),
+    registeredSince: isOnline ? new Date() : new Date(2024, 0, 1, 0, 0, 0, 0),
     gridOperatorName: gridOperatorName,
     gridOperatorId: gridOperatorId,
     partFact: 100,
@@ -40,7 +40,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
     remove(0)
   }, [remove])
 
- const meters = watch("meters")
+  const meters = watch("meters")
 
   const showMeter = (meter: Metering) => {
     setMeteringPoint(meter);
