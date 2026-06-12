@@ -1,13 +1,13 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC,  useState} from "react";
 import {EegParticipant} from "../../models/members.model";
 import cn from "classnames";
 
 import "./ParticipantDetailsPane.compoenent.css"
 import {
-  IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonContent, IonFooter,
+  IonButton, IonButtons, IonCard,
   IonIcon,
   IonItem,
-  IonLabel, IonPage,
+  IonLabel,
   IonTitle,
   IonToggle,
   IonToolbar, useIonAlert, useIonModal, useIonToast
@@ -17,36 +17,33 @@ import {
   documentTextOutline,
   logoEuro, moveOutline,
   person,
-  trashBin
 } from "ionicons/icons";
 import {eegExclamation, eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
 import {store, useAppDispatch, useAppSelector} from "../../store";
 import {Metering} from "../../models/meteringpoint.model";
-import MemberFormComponent from "../MemberForm.component";
-import MeterFormComponent from "./MeterForm.component";
+import MemberFormComponent from "../core/MemberForm.component";
+import MeterFormComponent from "../core/MeterForm.component";
 import {
   archiveParticipant,
-  confirmParticipant, moveMeteringPoint, participantsSelector1, removeMeteringPoint,
+  confirmParticipant, moveMeteringPoint, allParticipantsSelector, removeMeteringPoint,
   selectedMeterSelector,
-  selectedParticipantSelector, selectParticipantById,
+  selectedParticipantSelector,
   updateParticipant, updateParticipantPartial
 } from "../../store/participant";
-import {formatMeteringPointString, GetWeek, JoinStrings} from "../../util/Helper.util";
-import {activeTenant, selectedTenant} from "../../store/eeg";
+import {formatMeteringPointString} from "../../util/Helper.util";
 import AllowParticipantDialog from "../dialogs/AllowParticipant.dialog";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import InvoiceDocumentComponent from "./InvoiceDocument.component";
 import ContractDocumentComponent from "./ContractDocument.component";
 import {ratesSelector} from "../../store/rate";
-import {meteringInterReportSelectorV2, meteringReportSelectorV2, selectedPeriodSelector} from "../../store/energy";
+import {meteringInterReportSelectorV2, selectedPeriodSelector} from "../../store/energy";
 import MeterChartComponent from "./MeterChart.component";
 import {Api} from "../../service";
 import {useLocale} from "../../store/hook/useLocale";
 import {useAccessGroups, useTenant} from "../../store/hook/Eeg.provider";
-import {BasicSelectComponent} from "../form/BasicSelect.component";
-import {useForm} from "react-hook-form";
 import {useMoveMeteringPointHook} from "../../store/hook/MoveMeteringPoint.hook";
 import moment from "moment";
+import {useDeleteParticipantMutation} from "../../store/participant/api";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 
@@ -102,8 +99,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const {isAdmin} = useAccessGroups()
   // const [moveMeterModal] = useIonModal(MoveParticipantModel, {meter: selectedMeter, participants: participantsSelector1(store.getState())});
   const {showMoveMeteringModal} = useMoveMeteringPointHook(selectedMeter!,
-    participantsSelector1(store.getState()), (name: string, value: string, event?: any) => {
-    console.log("meter", value)
+    allParticipantsSelector(store.getState()), (name: string, value: string, event?: any) => {
       dispatcher(moveMeteringPoint({tenant: tenant.tenant, sParticipantId: selectedParticipant!.id, dParticipantId: value, meter: selectedMeter!}))
     });
 
@@ -119,6 +115,8 @@ const ParticipantDetailsPaneComponent: FC = () => {
 
   const meterInvalidCodes = [56, 57, 76, 104, 156, 157, 158, 159, 172, 173, 177, 181, 184, 185, 196]
 
+  const [deleteParticipant] = useDeleteParticipantMutation()
+
   const onUpdateParticipant = (participant: EegParticipant) => {
     dispatcher(updateParticipant({
       tenant: tenant!.tenant,
@@ -127,12 +125,13 @@ const ParticipantDetailsPaneComponent: FC = () => {
   }
 
   const onUpdateParticipantPartial = (participantId: string, value: Record<string, any>) => {
+    console.log("Participant Update Participant Partial", value)
     dispatcher(updateParticipantPartial({
       tenant: tenant!.tenant,
       participantId: participantId,
       value: {path: Object.keys(value)[0], value: Object.values(value)[0]}
     })).unwrap()
-      .then(() => console.log("Participant Updated"))
+      // .then(() => console.log("Participant Updated"))
       .catch((e) => console.error("Error by updating participant: ", e))
   }
 
@@ -180,7 +179,6 @@ const ParticipantDetailsPaneComponent: FC = () => {
     if (ev.detail.role === 'confirm') {
       uploadFiles(tenant!.tenant, participant.id, ev.detail.data)
         .then(() => {
-          console.log(meters)
           return participant
         })
         .then(() => dispatcher(confirmParticipant(
@@ -285,7 +283,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
               <IonIcon icon={eegSandClass} slot="start"/>
               <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
             </IonItem>
-            {selectedMeter.processState === "INVALID" &&
+            {(selectedMeter.processState === "INVALID" && selectedMeter.status === "INIT") &&
                 <IonItem>
                     <IonButton color="warning" slot="end" size="small" fill="outline"
                                onClick={() => onRemoveMeteringPoint()}>Löschen</IonButton>
@@ -326,13 +324,13 @@ const ParticipantDetailsPaneComponent: FC = () => {
                   <IonCard color="warning-light">
                     <IonItem lines="none" color="warning-light">
                       <IonIcon icon={eegStar} slot="start"/>
-                      <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG
-                        aufnehmen?</IonLabel>
+                      <IonLabel>Möchtest du {selectedParticipant.lastname} in deine EEG aufnehmen?</IonLabel>
                     </IonItem>
-                    <IonItem lines="none" color="warning-light">
+                    <IonItem lines="none" color="warning-light" className="ion-align-items-baseline">
+                      <IonButton slot="end" color="warning-light" onClick={() => deleteParticipant({participantId: selectedParticipant.id})}
+                                 size="small">Nein, Löschen</IonButton>
                       <IonButton id="open-participant-allow-dialog" slot="end" color="warning"
-                                 size="default">Ja,
-                        Zulassen</IonButton>
+                                 size="default">Ja, Zulassen</IonButton>
                     </IonItem>
                   </IonCard>
                 </div>) : (<></>)}

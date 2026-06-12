@@ -1,15 +1,10 @@
-import ParticipantPaneComponent from "../../../components/participantPane/ParticipantPane.component";
-import {render} from "@testing-library/react";
-import {renderWithProviders} from "../../test-utils";
-import React from "react";
 import {AccountInfo, Address, Contact, Optionals} from "../../../models/eeg.model";
 import {Metering} from "../../../models/meteringpoint.model";
 import {buildAllocationMapFromSelected} from "../../../components/participantPane/ParticipantPane.functions";
-import {EegParticipant} from "../../../models/members.model"; // ES6
+import {EegParticipant} from "../../../models/members.model";
 
 describe("<ParticipantPane/> Functions", () => {
   beforeAll(() => {
-
   })
 
   it("allocate invoice member and metering points", async () => {
@@ -46,7 +41,7 @@ describe("<ParticipantPane/> Functions", () => {
     const checkedParticipants = {"1234567890": true}
     const meterGroup = {"AT0000000000000000000000000000001": 10, "AT0000000000000000000000000000002": 0}
 
-    const r = buildAllocationMapFromSelected(participants, checkedParticipants, meterGroup)
+    const r = buildAllocationMapFromSelected(participants, checkedParticipants)
     expect(r.length).toEqual(1)
     expect(r).toEqual([{meteringPoint: 'AT0000000000000000000000000000001', allocationKWh: 10}])
   });

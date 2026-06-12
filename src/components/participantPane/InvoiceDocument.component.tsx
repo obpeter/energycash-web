@@ -65,7 +65,7 @@ const InvoiceDocumentComponent: FC<{tenant: string, participant: EegParticipant}
       default:
         return (
           invoiceDocs.filter(d => search(d.name)).map((d, i) => (
-            <InvoiceDocumentItem tenant={tenant} item={d} />
+            <InvoiceDocumentItem key={i+"_invoice_document"} tenant={tenant} item={d} />
           ))
         )
     }
