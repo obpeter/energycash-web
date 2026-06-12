@@ -1,28 +1,16 @@
 import {
-  createAnimation,
-  IonAvatar,
-  IonButton,
-  IonButtons,
-  IonChip,
-  IonContent,
-  IonFooter,
-  IonHeader,
+  createAnimation, IonAvatar, IonButton,
+  IonButtons, IonChip,
+  IonContent, IonFooter, IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
   IonList,
   IonMenu,
-  IonMenuToggle,
-  IonModal,
-  IonPopover,
-  IonSelect,
-  IonSelectOption,
+  IonMenuToggle, IonModal, IonPopover, IonSelect, IonSelectOption,
   IonTitle,
-  IonToolbar,
-  SelectCustomEvent,
-  useIonPopover,
-  SelectChangeEventDetail,
-} from "@ionic/react";
+  IonToolbar, SelectCustomEvent, useIonPopover,
+} from '@ionic/react';
 
 import {useLocation} from 'react-router-dom';
 import {
@@ -32,32 +20,41 @@ import {
 import './Menu.css';
 import React, {FC, useEffect, useRef, useState} from "react";
 import {eegAvatar, eegChartBubble, eegChatIcon, eegProcess} from "../eegIcons";
-import {useAppDispatch, useAppSelector} from "../store";
-import {eegSelector,selectedTenant, selectTenant, updateEegModel} from "../store/eeg";
-import {
-  useAccessGroups,
-  useTenant,
-  useTenantSwitch,
-} from "../store/hook/Eeg.provider";
-import { useTenants } from "../store/hook/AuthProvider";
+import {useAppSelector} from "../store";
+import {eegSelector} from "../store/eeg";
+import {useAccessGroups, useTenant, useTenantDescription, useTenantSwitch} from "../store/hook/Eeg.provider";
 import {useUser} from "../store/hook/AuthProvider";
 import {AuthService} from "../service/auth.service";
 import {User} from "oidc-client-ts";
 import {useAuth} from "react-oidc-context";
 import {useLocale} from "../store/hook/useLocale";
-import { useForm } from 'react-hook-form';
-import { AccountInfo, Address, Contact, Eeg, Optionals } from '../models/eeg.model';
-import { IonSelectCustomEvent } from "@ionic/core/dist/types/components";
 
 // const UserDetailPopover = (logout: () => Promise<void>, user: User) =>
 const UserDetailPopover:FC<{authSvc: AuthService | undefined}> = ({authSvc}) => {
   const {t} = useLocale("common")
   const [user, setUser] = useState<User|null>()
+  const [sortedTenants, setSortedTenants] = useState<{tenant: string, name: string}[] | undefined>(undefined)
+  const tenants = useTenantDescription()
+  const tenant = useTenant()
+  const switchTenant = useTenantSwitch()
+
   useEffect(() => {
     if (authSvc) {
       authSvc?.getUser().then(u => setUser(u))
     }
   }, [authSvc]);
+
+  useEffect(() => {
+    if (tenants) {
+      setSortedTenants([...tenants].sort((a, b) => a.tenant.localeCompare(b.tenant)))
+    }
+  }, [tenants])
+
+  const onSwitchTenant = (e: SelectCustomEvent<string>) => {
+    const tenant = e.detail.value;
+    switchTenant(tenant)
+  }
+
   return (
     <IonContent className="ion-padding">
       <IonItem>
@@ -68,6 +65,19 @@ const UserDetailPopover:FC<{authSvc: AuthService | undefined}> = ({authSvc}) => 
         </IonAvatar>
         <IonLabel style={{fontSize: "14px"}}>{user?.profile.email}</IonLabel>
       </IonToolbar>
+        </div>
+      </IonItem>
+      <IonItem lines="none">
+        <div style={{padding:'10px', width:"100%"}}>
+          <IonSelect fill="outline" label="Auswahl Gemeinschaft" labelPlacement={"floating"} className="select-box"
+                     value={tenant.tenant}
+                     onIonChange={onSwitchTenant}
+          >
+            {sortedTenants && sortedTenants.map((o, idx) => (
+                <IonSelectOption key={idx} value={o.tenant}>{o.tenant}-{o.name}</IonSelectOption>
+              )
+            )}
+          </IonSelect>
         </div>
       </IonItem>
       <div style={{marginTop: "16px"}}>
@@ -120,7 +130,7 @@ const Menu: FC = () => {
       mdIcon: eegChatIcon
     },
     {
-      title: t("Stammdaten"),
+      title: eeg ? eeg.name : t("menu.eeg_name"),
       url: '/page/eeg',
       iosIcon: newspaper,
       mdIcon: newspaper
@@ -158,71 +168,6 @@ const Menu: FC = () => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////
   // TEST
   const modal = useRef<HTMLIonModalElement>(null);
-  
-const { tenant } = useTenant();
-const dispatcher = useAppDispatch();
-
-const switchTenant = useTenantSwitch();
-
-const {
-  handleSubmit,
-  setValue,
-  reset,
-  control,
-  formState: { errors, isDirty, dirtyFields },
-} = useForm({
-  defaultValues: eeg,
-  values: eeg,
-  mode: "all",
-});
-const [tenantsState, setTenantsState] = useState<string[]>([]);
-const tenants = useTenants();
-
-useEffect(() => {
-  // setTenantState(tenant);
-  setTenantsState(
-    tenants.map((t) => t.toUpperCase()).sort((a, b) => a.localeCompare(b))
-  );
-}, [tenants]);
-
-const EMPTY_EEG_ENTITY = {
-  communityId: "", rcNumber: "", name: "",
-  legal: "", salesTax: "", taxNumber: "", vatNumber: "",
-  businessNr: "", settlement: "", description: "", gridOperator: "", operatorName: "",
-  settlementInterval: 'MONTHLY', allocationMode: "DYNAMIC", area: "LOCAL",
-  address: {city: "", type: "BILLING", street: "", streetNumber: "", zip: ""} as Address,
-  contact: {email: "", phone: ""} as Contact,
-  accountInfo: {bankName: "", iban: "", owner: "", sepa: false} as AccountInfo,
-  optionals: {website: ""} as Optionals,
-  online: false,
-} as Eeg
-
-useEffect(() => {
-  if (!eeg) {
-    reset(EMPTY_EEG_ENTITY, { keepDefaultValues: true });
-  } else {
-    reset(eeg);
-  }
-}, [eeg]);
-
-const onSwitchTenant = (e: SelectCustomEvent<string>) => {
-  const tenant = e.detail.value;
-  switchTenant(tenant);
-};
-
-const onChangeField = (mapper: string) => (name: string, value: any) => {
-  dispatcher(
-    updateEegModel({
-      tenant,
-      eeg: { [mapper]: value },
-    })
-  );
-};
-
-const onChangeValue =
-  (property: string) => (e: IonSelectCustomEvent<SelectChangeEventDetail>) => {
-    dispatcher(updateEegModel({ tenant, eeg: { [property]: e.detail.value } }));
-  };
 
   function dismiss() {
     modal.current?.dismiss();
@@ -257,118 +202,47 @@ const onChangeValue =
     <IonMenu contentId="main" type="overlay">
       <IonHeader>
         <IonToolbar color="primary">
-          <IonTitle style={{ paddingLeft: "20px", color: "#79DFB4",paddingTop : "20px" }}>
-            {eeg?.name}
-          </IonTitle>
-
+          <IonTitle>EEG <span style={{color: "#79DFB4"}}>Faktura</span></IonTitle>
           <IonChip slot="end" onClick={openPopover}>
             <IonAvatar>
-              <img
-                alt="Silhouette of a person's head"
-                src="/assets/icon/avatar.svg"
-              />
+              <img alt="Silhouette of a person's head" src="/assets/icon/avatar.svg" />
               {/*<IonIcon icon={eegAvatar} size="large"/>*/}
             </IonAvatar>
-            <IonLabel style={{ color: "white" }}>...</IonLabel>
+            <IonLabel style={{color: "white"}}>...</IonLabel>
           </IonChip>
-
-          <IonList className="select-box" lines="none">
-            <IonItem lines="none">
-              <IonSelect
-                fill="outline"
-                value={tenant}
-                onIonChange={onSwitchTenant}
-              >
-                {tenantsState &&
-                  tenantsState.map((o, idx) => (
-                    <IonSelectOption key={idx} value={o}>
-                      {o}
-                    </IonSelectOption>
-                  ))}
-              </IonSelect>
-            </IonItem>
-          </IonList>
         </IonToolbar>
       </IonHeader>
-      <IonPopover
-        ref={popover}
-        isOpen={popoverOpen}
-        onDidDismiss={() => setPopoverOpen(false)}
-        side="bottom"
-        alignment="end"
-        size="auto"
-        style={{ "--width": "300px" }}
-      >
+      <IonPopover className="user-popup-menu" ref={popover} isOpen={popoverOpen} onDidDismiss={() => setPopoverOpen(false)} side="bottom" alignment="end" size="auto" dismissOnSelect={true} reference="trigger">
         <UserDetailPopover authSvc={authSvr} />
       </IonPopover>
       <IonContent>
-        <IonItem
-          button
-          lines="full"
-          routerLink={"/page/notifications"}
-          routerDirection="none"
-        >
-          <IonIcon
-            aria-hidden="true"
-            slot="start"
-            ios={eegChartBubble}
-            md={eegChartBubble}
-          />
+        <IonItem button lines="full" routerLink={"/page/notifications"} routerDirection="none">
+          <IonIcon aria-hidden="true" slot="start" ios={eegChartBubble} md={eegChartBubble}/>
           <IonLabel>Messages</IonLabel>
         </IonItem>
         <IonList id="inbox-list">
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
-                <IonItem
-                  className={
-                    location.pathname === appPage.url ? "selected" : ""
-                  }
-                  routerLink={appPage.url}
-                  routerDirection="none"
-                  lines="none"
-                  detail={false}
-                >
-                  <IonIcon
-                    aria-hidden="true"
-                    slot="start"
-                    ios={appPage.iosIcon}
-                    md={appPage.mdIcon}
-                  />
+                <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url}
+                         routerDirection="none" lines="none" detail={false}>
+                  <IonIcon aria-hidden="true" slot="start" ios={appPage.iosIcon} md={appPage.mdIcon}/>
                   <IonLabel>{appPage.title}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             );
           })}
-          {isAdmin() &&
-            adminPages
-              .filter((p) => !(p.forOnline && p.forOnline !== eeg?.online))
-              .map((adminPage, adminIdx) => {
-                return (
-                  <IonMenuToggle
-                    key={appPages.length + adminIdx}
-                    autoHide={false}
-                  >
-                    <IonItem
-                      className={
-                        location.pathname === adminPage.url ? "selected" : ""
-                      }
-                      routerLink={adminPage.url}
-                      routerDirection="none"
-                      lines="none"
-                      detail={false}
-                    >
-                      <IonIcon
-                        aria-hidden="true"
-                        slot="start"
-                        ios={adminPage.iosIcon}
-                        md={adminPage.mdIcon}
-                      />
-                      <IonLabel>{adminPage.title}</IonLabel>
-                    </IonItem>
-                  </IonMenuToggle>
-                );
-              })}
+          {isAdmin() && adminPages.filter(p => !(p.forOnline && p.forOnline !== eeg?.online)).map((adminPage, adminIdx) => {
+            return (
+              <IonMenuToggle key={appPages.length + adminIdx} autoHide={false}>
+                <IonItem className={location.pathname === adminPage.url ? 'selected' : ''} routerLink={adminPage.url}
+                         routerDirection="none" lines="none" detail={false}>
+                  <IonIcon aria-hidden="true" slot="start" ios={adminPage.iosIcon} md={adminPage.mdIcon}/>
+                  <IonLabel>{adminPage.title}</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+            )
+          })}
         </IonList>
 
         {/*<IonList id="labels-list">*/}
@@ -383,18 +257,9 @@ const onChangeValue =
       </IonContent>
       <IonFooter>
         <IonMenuToggle autoHide={false}>
-          <IonItem
-            className={location.pathname === "/pages/info" ? "selected" : ""}
-            id={"open-modal"}
-            lines="none"
-            detail={false}
-          >
-            <IonIcon
-              aria-hidden="true"
-              slot="start"
-              ios={informationCircle}
-              md={informationCircle}
-            />
+          <IonItem className={location.pathname === "/pages/info" ? 'selected' : ''} id={"open-modal"} lines="none"
+                   detail={false}>
+            <IonIcon aria-hidden="true" slot="start" ios={informationCircle} md={informationCircle}/>
             <IonLabel>{"Info"}</IonLabel>
           </IonItem>
         </IonMenuToggle>
@@ -412,53 +277,34 @@ const onChangeValue =
                 <IonButton onClick={() => dismiss()}>Close</IonButton>
               </IonButtons>
             </IonToolbar>
-            <div style={{ padding: "25px", fontSize: "14px" }}>
-              <img
-                alt="vfeeg"
-                src="/assets/vfeeg-image.png"
-                style={{ width: "150px", background: "rgb(16, 57, 49)" }}
-              />
+            <div style={{padding: "25px", fontSize:"14px"}}>
+              <img alt="vfeeg" src="/assets/vfeeg-image.png"
+                   style={{width: "150px", background: "rgb(16, 57, 49)"}}/>
               <p>Verein zur Förderung von Erneuerbaren Energiegemeinschaften</p>
               <p>ZVR-Zahl 1528480260</p>
               <p>Obmensch: Harald Geissler</p>
               <p>Anschrift: Fellingerstraße 9, 4730 Waizenkirchen</p>
             </div>
             <div>
-              <img src="/assets/leader-image-v1.png" />
-              <div style={{ padding: "10px" }}>
+              <img src="/assets/leader-image-v1.png"/>
+              <div style={{padding: "10px"}}>
                 <div>
-                  <a
-                    href="https://ec.europa.eu/info/departments/agriculture-and-rural-development_de"
-                    style={{ fontSize: "12px" }}
-                  >
-                    https://ec.europa.eu/info/departments/agriculture-and-rural-development_de
-                  </a>
+                <a href="https://ec.europa.eu/info/departments/agriculture-and-rural-development_de"
+                   style={{fontSize: "12px"}}>https://ec.europa.eu/info/departments/agriculture-and-rural-development_de</a>
                 </div>
                 <div>
-                  <a href="https://www.bml.gv.at/" style={{ fontSize: "12px" }}>
-                    https://www.bml.gv.at/
-                  </a>
+                <a href="https://www.bml.gv.at/" style={{fontSize: "12px"}}>https://www.bml.gv.at/</a>
                 </div>
                 <div>
-                  <a
-                    href="https://www.land-oberoesterreich.gv.at/"
-                    style={{ fontSize: "12px" }}
-                  >
-                    https://www.land-oberoesterreich.gv.at/
-                  </a>
+                <a href="https://www.land-oberoesterreich.gv.at/"
+                   style={{fontSize: "12px"}}>https://www.land-oberoesterreich.gv.at/</a>
                 </div>
               </div>
             </div>
           </IonContent>
           <IonFooter color="eeg">
-            <IonItem
-              lines="none"
-              style={{ fontSize: "12px", textAlign: "center" }}
-            >
-              <IonLabel>
-                eegFaktura ist eine freie und quelloffene Software und steht
-                unter der AGPL
-              </IonLabel>
+            <IonItem lines="none" style={{fontSize: "12px", textAlign: "center"}}>
+              <IonLabel>eegFaktura ist eine freie und quelloffene Software und steht unter der AGPL</IonLabel>
             </IonItem>
           </IonFooter>
         </IonModal>

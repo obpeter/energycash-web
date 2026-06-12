@@ -7,6 +7,8 @@
   "gridOperator_name": "Netzbetreiber Name",
   "participant": "Mitglied",
   "participant-nr": "Mitglieds-Nr",
+  "participant_active-since": "Aktiv seit",
+  "participant_active-for": "Aktiv am",
   "participant-title_before": "Titel (Vor)",
   "participant-title_after": "Titel (Nach)",
   "participant-title_company": "Firma",
@@ -25,16 +27,22 @@
   "equipmentNumber_label": "Anlagen-Nr.",
   "equipmentName_label": "Anlagename",
   "participantFee": "Mitgliedbeitrag in € (je Abrechnungsintervall, netto)",
+  "participantFee_card": "Mitgliedbeitrag",
   "vatSupplementaryText": "Zusatztext für Umsatzsteuer",
   "discount": "Rabatt in %",
+  "discount_card": "Rabatt",
   "baseFee": "Pauschalbetrag in € (je Abrechnungsintervall, netto)",
   "centPerKWh": "Arbeitspreis in ct/kWh (netto)",
+  "centPerKWh_card": "Cent pro kWh",
   "freeKWh": "Kostenlose Energie in kWh (je Abrechnungsintervall)",
+  "freeKWh_card": "Inklusive kWh",
   "useMeteringPointFee": "Zählpunkt Gebühr einheben?",
   "meteringPointFee": "Zählpunktgebühr in €",
+  "meteringPointVat": "Ust. für Zählpunktgebühr in %",
   "meteringPointFee_card": "Zählpunktgebühr",
   "useVat": "Umsatzsteuer anführen",
   "vatInPercent": "Umsatzsteuer in %",
+  "vatInPercent_card": "Umsatzsteuer",
   "consumer": "Verbraucher",
   "producer": "Erzeuger",
   "city": "Ort",
@@ -46,12 +54,19 @@
   "account-owner": "Kontoinhaber",
   "participant-since": "Mitglied seit ...",
   "date": "Datum",
+  "phone": "Telefon",
+  "website": "Webseite",
   "warnings": {
     "email_missing": "Email Adresse fehlt!",
     "email_wrong": "Email Adresse ist nicht valide!",
     "firstname_missing": "Vorname fehlt!",
     "lastname_missing": "Nachname fehlt!",
-    "company-name_missing": "Firmenname fehlt!"
+    "company-name_missing": "Firmenname fehlt!",
+    "city_missing": "Ort fehlt!",
+    "zip_missing": "PLZ fehlt!",
+    "street_missing": "Straße fehlt!",
+    "street-number_missing": "Hausnummer fehlt!",
+    "account-owner_missing": "Kontoinhaber fehlt!"
   },
   "alerts": {
     "changeDirection_0": "Energierichtung zu einen $t(producer) ändern? Es gilt zu beachten, dass diese Änderung nicht mit dem Netzbetreiber kommuniziert wird. Die Änderung wird nur in EEGFaktura vollzogen und keine Auswirkung beim Netzbetreiber!",
@@ -102,6 +117,9 @@
     "CR_MSG": "Versenden der Energiedaten",
     "CM_REV_IMP": "Datenfreigabe-Aufhebung"
   },
+  "headers": {
+    "bank-data": "Bankdaten"
+  },
   "menu": {
     "changePassword": "Passwort ändern",
     "logout": "Abmelden",
@@ -115,6 +133,7 @@
     "status_code_56": "Zählpunkt nicht gefunden",
     "status_code_57": "Zählpunkt nicht versorgt",
     "status_code_76": "Ungültige Anforderungsdaten",
+    "status_code_82": "Prozessdatum falsch",
     "status_code_104": "Falsche Energierichtung",
     "status_code_156": "ZP bereits zugeordnet",
     "status_code_157": "ZP bereits einem Betreiber zugeordnet",
@@ -123,9 +142,12 @@
     "status_code_172": "Kunde hat Datenfreigabe abgelehnt",
     "status_code_173": "Kunde hat auf Datenfreigabe nicht reagiert (Timeout)",
     "status_code_177": "Keine Datenfreigabe vorhanden",
+    "status_code_180": "ConsentID abgelaufen",
     "status_code_181": "Gemeinschafts-ID nicht vorhanden",
     "status_code_184": "Kunde hat optiert",
     "status_code_185": "Zählpunkt befindet sich nicht im Bereich der Energiegemeinschaft",
+    "status_code_187": "ConsentID und Zählpunkt passen nicht zusammen",
+    "status_code_189": "Zählpunkt ist der Gemeinschafts-ID nicht zugeordnet",
     "status_code_196": "Teilnahme-Limit wird überschritten",
     "status_text_NEW": "Antwort des Netzbetreibers noch ausstehend.",
     "status_text_INIT": "Antwort des Netzbetreibers noch ausstehend.",
@@ -133,6 +155,13 @@
     "status_text_APPROVED": "Abschluss Meldung von Netzbetreiber noch ausstehend.",
     "status_text_REJECTED": "Zählpunkt wurde vom Netzbetreiber abgewiesen.",
     "status_text_REVOKED": "Zählpunkt wurde vom Netzbetreiber aufgehoben.",
-    "status_text_INVALID": "Zählpunkt wurde vom Netzbetreiber nicht angenommen."
+    "status_text_INVALID": "Zählpunkt wurde vom Netzbetreiber nicht angenommen.",
+    "status_text_INACTIVE": "Zählpunkt INAKTIV."
+  },
+  "meterlist": {
+    "filter_text_rejected": "Abgewiesen",
+    "filter_text_init": "Ausstehend",
+    "filter_text_invalid": "Aufgehoben",
+    "filter_text_revoked": "Abgelehnt"
   }
 }

@@ -19,7 +19,7 @@ import {
   person,
   trashBin
 } from "ionicons/icons";
-import {eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
+import {eegExclamation, eegPlug, eegSandClass, eegShieldCrown, eegSolar, eegStar} from "../../eegIcons";
 import {store, useAppDispatch, useAppSelector} from "../../store";
 import {Metering} from "../../models/meteringpoint.model";
 import MemberFormComponent from "../MemberForm.component";
@@ -46,6 +46,7 @@ import {useAccessGroups, useTenant} from "../../store/hook/Eeg.provider";
 import {BasicSelectComponent} from "../form/BasicSelect.component";
 import {useForm} from "react-hook-form";
 import {useMoveMeteringPointHook} from "../../store/hook/MoveMeteringPoint.hook";
+import moment from "moment";
 
 type DynamicComponentKey = "memberForm" | "meterForm" | "documentForm" | "invoiceForm" | "participantDocumentForm"
 
@@ -96,7 +97,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const activePeriod = useAppSelector(selectedPeriodSelector);
   const report = useAppSelector(meteringInterReportSelectorV2(selectedParticipant?.id, selectedMeter?.meteringPoint))
 
-  const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("memberForm")
+  const [activeMenu, setActiveMenu] = useState<DynamicComponentKey>("meterForm")
 
   const {isAdmin} = useAccessGroups()
   // const [moveMeterModal] = useIonModal(MoveParticipantModel, {meter: selectedMeter, participants: participantsSelector1(store.getState())});
@@ -109,9 +110,10 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const [toaster] = useIonToast();
   const [participantAlert] = useIonAlert();
 
-  const isMeterNew = () => selectedMeter?.status === 'NEW';
-  const isMeterActive = () => selectedMeter?.status === "ACTIVE" || selectedMeter?.status === "INACTIVE"
-  const isMeterPending = () => selectedMeter?.status === "PENDING"
+  const isMeterNew = () => selectedMeter?.processState === 'NEW';
+  const isMeterActive = () => selectedMeter?.processState === "ACTIVE" || selectedMeter?.processState === "INACTIVE"
+  const isMeterInactive = () => selectedMeter?.processState !== "ACTIVE"
+  const isMeterPending = () => selectedMeter?.processState === "PENDING"
 
   const isGenerator = () => selectedMeter?.direction === 'GENERATION';
 
@@ -181,7 +183,11 @@ const ParticipantDetailsPaneComponent: FC = () => {
           console.log(meters)
           return participant
         })
-        .then(() => dispatcher(confirmParticipant({tenant: tenant!.tenant, participantId: participant.id, meters: meters.filter(m=>m.enabled)})).unwrap())
+        .then(() => dispatcher(confirmParticipant(
+          {tenant: tenant!.tenant,
+            participantId: participant.id,
+            meters: meters.filter(m=>m.enabled)
+          })).unwrap())
         .then((value) => presentToast(`${value.firstname} ist nun Mitglied deiner EEG. Ein Infomail wurde an ${value.contact.email} gesendet.`))
         .catch(() => presentToast('Mitglied konnte nicht aktiviert werden.'))
     }
@@ -190,8 +196,32 @@ const ParticipantDetailsPaneComponent: FC = () => {
   const meterStatusText = (meter: Metering) => {
     return (
       <div>
-        <span>{t(`meter.status_text_${meter.status}`)}</span>
+        <span>{t(`meter.status_text_${meter.processState}`)}</span>
         {hasStatusCode(meter) && <span> <strong>{t(`meter.status_code_${meter.statusCode}`)}</strong></span>}
+      </div>
+    )
+  }
+
+  const meterInvalidStatusText = (meter: Metering) => {
+
+    const inaktiveMsg = () => {
+      const diff = moment(meter.participantState.inactiveSince).diff(moment(), "days")
+      if (diff >= 0) {
+        return (
+          <span>Zählpunkt inaktive am <strong>{moment(meter.participantState.inactiveSince).format("DD-MM-YYYY")}</strong></span>
+        )
+      }
+      return (
+        <span>Zählpunkt inaktive seit <strong>{moment(meter.participantState.inactiveSince).format("DD-MM-YYYY")}</strong></span>
+      )
+    }
+
+    return (
+      <div>
+        {/*<p>*/}
+        {/*  <span>{t(`meter.status_text_${meter.status}`)}</span>*/}
+        {/*</p>*/}
+        <p>{inaktiveMsg()}</p>
       </div>
     )
   }
@@ -234,8 +264,39 @@ const ParticipantDetailsPaneComponent: FC = () => {
   }
 
   const hasStatusCode = (meter: Metering) => {
-    return !!(meter && (meter.status === 'INVALID' || meter.status === 'REJECTED') && meter.statusCode && meterInvalidCodes.includes(meter.statusCode))
+    return !!(meter && (meter.processState === 'INVALID' || meter.processState === 'REJECTED') && meter.statusCode && meterInvalidCodes.includes(meter.statusCode))
   }
+
+  const renderMeterStatus = (selectedMeter: Metering) => {
+    switch (selectedMeter.processState) {
+      case 'INACTIVE':
+        return (
+          <IonCard color="secondary-light">
+            <IonItem lines="none" color="secondary-light">
+              <IonIcon icon={eegExclamation} slot="start"/>
+              <IonLabel>{meterInvalidStatusText(selectedMeter)}</IonLabel>
+            </IonItem>
+          </IonCard>
+        )
+      default:
+        return (
+          <IonCard color="warning-light">
+            <IonItem lines="none" color="warning-light">
+              <IonIcon icon={eegSandClass} slot="start"/>
+              <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
+            </IonItem>
+            {selectedMeter.processState === "INVALID" &&
+                <IonItem>
+                    <IonButton color="warning" slot="end" size="small" fill="outline"
+                               onClick={() => onRemoveMeteringPoint()}>Löschen</IonButton>
+                </IonItem>
+            }
+          </IonCard>
+        )
+    }
+
+  }
+
   if (!selectedParticipant) {
     return <></>
   } else {
@@ -330,20 +391,7 @@ const ParticipantDetailsPaneComponent: FC = () => {
                         </IonButton>
                       </IonButtons>}
                     </IonToolbar>
-                    {!isMeterActive() &&
-                        <IonCard color="warning-light">
-                            <IonItem lines="none" color="warning-light">
-                                <IonIcon icon={eegSandClass} slot="start"/>
-                                <IonLabel>{meterStatusText(selectedMeter)}</IonLabel>
-                            </IonItem>
-                          {selectedMeter.status === "INVALID" &&
-                              <IonItem>
-                                  <IonButton color="warning" slot="end" size="small" fill="outline"
-                                             onClick={() => onRemoveMeteringPoint()}>Löschen</IonButton>
-                              </IonItem>
-                          }
-                        </IonCard>
-                    }
+                    {isMeterInactive() && renderMeterStatus(selectedMeter) }
 
                     <IonItem button lines="full"
                              className={cn("eeg-item-box", {"selected": activeMenu === "meterForm"})}
@@ -357,9 +405,9 @@ const ParticipantDetailsPaneComponent: FC = () => {
                       <IonIcon icon={caretForwardOutline} slot="start"></IonIcon>
                       <div>
                         <div
-                          className={"detail-header"}>{`Zählpunkt ${selectedMeter.status === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
+                          className={"detail-header"}>{`Zählpunkt ${selectedMeter.processState === "ACTIVE" ? "aktiv" : "inaktiv"}`}</div>
                       </div>
-                      <IonToggle slot="end" checked={selectedMeter.status === "ACTIVE"}
+                      <IonToggle slot="end" checked={selectedMeter.processState === "ACTIVE"}
                                  disabled={true}></IonToggle>
                     </IonItem>
                     {isMeterActive() && report && activePeriod &&
