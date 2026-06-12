@@ -40,7 +40,7 @@ const ParticipantRegisterMeterPaneComponent: FC<ParticipantRegisterMeterPaneComp
     remove(0)
   }, [remove])
 
-  const meters = watch("meters")
+ const meters = watch("meters")
 
   const showMeter = (meter: Metering) => {
     setMeteringPoint(meter);
